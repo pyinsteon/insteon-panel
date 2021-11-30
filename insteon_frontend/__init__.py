@@ -1,4 +1,4 @@
-"""HACS Frontend"""
+"""Insteon Frontend"""
 from .version import VERSION
 
 def locate_dir():
