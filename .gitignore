@@ -1,0 +1,11 @@
+node_modules
+package-lock.json
+build
+src/localize/generated.ts
+!script/build
+insteon_frontend/*.js
+insteon_frontend/*.json
+insteon_frontend/*.js.gz
+!insteon_frontend/*.py
+
+yarn-error.log
