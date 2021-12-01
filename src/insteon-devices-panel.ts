@@ -49,8 +49,19 @@ export class InsteonDevicesPanel extends LitElement {
 
   @state() private _showDisabled = false;
 
-  public connectedCallback() {
-    super.connectedCallback();
+  public firstUpdated(changedProperties) {
+    super.firstUpdated(changedProperties);
+
+    if (!this.hass || !this.insteon) {
+      return;
+    }
+    if (!this._unsubs) {
+      this._getDevices();
+    }
+  }
+
+  public updated(changedProperties) {
+    super.updated(changedProperties);
 
     if (!this.hass || !this.insteon) {
       return;
@@ -156,7 +167,7 @@ export class InsteonDevicesPanel extends LitElement {
       const deviceRowdata: DeviceRowData = {
         id: device.id,
         name: device.name_by_user || device.name || "No device name",
-        address: device.name?.substr(device.name.length - 7, 8) || "",
+        address: device.name?.substr(device.name.length - 8, 8) || "",
         description: device.name?.substr(0, device.name.length - 8) || "",
         model: device.model || "",
         area: device.area_id ? areaLookup[device.area_id].name : "",
@@ -164,7 +175,7 @@ export class InsteonDevicesPanel extends LitElement {
       return deviceRowdata;
     });
     if (!this._showDisabled) {
-      return insteonDevices.filter((device) => device.disabled_by != null);
+      return insteonDevices.filter((device) => device.disabled_by);
     }
     return insteonDevices;
   });
