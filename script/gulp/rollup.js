@@ -7,6 +7,7 @@ const log = require("fancy-log");
 const { string } = require("rollup-plugin-string");
 const handler = require("serve-handler");
 const json = require("@rollup/plugin-json");
+const ignore = require("../../homeassistant-frontend/build-scripts/rollup-plugins/ignore-plugin");
 const commonjs = require("@rollup/plugin-commonjs");
 const babel = require("@rollup/plugin-babel").babel;
 const babelTypescript = require("@babel/preset-typescript");
@@ -19,8 +20,6 @@ const gzipPlugin = require("rollup-plugin-gzip");
 const { terser } = require("rollup-plugin-terser");
 
 const extensions = [".js", ".ts"];
-
-const main = "./src/main.ts";
 
 const DevelopPlugins = [
   string({
@@ -52,6 +51,12 @@ const DevelopPlugins = [
     extensions,
     exclude: [require.resolve("@mdi/js/mdi.js")],
   }),
+  ignore({
+    files: [
+      require.resolve("@polymer/font-roboto/roboto.js"),
+      path.resolve("./homeassistant-frontend/src/components/ha-icon.ts"),
+    ],
+  }),
   entrypointHashmanifest({ manifestName: "./insteon_frontend/manifest.json" }),
 ];
 
@@ -63,7 +68,7 @@ const BuildPlugins = DevelopPlugins.concat([
 ]);
 
 const inputconfig = {
-  input: main,
+  input: "./src/main.ts",
   plugins: DevelopPlugins,
   preserveEntrySignatures: false,
 };
@@ -86,8 +91,8 @@ function createServer() {
     });
   });
 
-  server.listen(5001, true, () => {
-    log.info("File will be served to http://127.0.0.1:5001/entrypoint.js");
+  server.listen(5000, true, () => {
+    log.info("File will be served to http://127.0.0.1:5000/entrypoint.js");
   });
 }
 
@@ -141,29 +146,14 @@ function writeEntrypoint() {
   fs.writeFileSync(
     path.resolve("./insteon_frontend/entrypoint.js"),
     `
-import './${entrypointManifest[main]}';
-
-const styleEl = document.createElement('style');
-styleEl.innerHTML = \`
-body {
-  font-family: Roboto, sans-serif;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  font-weight: 400;
-  margin: 0;
-  padding: 0;
-  height: 100vh;
+try {
+  new Function("import('/hacsfiles/frontend/${entrypointManifest["./src/main.ts"]}')")();
+} catch (err) {
+  var el = document.createElement('script');
+  el.src = '/hacsfiles/frontend/${entrypointManifest["./src/main.ts"]}';
+  el.type = 'module';
+  document.body.appendChild(el);
 }
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #111111;
-    color: #e1e1e1;
-  }
-}
-\`;
-
-
-document.head.appendChild(styleEl);
   `,
     { encoding: "utf-8" }
   );

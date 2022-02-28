@@ -1,5 +1,6 @@
 {
 	"name": "Instoen Panel Frontend",
+	"dockerFile": "Dockerfile",
 	"image": "ghcr.io/ludeeus/devcontainer/frontend:stable",
 	"context": "..",
 	"appPort": ["5001:5001"],
