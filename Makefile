@@ -5,18 +5,19 @@ help: ## Shows help message.
 	@awk 'BEGIN {FS = ":.*##";} /^[a-zA-Z_-]+:.*?##/ { printf " \033[36m make %-18s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST);
 	@echo
 
-init: bootstrap
+init:
+	make bootstrap;
 
-start: ## Start the frontend
-	yarn start;
+develop: ## Start the frontend
+	script/develop;
 
-bootstrap: ## Run yarn
-	yarn;
+bootstrap: ## Bootstrap the repository
+	script/bootstrap;
 
-build: ## Build the frontend
-	yarn build;
+build: ## Build the repository
+	script/build;
 
-update: ## Pull main from insteon-panel/frontend
+update: ## Pull main from pyinteon/insteon-panel
 	git pull upstream main;
 
 update-submodule: ## Udpate submodules
