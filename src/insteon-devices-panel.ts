@@ -1,26 +1,38 @@
+import "@polymer/app-layout/app-header/app-header";
+import "@polymer/app-layout/app-toolbar/app-toolbar";
+import "@material/mwc-list/mwc-list-item";
+import "@material/mwc-button";
+import "@material/mwc-fab";
+import { mdiPlus, mdiDotsVertical } from "@mdi/js";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import { html, LitElement, TemplateResult } from "lit";
-import { customElement, property, state } from "lit/decorators";
+import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
+import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "./data-table/insteon-data-table";
 import "../homeassistant-frontend/src/components/ha-card";
+import "../homeassistant-frontend/src/components/ha-button-menu";
 import "../homeassistant-frontend/src/layouts/hass-subpage";
+import "../homeassistant-frontend/src/layouts/ha-app-layout";
+import { haStyle } from "../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
 import {
   subscribeDeviceRegistry,
   DeviceRegistryEntry,
 } from "../homeassistant-frontend/src/data/device_registry";
-import { Insteon } from "./data/insteon";
+import { Insteon, addInsteonDevice } from "./data/insteon";
 import { navigate } from "../homeassistant-frontend/src/common/navigate";
 import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
-import {
-  RowClickedEvent,
-  DataTableRowData,
-} from "./data-table/insteon-data-table";
+import { RowClickedEvent, DataTableRowData } from "./data-table/insteon-data-table";
 import {
   AreaRegistryEntry,
   subscribeAreaRegistry,
 } from "../homeassistant-frontend/src/data/area_registry";
+import { showInsteonAddDeviceDialog } from "./device/show-dialog-insteon-add-device";
+import { showInsteonAddingDeviceDialog } from "./device/show-dialog-adding-device";
+import {
+  showConfirmationDialog,
+  showAlertDialog,
+} from "../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
 
 interface DeviceRowData extends DataTableRowData {
   id: string;
@@ -46,8 +58,6 @@ export class InsteonDevicesPanel extends LitElement {
   private _areas: AreaRegistryEntry[] = [];
 
   private _unsubs?: UnsubscribeFunc[];
-
-  @state() private _showDisabled = false;
 
   public firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);
@@ -93,8 +103,7 @@ export class InsteonDevicesPanel extends LitElement {
       subscribeDeviceRegistry(this.hass.connection, (entries) => {
         this._devices = entries.filter(
           (device) =>
-            device.config_entries &&
-            device.config_entries[0] == this.insteon.config_entry.entry_id
+            device.config_entries && device.config_entries[0] == this.insteon.config_entry.entry_id
         );
       }),
     ];
@@ -115,7 +124,7 @@ export class InsteonDevicesPanel extends LitElement {
             sortable: true,
             filterable: true,
             direction: "asc",
-            width: "10%",
+            width: "5hv",
           },
         }
       : {
@@ -131,7 +140,7 @@ export class InsteonDevicesPanel extends LitElement {
             sortable: true,
             filterable: true,
             direction: "asc",
-            width: "10%",
+            width: "20%",
           },
           description: {
             title: "Description",
@@ -167,43 +176,133 @@ export class InsteonDevicesPanel extends LitElement {
       const deviceRowdata: DeviceRowData = {
         id: device.id,
         name: device.name_by_user || device.name || "No device name",
-        address: device.name?.substr(device.name.length - 8, 8) || "",
-        description: device.name?.substr(0, device.name.length - 8) || "",
+        address: device.name?.substring(device.name.length - 8) || "",
+        description: device.name?.substring(0, device.name.length - 8) || "",
         model: device.model || "",
         area: device.area_id ? areaLookup[device.area_id].name : "",
       };
       return deviceRowdata;
     });
-    if (!this._showDisabled) {
-      return insteonDevices.filter((device) => device.disabled_by);
-    }
     return insteonDevices;
   });
 
   protected render(): TemplateResult | void {
     return html`
-      <hass-subpage
-        .hass=${this.hass}
-        header="Insteon Devices"
-        .narrow=${this.narrow}
-      >
+      <ha-app-layout>
+        <app-header fixed slot="header">
+          <app-toolbar>
+            <ha-menu-button .hass=${this.hass} .narrow=${this.narrow}></ha-menu-button>
+            <div main-title>Insteon Configuration</div>
+          </app-toolbar>
+        </app-header>
         <insteon-data-table
           .hass=${this.hass}
           .data=${this._insteonDevices(this._devices)}
           .columns=${this._columns(this.narrow)}
           @row-click=${this._handleRowClicked}
         ></insteon-data-table>
-      </hass-subpage>
+        <div id="fab">
+          <mwc-fab
+            slot="fab"
+            title="${this.insteon.localize("aldb.actions.create")}"
+            @click=${this._addDevice}
+          >
+            <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
+          </mwc-fab>
+        </div>
+      </ha-app-layout>
     `;
   }
 
-  private async _handleRowClicked(
-    ev: HASSDomEvent<RowClickedEvent>
-  ): Promise<void> {
+  private async _addDevice(): Promise<void> {
+    showInsteonAddDeviceDialog(this, {
+      hass: this.hass,
+      insteon: this.insteon,
+      title: this.insteon.localize("device.actions.add"),
+      callback: async (address, multiple) => this._handleDeviceAdd(address, multiple),
+    });
+  }
+
+  private async _handleDeviceAdd(address: string, multiple: boolean) {
+    await addInsteonDevice(this.hass, address, multiple);
+    showInsteonAddingDeviceDialog(this, {
+      hass: this.hass,
+      insteon: this.insteon,
+      multiple: multiple,
+      address: address,
+      title: "Adding Insteon Device",
+    });
+  }
+
+  private async _handleRowClicked(ev: HASSDomEvent<RowClickedEvent>): Promise<void> {
     // eslint-disable-next-line no-console
-    console.info("Row clicked received");
+    // console.info("Row clicked received");
     const id = ev.detail.id;
     navigate("/insteon/device/properties/" + id);
+  }
+
+  static get styles(): CSSResultGroup {
+    return [
+      haStyle,
+      css`
+        :host(:not([narrow])) ha-card:last-child {
+          margin-bottom: 24px;
+        }
+        ha-config-section {
+          margin: auto;
+          margin-top: -32px;
+          max-width: 600px;
+        }
+        ha-card {
+          overflow: hidden;
+        }
+        ha-card a {
+          text-decoration: none;
+          color: var(--primary-text-color);
+        }
+        .title {
+          font-size: 16px;
+          padding: 16px;
+          padding-bottom: 0;
+        }
+        :host([narrow]) ha-card {
+          border-radius: 0;
+          box-shadow: unset;
+        }
+
+        :host(:not([narrow])) insteon-data-table {
+          height: 94vh;
+          display: block;
+        }
+        :host([narrow]) insteon-data-table {
+          width: 100%;
+          height: 100%;
+          --data-table-border-width: 0;
+        }
+        #fab {
+          position: fixed;
+          right: calc(16px + env(safe-area-inset-right));
+          bottom: calc(16px + env(safe-area-inset-bottom));
+          z-index: 1;
+        }
+        :host([narrow]) #fab.tabs {
+          bottom: calc(84px + env(safe-area-inset-bottom));
+        }
+        #fab[is-wide] {
+          bottom: 24px;
+          right: 24px;
+        }
+        :host([rtl]) #fab {
+          right: auto;
+          left: calc(16px + env(safe-area-inset-left));
+        }
+        :host([rtl][is-wide]) #fab {
+          bottom: 24px;
+          left: 24px;
+          right: auto;
+        }
+      `,
+    ];
   }
 }
 

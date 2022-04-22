@@ -1,5 +1,10 @@
 import { HomeAssistant } from "../../homeassistant-frontend/src/types";
-import type { HaFormSchema } from "../../homeassistant-frontend/src/components/ha-form/types";
+import type {
+  HaFormSchema,
+  HaFormBooleanSchema,
+  HaFormStringSchema,
+  HaFormConstantSchema,
+} from "../../homeassistant-frontend/src/components/ha-form/types";
 import { Repository, Status, Message } from "./common";
 import { ConfigEntry } from "../..//homeassistant-frontend/src/data/config_entries";
 
@@ -25,10 +30,37 @@ export interface InsteonDevice {
   aldb_status: string;
 }
 
-export interface Property {
+export type Property =
+  | PropertyNumber
+  | PropertyBoolean
+  | PropertySelect
+  | PropertyMultiSelect
+  | PropertyRadioButtons;
+
+export interface PropertyBase {
   name: string;
-  value: number | boolean;
   modified: boolean;
+}
+
+export interface PropertyNumber extends PropertyBase {
+  value: number;
+}
+
+export interface PropertyBoolean extends PropertyBase {
+  value: boolean;
+}
+
+export interface PropertySelect extends PropertyBase {
+  value: [string] | [number];
+}
+
+export interface PropertyMultiSelect extends PropertyBase {
+  value: [string] | [number];
+}
+
+export interface PropertyRadioButtons extends PropertyBase {
+  name: "radio_button_groups";
+  value: [[number]] | [];
 }
 
 export interface PropertiesInfo {
@@ -36,7 +68,7 @@ export interface PropertiesInfo {
   schema: { [key: string]: HaFormSchema }; // HaFormSchema };
 }
 
-export const AddressRegex = RegExp(/(?<!.)[A-Fa-f0-9]{2}\.?[A-Fa-f0-9]{2}\.?[A-Fa-f0-9]{2}$/);
+// export const AddressRegex = RegExp(/(?<!.)[A-Fa-f0-9]{2}\.?[A-Fa-f0-9]{2}\.?[A-Fa-f0-9]{2}$/);
 
 export interface ALDBRecord {
   mem_addr: number;
@@ -64,10 +96,15 @@ export const fetchInsteonALDB = (hass: HomeAssistant, id: string): Promise<ALDBR
     device_address: id,
   });
 
-export const fetchInsteonProperties = (hass: HomeAssistant, id: string): Promise<PropertiesInfo> =>
+export const fetchInsteonProperties = (
+  hass: HomeAssistant,
+  id: string,
+  showAdvanced: boolean
+): Promise<PropertiesInfo> =>
   hass.callWS({
     type: "insteon/properties/get",
     device_address: id,
+    show_advanced: showAdvanced,
   });
 
 export const changeALDBRecord = (
@@ -92,6 +129,22 @@ export const changeProperty = (
     device_address: id,
     name: name,
     value: value,
+  });
+
+export const addInsteonDevice = (
+  hass: HomeAssistant,
+  address: string | undefined,
+  multiple: boolean
+): Promise<void> =>
+  hass.callWS({
+    type: "insteon/device/add",
+    device_address: address,
+    multiple: multiple,
+  });
+
+export const cancelAddInsteonDevice = (hass: HomeAssistant): Promise<void> =>
+  hass.callWS({
+    type: "insteon/device/add/cancel",
   });
 
 export const createALDBRecord = (
@@ -206,3 +259,21 @@ export const aldbChangeRecordSchema = (insteon: Insteon): HaFormSchema[] => [
   },
   ...aldbNewRecordSchema(insteon),
 ];
+
+export const addDeviceSchema = (multiple: boolean): HaFormSchema[] => [
+  {
+    name: "multiple",
+    required: true,
+    type: "boolean",
+  },
+  {
+    name: "address",
+    required: false,
+    type: multiple ? "constant" : "string",
+  },
+];
+
+export type deviceAddedMessage = {
+  type: string,
+  address: string
+}

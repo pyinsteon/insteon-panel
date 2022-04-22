@@ -10,12 +10,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/teharris1/insteon-paenl.git"
+    "url": "git+https://github.com/teharris1/insteon-panel.git"
   },
   "bugs": {
-    "url": "https://github.com/teharris1/insteon-paenl/issues"
+    "url": "https://github.com/teharris1/insteon-panel/issues"
   },
-  "homepage": "https://github.com/teharris1/insteon-paenl",
+  "homepage": "https://github.com/teharris1/insteon-panel",
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/plugin-external-helpers": "^7.14.5",

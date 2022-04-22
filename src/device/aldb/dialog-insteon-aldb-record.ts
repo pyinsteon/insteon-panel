@@ -4,8 +4,9 @@ import "../../../homeassistant-frontend/src/components/ha-code-editor";
 import { createCloseHeading } from "../../../homeassistant-frontend/src/components/ha-dialog";
 import { haStyleDialog } from "../../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant } from "../../../homeassistant-frontend/src/types";
+import { Insteon, ALDBRecord } from "../../data/insteon";
 import "./insteon-aldb-data-table";
-import { ALDBRecord, AddressRegex } from "../../data/insteon";
+import { check_address } from "../../tools/check_address";
 import "../../../homeassistant-frontend/src/components/ha-form/ha-form";
 import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
 import { InsteonALDBRecordDialogParams } from "./show-dialog-insteon-aldb-record";
@@ -13,6 +14,8 @@ import { InsteonALDBRecordDialogParams } from "./show-dialog-insteon-aldb-record
 @customElement("dialog-insteon-aldb-record")
 class DialogInsteonALDBRecord extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public insteon!: Insteon;
 
   @property({ type: Boolean }) public isWide?: boolean;
 
@@ -30,7 +33,11 @@ class DialogInsteonALDBRecord extends LitElement {
 
   @state() private _formData?: { [key: string]: any };
 
+  @state() private _opened = false;
+
   public async showDialog(params: InsteonALDBRecordDialogParams): Promise<void> {
+    this.hass = params.hass;
+    this.insteon = params.insteon;
     this._record = params.record;
     this._formData = { ...params.record };
     this._formData!.mode = this._currentMode();
@@ -38,17 +45,17 @@ class DialogInsteonALDBRecord extends LitElement {
     this._callback = params.callback;
     this._title = params.title;
     this._errors = {};
+    this._opened = true;
   }
 
   protected render(): TemplateResult {
-    if (!this._record) {
+    if (!this._opened) {
       return html``;
     }
     return html`
       <ha-dialog
         open
-        hideActions
-        @closing="${this._close}"
+        @closed="${this._close}"
         .heading=${createCloseHeading(this.hass, this._title!)}
       >
         <div class="form">
@@ -95,7 +102,7 @@ class DialogInsteonALDBRecord extends LitElement {
       this._close();
       await this._callback!(record!);
     } else {
-      this._errors!.base = this.hass.localize("ui.panel.config.insteon.common.error.base");
+      this._errors!.base = this.insteon.localize("common.error.base");
     }
   }
 
@@ -112,7 +119,7 @@ class DialogInsteonALDBRecord extends LitElement {
   }
 
   private _close(): void {
-    this._record = undefined;
+    this._opened = false;
   }
 
   private _currentMode(): string {
@@ -133,8 +140,12 @@ class DialogInsteonALDBRecord extends LitElement {
   private _checkData(): boolean {
     let success = true;
     this._errors = {};
-    if (!AddressRegex.test(this._formData!.target)) {
-      this._errors!.target = this.hass.localize("ui.panel.config.insteon.common.error.address");
+    if (!check_address(this._formData!.target)) {
+      if (!this.insteon) {
+        // eslint-disable-next-line no-console
+        console.info("This should NOT show up");
+      }
+      this._errors.target = this.insteon!.localize("common.error.address");
       success = false;
     }
     return success;

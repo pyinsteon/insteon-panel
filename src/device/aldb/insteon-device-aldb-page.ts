@@ -1,6 +1,7 @@
+import type { ActionDetail } from "@material/mwc-list";
 import "@material/mwc-fab";
-import { mdiPlus } from "@mdi/js";
-// import "@material/mwc-button";
+import { mdiPlus, mdiDotsVertical } from "@mdi/js";
+import "@material/mwc-button";
 import "../../../homeassistant-frontend/src/components/ha-icon-button";
 import "../../../homeassistant-frontend/src/components/ha-circular-progress";
 import { css, CSSResultGroup, html, LitElement, TemplateResult, PropertyValues } from "lit";
@@ -34,6 +35,7 @@ import {
 } from "../../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
 import { showInsteonALDBRecordDialog } from "./show-dialog-insteon-aldb-record";
 import { navigate } from "../../../homeassistant-frontend/src/common/navigate";
+import "../../../homeassistant-frontend/src/components/ha-button-menu";
 
 @customElement("insteon-device-aldb-page")
 class InsteonDeviceALDBPage extends LitElement {
@@ -41,7 +43,7 @@ class InsteonDeviceALDBPage extends LitElement {
 
   @property({ attribute: false }) public insteon!: Insteon;
 
-  @property({ type: Boolean }) public narrow?: boolean;
+  @property({ type: Boolean, reflect: true }) public narrow!: boolean;
 
   @property({ type: Boolean }) public isWide?: boolean;
 
@@ -105,16 +107,52 @@ class InsteonDeviceALDBPage extends LitElement {
         .localizeFunc=${this.insteon.localize}
         .backCallback=${() => this._handleBackTapped()}
       >
-        ${this.narrow ? html` <span slot="header"> ${this._device?.name} </span> ` : ""}
+        ${this.narrow
+          ? html`
+              <!-- <span slot="header"> -->
+              <div slot="header" class="header fullwidth">
+                <div slot="header" class="narrow-header-left">${this._device?.name}</div>
+                <div slot="header" class="narrow-header-right">
+                  <ha-button-menu
+                    corner="BOTTOM_START"
+                    @action=${this._handleMenuAction}
+                    activatable
+                  >
+                    <ha-icon-button
+                      slot="trigger"
+                      .label=${this.hass.localize("ui.common.menu")}
+                      .path=${mdiDotsVertical}
+                    ></ha-icon-button>
+
+                    <mwc-list-item>
+                      ${this.insteon!.localize("aldb.actions." + this._showHideUnused)}
+                    </mwc-list-item>
+                    <mwc-list-item>
+                      ${this.insteon!.localize("aldb.actions.add_default_links")}
+                    </mwc-list-item>
+                    <mwc-list-item>
+                      ${this.insteon!.localize("common.actions.load")}
+                    </mwc-list-item>
+                    <mwc-list-item .disabled=${!this._dirty()}>
+                      ${this.insteon!.localize("common.actions.write")}
+                    </mwc-list-item>
+                    <mwc-list-item .disabled=${!this._dirty()}>
+                      ${this.insteon!.localize("common.actions.reset")}
+                    </mwc-list-item>
+                  </ha-button-menu>
+                </div>
+              </div>
+              <!-- </span> -->
+            `
+          : ""}
         <div class="container">
-          <div slot="header" class="header fullwidth">
-            ${this.narrow
-              ? ""
-              : html`
-                  <div>
+          ${!this.narrow
+            ? html`
+                <div class="page-header fullwidth">
+                  <div class="device-name">
                     <h1>${this._device?.name}</h1>
                   </div>
-                  <div class="header-right">
+                  <div class="logo header-right">
                     <img
                       src="https://brands.home-assistant.io/insteon/logo.png"
                       referrerpolicy="no-referrer"
@@ -122,33 +160,46 @@ class InsteonDeviceALDBPage extends LitElement {
                       @error=${this._onImageError}
                     />
                   </div>
-                `}
-          </div>
-          <div slot="header" class="header fullwidth">
-            <div>
-              ALDB Status:
-              ${this._device
-                ? this.insteon!.localize("aldb.status." + this._device?.aldb_status)
-                : ""}
-            </div>
-            <div class="header-right">
-              <mwc-button @click=${this._onShowHideUnusedClicked}>
-                ${this.insteon!.localize("aldb.actions." + this._showHideUnused)}
-              </mwc-button>
-              <mwc-button @click=${this._onLoadALDBClick}>
-                ${this.insteon!.localize("common.actions.load")}
-              </mwc-button>
-              <mwc-button @click=${this._onAddDefaultLinksClicked}>
-                ${this.insteon!.localize("aldb.actions.add_default_links")}
-              </mwc-button>
-              <mwc-button .disabled=${!this._dirty()} @click=${this._onWriteALDBClick}>
-                ${this.insteon!.localize("common.actions.write")}
-              </mwc-button>
-              <mwc-button .disabled=${!this._dirty()} @click=${this._onResetALDBClick}>
-                ${this.insteon!.localize("common.actions.reset")}
-              </mwc-button>
-            </div>
-          </div>
+                </div>
+                <div class="page-header fullwidth">
+                  <div class="aldb-status">
+                    ALDB Status:
+                    ${this._device
+                      ? this.insteon!.localize("aldb.status." + this._device?.aldb_status)
+                      : ""}
+                  </div>
+                  <div class="actions header-right">
+                    <mwc-button @click=${this._onLoadALDBClick}>
+                      ${this.insteon!.localize("common.actions.load")}
+                    </mwc-button>
+                    <mwc-button @click=${this._onAddDefaultLinksClicked}>
+                      ${this.insteon!.localize("aldb.actions.add_default_links")}
+                    </mwc-button>
+                    <mwc-button .disabled=${!this._dirty()} @click=${this._onWriteALDBClick}>
+                      ${this.insteon!.localize("common.actions.write")}
+                    </mwc-button>
+                    <mwc-button .disabled=${!this._dirty()} @click=${this._onResetALDBClick}>
+                      ${this.insteon!.localize("common.actions.reset")}
+                    </mwc-button>
+                    <ha-button-menu
+                      corner="BOTTOM_START"
+                      @action=${this._handleMenuAction}
+                      activatable
+                    >
+                      <ha-icon-button
+                        slot="trigger"
+                        .label=${this.hass.localize("ui.common.menu")}
+                        .path=${mdiDotsVertical}
+                      ></ha-icon-button>
+
+                      <mwc-list-item>
+                        ${this.insteon!.localize("aldb.actions." + this._showHideUnused)}
+                      </mwc-list-item>
+                    </ha-button-menu>
+                  </div>
+                </div>
+              `
+            : ""}
           <insteon-aldb-data-table
             .insteon=${this.insteon}
             .hass=${this.hass}
@@ -195,6 +246,8 @@ class InsteonDeviceALDBPage extends LitElement {
       dirty: true,
     };
     showInsteonALDBRecordDialog(this, {
+      hass: this.hass,
+      insteon: this.insteon,
       schema: aldbNewRecordSchema(this.insteon),
       record: record,
       title: this.insteon.localize("aldb.actions.new"),
@@ -287,6 +340,8 @@ class InsteonDeviceALDBPage extends LitElement {
     const id = ev.detail.id;
     const record = this._records!.find((rec) => rec.mem_addr === +id);
     showInsteonALDBRecordDialog(this, {
+      hass: this.hass,
+      insteon: this.insteon,
       schema: aldbChangeRecordSchema(this.insteon),
       record: record!,
       title: this.insteon.localize("aldb.actions.change"),
@@ -305,6 +360,26 @@ class InsteonDeviceALDBPage extends LitElement {
       });
     } else {
       navigate("/insteon/devices");
+    }
+  }
+
+  private async _handleMenuAction(ev: CustomEvent<ActionDetail>) {
+    switch (ev.detail.index) {
+      case 0:
+        await this._onShowHideUnusedClicked();
+        break;
+      case 1:
+        await this._addDefaultLinks();
+        break;
+      case 2:
+        await this._onLoadALDBClick();
+        break;
+      case 3:
+        await this._onWriteALDBClick();
+        break;
+      case 4:
+        await this._onResetALDBClick();
+        break;
     }
   }
 
@@ -368,29 +443,30 @@ class InsteonDeviceALDBPage extends LitElement {
         --app-header-border-bottom: 1px solid var(--divider-color);
       }
 
-      insteon-aldb-data-table {
-        width: 100%;
-        height: 100%;
-        --data-table-border-width: 0;
+      :host([narrow]) {
+        --aldb-table-height: 86vh;
       }
-      :host(:not([narrow])) insteon-aldb-data-table {
-        height: 78vh;
-        display: block;
+
+      :host(:not([narrow])) {
+        --aldb-table-height: 80vh;
       }
-      .table-header {
-        border-bottom: 1px solid rgba(var(--rgb-primary-text-color), 0.12);
-        padding: 0 16px;
+
+      .header {
         display: flex;
-        align-items: center;
+        justify-content: space-between;
       }
+
       .container {
         display: flex;
         flex-wrap: wrap;
-        margin: auto;
-        max-width: 1000px;
-        margin-top: 32px;
-        margin-bottom: 32px;
-        height: 100px;
+        margin: 0px;
+      }
+
+      insteon-aldb-data-table {
+        width: 100%;
+        height: var(--aldb-table-height);
+        display: block;
+        --data-table-border-width: 0;
       }
 
       h1 {
@@ -404,7 +480,10 @@ class InsteonDeviceALDBPage extends LitElement {
         opacity: var(--dark-primary-opacity);
       }
 
-      .header {
+      .page-header {
+        padding: 8px;
+        margin-left: 32px;
+        margin-right: 32px;
         display: flex;
         justify-content: space-between;
       }
@@ -412,22 +491,17 @@ class InsteonDeviceALDBPage extends LitElement {
       .fullwidth {
         padding: 8px;
         box-sizing: border-box;
-      }
-      .fullwidth {
         width: 100%;
         flex-grow: 1;
       }
 
       .header-right {
         align-self: center;
+        display: flex;
       }
 
       .header-right img {
         height: 30px;
-      }
-
-      .header-right {
-        display: flex;
       }
 
       .header-right:first-child {
@@ -435,12 +509,20 @@ class InsteonDeviceALDBPage extends LitElement {
         justify-content: flex-end;
       }
 
-      .header-right > *:not(:first-child) {
-        margin-left: 16px;
+      .actions mwc-button {
+        margin: 8px;
       }
 
       :host([narrow]) .container {
         margin-top: 0;
+      }
+
+      .narrow-header-left {
+        padding: 8px;
+        width: 90%;
+      }
+      .narrow-header-right {
+        align-self: right;
       }
     `;
   }

@@ -1,5 +1,5 @@
-// import "@material/mwc-button";
-// import "@polymer/paper-input/paper-textarea";
+import { mdiDotsVertical } from "@mdi/js";
+import type { ActionDetail } from "@material/mwc-list";
 import { css, CSSResultGroup, html, LitElement, TemplateResult, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { HomeAssistant, Route } from "../../../homeassistant-frontend/src/types";
@@ -23,11 +23,16 @@ import {
   showConfirmationDialog,
   showAlertDialog,
 } from "../../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
-import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
+import type {
+  HaFormSchema,
+  HaFormMultiSelectSchema,
+  HaFormDataContainer,
+} from "../../../homeassistant-frontend/src/components/ha-form/types";
 import { RowClickedEvent } from "../../data-table/insteon-data-table";
 import "../../../homeassistant-frontend/src/layouts/hass-tabs-subpage";
 import { insteonDeviceTabs } from "../insteon-device-router";
 import { navigate } from "../../../homeassistant-frontend/src/common/navigate";
+import "../../../homeassistant-frontend/src/components/ha-button-menu";
 
 @customElement("insteon-device-properties-page")
 class InsteonDevicePropertiesPage extends LitElement {
@@ -35,7 +40,7 @@ class InsteonDevicePropertiesPage extends LitElement {
 
   @property({ attribute: false }) public insteon!: Insteon;
 
-  @property({ type: Boolean }) public narrow?: boolean;
+  @property({ type: Boolean, reflect: true }) public narrow!: boolean;
 
   @property({ type: Boolean }) public isWide?: boolean;
 
@@ -51,9 +56,11 @@ class InsteonDevicePropertiesPage extends LitElement {
 
   @state() private _showWait = false;
 
+  @state() private _showAdvanced = false;
+
+  private _showHideAdvanced = "show";
+
   protected firstUpdated(changedProps: PropertyValues) {
-    // eslint-disable-next-line no-console
-    console.info("Device GUID: " + this.deviceId + " in properties");
     super.firstUpdated(changedProps);
     if (this.deviceId && this.hass) {
       fetchInsteonDevice(this.hass, this.deviceId).then(
@@ -73,8 +80,6 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   protected render(): TemplateResult {
-    // eslint-disable-next-line no-console
-    console.info("In properties render");
     return html`
       <hass-tabs-subpage
         .hass=${this.hass}
@@ -84,37 +89,101 @@ class InsteonDevicePropertiesPage extends LitElement {
         .localizeFunc=${this.insteon.localize}
         .backCallback=${async () => this._handleBackTapped()}
       >
-        ${this.narrow ? html` <span slot="header"> ${this._device?.name} </span> ` : ""}
+        ${
+          this.narrow
+            ? html`
+                <!-- <span slot="header"> -->
+                <div slot="header" class="header fullwidth">
+                  <div slot="header" class="narrow-header-left">${this._device?.name}</div>
+                  <div slot="header" class="narrow-header-right">
+                    <ha-button-menu
+                      corner="BOTTOM_START"
+                      @action=${this._handleMenuAction}
+                      activatable
+                    >
+                      <ha-icon-button
+                        slot="trigger"
+                        .label=${this.hass.localize("ui.common.menu")}
+                        .path=${mdiDotsVertical}
+                      ></ha-icon-button>
+
+                      <mwc-list-item>
+                        ${this.insteon!.localize("properties.actions." + this._showHideAdvanced)}
+                      </mwc-list-item>
+                      <mwc-list-item>
+                        ${this.insteon!.localize("common.actions.load")}
+                      </mwc-list-item>
+                      <mwc-list-item .disabled=${!this._dirty()}>
+                        ${this.insteon!.localize("common.actions.write")}
+                      </mwc-list-item>
+                      <mwc-list-item .disabled=${!this._dirty()}>
+                        ${this.insteon!.localize("common.actions.reset")}
+                      </mwc-list-item>
+                    </ha-button-menu>
+                  </div>
+                </div>
+                <!-- </span> -->
+              `
+            : ""
+        }
         <div class="container">
-          <div slot="header" class="header fullwidth">
-            ${this.narrow
-              ? ""
-              : html`
-                  <div>
-                    <h1>${this._device?.name}</h1>
+          ${
+            !this.narrow
+              ? html`
+                  <div class="page-header fullwidth">
+                    <div class="device-name">
+                      <h1>${this._device?.name}</h1>
+                    </div>
+                    <div class="logo header-right">
+                      <img
+                        src="https://brands.home-assistant.io/insteon/logo.png"
+                        referrerpolicy="no-referrer"
+                        @load=${this._onImageLoad}
+                        @error=${this._onImageError}
+                      />
+                    </div>
                   </div>
-                  <div class="header-right">
-                    <img
-                      src="https://brands.home-assistant.io/insteon/logo.png"
-                      referrerpolicy="no-referrer"
-                      @load=${this._onImageLoad}
-                      @error=${this._onImageError}
-                    />
+                  <div class="page-header fullwidth">
+                    <div class="header-right">
+                      <div slot="header" class="actions header-right">
+                        <mwc-button @click=${this._onLoadPropertiesClick}>
+                          ${this.insteon!.localize("common.actions.load")}
+                        </mwc-button>
+                        <mwc-button
+                          .disabled=${!this._dirty()}
+                          @click=${this._onWritePropertiesClick}
+                        >
+                          ${this.insteon!.localize("common.actions.write")}
+                        </mwc-button>
+                        <mwc-button
+                          .disabled=${!this._dirty()}
+                          @click=${this._onResetPropertiesClick}
+                        >
+                          ${this.insteon!.localize("common.actions.reset")}
+                        </mwc-button>
+                        <ha-button-menu
+                          corner="BOTTOM_START"
+                          @action=${this._handleMenuAction}
+                          activatable
+                        >
+                          <ha-icon-button
+                            slot="trigger"
+                            .label=${this.hass.localize("ui.common.menu")}
+                            .path=${mdiDotsVertical}
+                          ></ha-icon-button>
+
+                          <mwc-list-item>
+                            ${this.insteon!.localize(
+                              "properties.actions." + this._showHideAdvanced
+                            )}
+                          </mwc-list-item>
+                        </ha-button-menu>
+                      </div>
+                    </div>
                   </div>
-                `}
-          </div>
-          <div slot="header" class="header fullwidth">
-            <div class="header-right">
-              <mwc-button @click=${this._onLoadPropertiesClick}>
-                ${this.insteon!.localize("common.actions.load")}
-              </mwc-button>
-              <mwc-button .disabled=${!this._dirty()} @click=${this._onWritePropertiesClick}>
-                ${this.insteon!.localize("common.actions.write")}
-              </mwc-button>
-              <mwc-button .disabled=${!this._dirty()} @click=${this._onResetPropertiesClick}>
-                ${this.insteon!.localize("common.actions.reset")}
-              </mwc-button>
-            </div>
+                `
+              : ""
+          }
           </div>
           <insteon-properties-data-table
             .hass=${this.hass}
@@ -172,19 +241,24 @@ class InsteonDevicePropertiesPage extends LitElement {
 
   private async _write() {
     this._showWait = true;
-    await writeProperties(this.hass, this._device!.address);
+    try {
+      await writeProperties(this.hass, this._device!.address);
+    } catch (err) {
+      showAlertDialog(this, {
+        text: this.insteon!.localize("common.error.write"),
+        confirmText: this.hass!.localize("ui.common.ok"),
+      });
+    }
     this._getProperties();
     this._showWait = false;
   }
 
   private async _getProperties() {
-    const propertiesInfo = await fetchInsteonProperties(this.hass, this._device!.address);
-    /*
-    fetchInsteonProperties(this.hass, this._device!.address).then((propertiesInfo) => {
-      this._schema = this._translateSchema(propertiesInfo.schema);
-      this._properties = propertiesInfo.properties;
-    });
-    */
+    const propertiesInfo = await fetchInsteonProperties(
+      this.hass,
+      this._device!.address,
+      this._showAdvanced
+    );
     // eslint-disable-next-line no-console
     console.info("Properties: " + propertiesInfo.properties.length);
     this._properties = propertiesInfo.properties;
@@ -199,8 +273,12 @@ class InsteonDevicePropertiesPage extends LitElement {
   private async _handleRowClicked(ev: HASSDomEvent<RowClickedEvent>) {
     const id = ev.detail.id;
     const record = this._properties!.find((rec) => rec.name === id);
+    const schema = this._schema![record!.name];
+
     showInsteonPropertyDialog(this, {
-      schema: this._schema![record!.name],
+      hass: this.hass,
+      insteon: this.insteon,
+      schema: [schema!],
       record: record!,
       title: this.insteon!.localize("properties.actions.change"),
       callback: async (name, value) => this._handlePropertyChange(name, value),
@@ -226,6 +304,33 @@ class InsteonDevicePropertiesPage extends LitElement {
     }
   }
 
+  private async _handleMenuAction(ev: CustomEvent<ActionDetail>) {
+    switch (ev.detail.index) {
+      case 0:
+        await this._onShowHideAdvancedClicked();
+        break;
+      case 1:
+        await this._onLoadPropertiesClick();
+        break;
+      case 2:
+        await this._onWritePropertiesClick();
+        break;
+      case 3:
+        await this._onResetPropertiesClick();
+        break;
+    }
+  }
+
+  private async _onShowHideAdvancedClicked() {
+    this._showAdvanced = !this._showAdvanced;
+    if (this._showAdvanced) {
+      this._showHideAdvanced = "hide";
+    } else {
+      this._showHideAdvanced = "show";
+    }
+    this._getProperties();
+  }
+
   private _goBack(): void {
     resetProperties(this.hass, this._device!.address);
     navigate("/insteon/devices");
@@ -239,7 +344,8 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   private _translateSchema(schema: { [key: string]: HaFormSchema }) {
-    Object.entries(schema).forEach(([prop, prop_schema]) => {
+    const new_schema: { [key: string]: HaFormSchema | HaFormSchema[] } = { ...schema };
+    Object.entries(new_schema as { [key: string]: HaFormSchema }).forEach(([prop, prop_schema]) => {
       if (!prop_schema.description) {
         prop_schema.description = {};
       }
@@ -278,33 +384,30 @@ class InsteonDevicePropertiesPage extends LitElement {
         --app-header-border-bottom: 1px solid var(--divider-color);
       }
 
-      insteon-properties-data-table {
-        width: 100%;
-        height: 100%;
-        --data-table-border-width: 0;
+      :host([narrow]) {
+        --properties-table-height: 86vh;
       }
-      :host(:not([narrow])) insteon-properties-data-table {
-        height: 78vh;
-        display: block;
+
+      :host(:not([narrow])) {
+        --properties-table-height: 80vh;
       }
-      .table-header {
-        border-bottom: 1px solid rgba(var(--rgb-primary-text-color), 0.12);
-        padding: 0 16px;
+
+      .header {
         display: flex;
-        align-items: center;
+        justify-content: space-between;
       }
+
       .container {
         display: flex;
         flex-wrap: wrap;
-        margin: auto;
-        max-width: 1000px;
-        margin-top: 32px;
-        margin-bottom: 32px;
-        height: 100px;
+        margin: 0px;
       }
 
-      .tab-bar {
-        color: black;
+      insteon-properties-data-table {
+        width: 100%;
+        height: var(--properties-table-height);
+        display: block;
+        --data-table-border-width: 0;
       }
 
       h1 {
@@ -318,7 +421,10 @@ class InsteonDevicePropertiesPage extends LitElement {
         opacity: var(--dark-primary-opacity);
       }
 
-      .header {
+      .page-header {
+        padding: 8px;
+        margin-left: 32px;
+        margin-right: 32px;
         display: flex;
         justify-content: space-between;
       }
@@ -332,14 +438,11 @@ class InsteonDevicePropertiesPage extends LitElement {
 
       .header-right {
         align-self: center;
+        display: flex;
       }
 
       .header-right img {
         height: 30px;
-      }
-
-      .header-right {
-        display: flex;
       }
 
       .header-right:first-child {
@@ -347,12 +450,20 @@ class InsteonDevicePropertiesPage extends LitElement {
         justify-content: flex-end;
       }
 
-      .header-right > *:not(:first-child) {
-        margin-left: 16px;
+      .actions mwc-button {
+        margin: 8px;
       }
 
       :host([narrow]) .container {
         margin-top: 0;
+      }
+
+      .narrow-header-left {
+        padding: 8px;
+        width: 90%;
+      }
+      .narrow-header-right {
+        align-self: right;
       }
     `;
   }

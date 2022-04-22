@@ -20,6 +20,25 @@
       "wake_up": "Because this is a battery operated device, the process will run in the background the next time the device wakes up."
     }
   },
+  "device": {
+    "caption": "Insteon Device",
+    "actions": {
+      "add": "Add Insteon Device",
+      "stop": "Stop"
+    },
+    "fields": {
+      "address": "Insteon device address (optional)",
+      "multiple": "Link mutiple devices"
+    },
+    "add": {
+      "caption": "Add Insteon Device",
+      "multiple": "The modem is ready to pair. Press the `set` button on the devices you wish to add. When complete press `Stop` below.",
+      "single": "The modem is ready to pair. Press the `set` button on the device you wish to add",
+      "address": "The modem is ready to pair. Attempting the put device --address-- in pairing mode, however, not all devices respond to this request. If the device does not link in the next minute, press the `set` button on the device.",
+      "added": "Device --address-- has been added.",
+      "complete": "All-Linking is complete."
+    }
+  },
   "aldb": {
     "caption": "All-Link Database",
     "status": {
@@ -61,7 +80,9 @@
     "no_data": "No properties are available for this device.",
     "actions": {
       "manage": "Insteon Properties",
-      "change": "Change Property Value"
+      "change": "Change Property Value",
+      "show": "Show Advanced",
+      "hide": "Hide Advanced"
     },
     "fields": {
       "name": "Property",
@@ -70,18 +91,26 @@
       "value": "Value"
     },
     "form_options": {
-      "on_off_switch_main": "Main",
-      "dimmable_light_main": "Main",
-      "on_off_switch_b": "B",
-      "on_off_switch_c": "C",
-      "on_off_switch_d": "D",
-      "on_off_switch_e": "E",
-      "on_off_switch_f": "F",
-      "on_off_switch_g": "G",
-      "on_off_switch_h": "H",
+      "on_off_switch_main": "Main switch",
+      "dimmable_light_main": "Main dimmery switch",
+      "on_off_switch_a": "Button A",
+      "on_off_switch_b": "Button B",
+      "on_off_switch_c": "Button C",
+      "on_off_switch_d": "Button D",
+      "on_off_switch_e": "Button E",
+      "on_off_switch_f": "Button F",
+      "on_off_switch_g": "Button G",
+      "on_off_switch_h": "Button H",
       "toggle_on_off_mode": "On/Off",
       "non_toggle_on_mode": "On only",
-      "non_toggle_off_mode": "Off only"
+      "non_toggle_off_mode": "Off only",
+      "toggle": "Toggle On/Off",
+      "on_only": "On only",
+      "off_only": "Off only",
+      "latching": "Latching",
+      "momentary_a": "Momentary A",
+      "momentary_b": "Momentary B",
+      "momentary_c": "Momentary C"
     },
     "descriptions": {
       "ramp_rate": "Dimmer ramp rate",
@@ -109,8 +138,6 @@
       "prescaler": "Prescaler",
       "duration_high": "Duration high",
       "duration_low": "Duration low",
-      "on_mask": "On bit mask",
-      "off_mask": "Off bit mask",
       "non_toggle_mask": "Non-toggle bit mask",
       "non_toggle_on_off_mask": "Non-toggle on/off bit mask",
       "backlight": "Backlight",
@@ -181,7 +208,71 @@
       "toggle": "toggle mode",
       "radio_button_group": "Radio button group",
       "main": "Main",
-      "button": "Button"
+      "button": "Button",
+      "ramp_rate_in_seconds": "Default ramp rate for device",
+      "toggle_button_a": "Toggle mode for button A",
+      "toggle_button_b": "Toggle mode for button B",
+      "toggle_button_c": "Toggle mode for button C",
+      "toggle_button_d": "Toggle mode for button D",
+      "toggle_button_e": "Toggle mode for button E",
+      "toggle_button_f": "Toggle mode for button F",
+      "toggle_button_g": "Toggle mode for button G",
+      "toggle_button_h": "Toggle mode for button H",
+      "disable_auto_linking": "Disables automatic linking when the user pushes and holds the SET Button",
+      "monitor_mode": "Enablesd Monitor Mode (see About Monitor Mode in the developers guide)",
+      "auto_led": "Disables automatic LED operation by the modem.",
+      "deadman": " Disable host communications Deadman feature (see IM RS232 Port Settings in the developers guide)",
+      "relay_mode": "Set the relay mode (see owners manual for a description of the options)",
+      "momentary_delay": "Delay in seconds for the relay to turn on/off (depends on relay mode)",
+      "radio_button_groups": "Keypad buttons assigned to act as radio buttions",
+      "radio_button_group_0": "Radio button group",
+      "radio_button_group_1": "Radio button group",
+      "x10_house": "X10 House Code (main button)",
+      "x10_house_2": "X10 House Code for button 2 (B: 8 button KPL)",
+      "x10_house_3": "X10 House Code for button 3 (C: 8 button KPL or A: 6 button KPL)",
+      "x10_house_4": "X10 House Code for button 4 (D: 8 button KPL or B: 6 button KPL)",
+      "x10_house_5": "X10 House Code for button 5 (E: 8 button KPL or C: 6 button KPL)",
+      "x10_house_6": "X10 House Code for button 6 (F: 8 button KPL or D: 6 button KPL)",
+      "x10_house_7": "X10 House Code for button 7 (G: 8 button KPL)",
+      "x10_house_8": "X10 House Code for button 8 (H: 8 button KPL)",
+      "x10_unit": "X10 Unit Code (main button)",
+      "x10_unit_2": "X10 Unit Code for button 2 (B: 8 button KPL)",
+      "x10_unit_3": "X10 Unit Code for button 3 (C: 8 button KPL or A: 6 button KPL)",
+      "x10_unit_4": "X10 Unit Code for button 4 (D: 8 button KPL or B: 6 button KPL",
+      "x10_unit_5": "X10 Unit Code for button 5 (E: 8 button KPL or C: 6 button KPL",
+      "x10_unit_6": "X10 Unit Code for button 6 (F: 8 button KPL or D: 6 button KPL",
+      "x10_unit_7": "X10 Unit Code for button 7 (G : 8 button KPL)",
+      "x10_unit_8": "X10 Unit Code for button 8 (H : 8 button KPL)",
+      "on_mask": "ON bit mask for radio button settings of the main button",
+      "on_mask_2": "ON bit mask for radio button settings of button 2 (Button B: 8 button KPL)",
+      "on_mask_3": "ON bit mask for radio button settings of button 3 (Button C: 8 button KPL or A: 6 button KPL)",
+      "on_mask_4": "ON bit mask for radio button settings of button 4 (Button D: 8 button KPL or B: 6 button KPL)",
+      "on_mask_5": "ON bit mask for radio button settings of button 5 (Button E: 8 button KPL or C: 6 button KPL)",
+      "on_mask_6": "ON bit mask for radio button settings of button 6 (Button F: 8 button KPL or D: 6 button KPL)",
+      "on_mask_7": "ON bit mask for radio button settings of button 7 (Button G: 8 button KPL)",
+      "on_mask_8": "ON bit mask for radio button settings of button 8 (Button H: 8 button KPL)",
+      "off_mask": "OFF bit mask for radio button settings of the main button",
+      "off_mask_2": "OFF bit mask for radio button settings of button 2 (Button B: 8 button KPL)",
+      "off_mask_3": "OFF bit mask for radio button settings of button 3 (Button C: 8 button KPL or A: 6 button KPL)",
+      "off_mask_4": "OFF bit mask for radio button settings of button 4 (Button D: 8 button KPL or B: 6 button KPL)",
+      "off_mask_5": "OFF bit mask for radio button settings of button 5 (Button E: 8 button KPL or C: 6 button KPL)",
+      "off_mask_6": "OFF bit mask for radio button settings of button 6 (Button F: 8 button KPL or D: 6 button KPL)",
+      "off_mask_7": "OFF bit mask for radio button settings of button 7 (Button G: 8 button KPL)",
+      "off_mask_8": "OFF bit mask for radio button settings of button 8 (Button H: 8 button KPL)",
+      "ramp_rate_2": "Ramp rate for button 2 (Button B: 8 button KPL)",
+      "ramp_rate_3": "Ramp rate for button 3 (Button C: 8 button KPL or A: 6 button KPL))",
+      "ramp_rate_4": "Ramp rate for button 4 (Button D: 8 button KPL or B: 6 button KPL))",
+      "ramp_rate_5": "Ramp rate for button 5 (Button E: 8 button KPL or C: 6 button KPL))",
+      "ramp_rate_6": "Ramp rate for button 6 (Button F: 8 button KPL or D: 6 button KPL))",
+      "ramp_rate_7": "Ramp rate for button 7 (Button G: 8 button KPL)",
+      "ramp_rate_8": "Ramp rate for button 8 (Button H: 8 button KPL)",
+      "on_level_2": "Default on level for button 2 (Button B: 8 button KPL)",
+      "on_level_3": "Default on level for button 3 (Button C: 8 button KPL or A: 6 button KPL))",
+      "on_level_4": "Default on level for button 4 (Button D: 8 button KPL or B: 6 button KPL))",
+      "on_level_5": "Default on level for button 5 (Button E: 8 button KPL or C: 6 button KPL))",
+      "on_level_6": "Default on level for button 6 (Button F: 8 button KPL or D: 6 button KPL))",
+      "on_level_7": "Default on level for button 7 (Button G: 8 button KPL)",
+      "on_level_8": "Default on level for button 8 (Button H: 8 button KPL)"
     }
   }
 }

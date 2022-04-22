@@ -62,20 +62,6 @@ export class InsteonPropertiesDataTable extends LitElement {
         this._calcButtonName(prop_name)
       );
     }
-    if (
-      prop_name.startsWith("on_mask_") ||
-      prop_name.startsWith("off_mask_") ||
-      prop_name.startsWith("ramp_rate_") ||
-      prop_name.startsWith("on_level_")
-    ) {
-      return (
-        this.insteon.localize(
-          "properties.descriptions." + prop_name.substr(0, prop_name.length - 2)
-        ) +
-        " " +
-        this._calcButtonName(prop_name)
-      );
-    }
     return this.insteon.localize("properties.descriptions." + prop_name);
   }
 
@@ -147,8 +133,6 @@ export class InsteonPropertiesDataTable extends LitElement {
   }
 
   protected render(): TemplateResult {
-    // eslint-disable-next-line no-console
-    console.info("Got records: " + this.records.length);
     if (this.showWait) {
       return html`
         <ha-circular-progress class="fullwidth" active alt="Loading"></ha-circular-progress>
@@ -165,8 +149,11 @@ export class InsteonPropertiesDataTable extends LitElement {
     `;
   }
 
-  private _translateValue(name: string, value: boolean | number | string | []) {
+  private _translateValue(name: string, value: boolean | number | string | [[number]] | []) {
     const schema = this.schema[name];
+    if (schema.name == "radio_button_groups") {
+      return "" + value.length + " groups";
+    }
     if (schema.type === "multi_select" && Array.isArray(value)) {
       return value.map((item) => schema.options[item]).join(", ");
     }

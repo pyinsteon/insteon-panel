@@ -52,7 +52,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "22%",
+              width: "15%",
             },
             dirty: {
               title: this.insteon.localize("aldb.fields.modified"),
@@ -73,7 +73,7 @@ export class InsteonALDBDataTable extends LitElement {
             group: {
               title: this.insteon.localize("aldb.fields.group"),
               sortable: true,
-              width: "22%",
+              width: "15%",
             },
             is_controller: {
               title: this.insteon.localize("aldb.fields.mode"),
@@ -84,7 +84,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.insteon.localize("aldb.mode.responder")}`;
               },
               sortable: true,
-              width: "22%",
+              width: "25%",
             },
           }
         : {
@@ -98,7 +98,7 @@ export class InsteonALDBDataTable extends LitElement {
               },
               sortable: true,
               direction: "desc",
-              width: "12%",
+              width: "10%",
             },
             in_use: {
               title: this.insteon.localize("aldb.fields.in_use"),
@@ -109,7 +109,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "12%",
+              width: "10%",
             },
             dirty: {
               title: this.insteon.localize("aldb.fields.modified"),
@@ -120,7 +120,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "12%",
+              width: "10%",
             },
             target: {
               title: this.insteon.localize("aldb.fields.target"),
@@ -135,7 +135,7 @@ export class InsteonALDBDataTable extends LitElement {
             group: {
               title: this.insteon.localize("aldb.fields.group"),
               sortable: true,
-              width: "12%",
+              width: "10%",
             },
             is_controller: {
               title: this.insteon.localize("aldb.fields.mode"),
@@ -146,7 +146,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.insteon.localize("aldb.mode.responder")}`;
               },
               sortable: true,
-              width: "22%",
+              width: "12%",
             },
           }
   );
@@ -177,11 +177,6 @@ export class InsteonALDBDataTable extends LitElement {
       >
         <ha-circular-progress active alt="Loading"></ha-circular-progress>
       </insteon-data-table>
-      <div>
-        ${this.isLoading
-          ? html` <div align="center">${this.insteon.localize("aldb.is_loading")}</div>`
-          : ""}
-      </div>
     `;
   }
 }

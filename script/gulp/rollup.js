@@ -21,6 +21,8 @@ const { terser } = require("rollup-plugin-terser");
 
 const extensions = [".js", ".ts"];
 
+const main = "./src/main.ts";
+
 const DevelopPlugins = [
   string({
     include: ["node_modules/**/*.css"],
@@ -68,7 +70,7 @@ const BuildPlugins = DevelopPlugins.concat([
 ]);
 
 const inputconfig = {
-  input: "./src/main.ts",
+  input: main,
   plugins: DevelopPlugins,
   preserveEntrySignatures: false,
 };
@@ -91,8 +93,8 @@ function createServer() {
     });
   });
 
-  server.listen(5000, true, () => {
-    log.info("File will be served to http://127.0.0.1:5000/entrypoint.js");
+  server.listen(5001, true, () => {
+    log.info("File will be served to http://127.0.0.1:5001/entrypoint.js");
   });
 }
 
@@ -146,12 +148,44 @@ function writeEntrypoint() {
   fs.writeFileSync(
     path.resolve("./insteon_frontend/entrypoint.js"),
     `
+import './${entrypointManifest[main]}';
+
+const styleEl = document.createElement('style');
+styleEl.innerHTML = \`
+body {
+  font-family: Roboto, sans-serif;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #111111;
+    color: #e1e1e1;
+  }
+}
+\`;
+
+
+document.head.appendChild(styleEl);
+  `,
+    { encoding: "utf-8" }
+  );
+}
+
+function writeEntrypoint2() {
+  const entrypointManifest = require(path.resolve("./insteon_frontend/manifest.json"));
+  fs.writeFileSync(
+    path.resolve("./insteon_frontend/entrypoint.js"),
+    `
 try {
-  new Function("import('/hacsfiles/frontend/${entrypointManifest["./src/main.ts"]}')")();
+  new Function("import('/insteonfiles/${entrypointManifest["./src/main.ts"]}')")();
 } catch (err) {
   var el = document.createElement('script');
-  el.src = '/hacsfiles/frontend/${entrypointManifest["./src/main.ts"]}';
-  el.type = 'module';
+  el.src = '/insteonfiles/${entrypointManifest["./src/main.ts"]}';
   document.body.appendChild(el);
 }
   `,

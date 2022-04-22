@@ -6,6 +6,13 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+if [ ! -d "./homeassistant-frontend/src" ]; then
+  cd homeassistant-frontend
+  git submodule init
+  git submodule update
+  cd ..
+fi
+
 rm -f yarn.lock
 node ./script/merge_requirements.js
 yarn install

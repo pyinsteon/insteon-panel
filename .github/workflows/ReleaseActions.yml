@@ -83,4 +83,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@0.3.2
         with:
-          args: "New version of insteon frontend are now pushed to [PyPi](https://pypi.org/project/insteon-frontend)."
+          args: "New version of insteon frontend are now pushed to [PyPi](https://pypi.org/project/insteon_ha_frontend)."

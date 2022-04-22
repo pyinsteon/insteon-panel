@@ -1,8 +1,11 @@
 import { fireEvent } from "../../../homeassistant-frontend/src/common/dom/fire_event";
-import { ALDBRecord } from "../../data/insteon";
+import { ALDBRecord, Insteon } from "../../data/insteon";
+import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
 import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
 
 export interface InsteonALDBRecordDialogParams {
+  hass: HomeAssistant;
+  insteon: Insteon;
   record: ALDBRecord;
   schema: HaFormSchema[];
   title: string;

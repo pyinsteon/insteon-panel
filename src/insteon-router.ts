@@ -21,7 +21,7 @@ class InsteonRouter extends HassRouterPage {
   @state() private _wide = false;
 
   protected routerOptions: RouterOptions = {
-    defaultPage: "device",
+    defaultPage: "devices",
     routes: {
       device: {
         tag: "insteon-device-router",
