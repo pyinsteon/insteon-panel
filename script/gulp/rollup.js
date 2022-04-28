@@ -21,7 +21,7 @@ const { terser } = require("rollup-plugin-terser");
 
 const extensions = [".js", ".ts"];
 
-const main = "./src/main.ts";
+const entrypoint = "./src/entrypoint.ts";
 
 const DevelopPlugins = [
   string({
@@ -70,7 +70,7 @@ const BuildPlugins = DevelopPlugins.concat([
 ]);
 
 const inputconfig = {
-  input: main,
+  input: entrypoint,
   plugins: DevelopPlugins,
   preserveEntrySignatures: false,
 };
@@ -124,7 +124,7 @@ gulp.task("rollup-develop", () => {
       log(`Build started @ ${new Date().toLocaleTimeString()}`);
     } else if (event.code === "BUNDLE_END") {
       if (first) {
-        writeEntrypoint();
+        writeEntrypointHash();
         first = false;
       }
 
@@ -139,56 +139,20 @@ gulp.task("rollup-build", async function (task) {
   inputconfig.plugins = BuildPlugins;
   const bundle = await rollup.rollup(inputconfig);
   await bundle.write(outputconfig(false));
-  writeEntrypoint();
+  writeEntrypointHash();
   task();
 });
 
-function writeEntrypoint() {
+function writeEntrypointHash() {
   const entrypointManifest = require(path.resolve("./insteon_frontend/manifest.json"));
+  const entrypointFile = entrypointManifest[entrypoint];
+  const fileElements = entrypointFile.split("-");
+  const fileHash = fileElements[1].split(".")[0];
+
   fs.writeFileSync(
-    path.resolve("./insteon_frontend/entrypoint.js"),
+    path.resolve("./insteon_frontend/constants.py"),
     `
-import './${entrypointManifest[main]}';
-
-const styleEl = document.createElement('style');
-styleEl.innerHTML = \`
-body {
-  font-family: Roboto, sans-serif;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  font-weight: 400;
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-}
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #111111;
-    color: #e1e1e1;
-  }
-}
-\`;
-
-
-document.head.appendChild(styleEl);
-  `,
-    { encoding: "utf-8" }
-  );
-}
-
-function writeEntrypoint2() {
-  const entrypointManifest = require(path.resolve("./insteon_frontend/manifest.json"));
-  fs.writeFileSync(
-    path.resolve("./insteon_frontend/entrypoint.js"),
-    `
-try {
-  new Function("import('/insteonfiles/${entrypointManifest["./src/main.ts"]}')")();
-} catch (err) {
-  var el = document.createElement('script');
-  el.src = '/insteonfiles/${entrypointManifest["./src/main.ts"]}';
-  document.body.appendChild(el);
-}
-  `,
-    { encoding: "utf-8" }
+FILE_HASH = '${fileHash}'
+`
   );
 }

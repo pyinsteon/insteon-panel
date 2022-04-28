@@ -19,7 +19,7 @@ import {
   subscribeDeviceRegistry,
   DeviceRegistryEntry,
 } from "../homeassistant-frontend/src/data/device_registry";
-import { Insteon, addInsteonDevice } from "./data/insteon";
+import { Insteon } from "./data/insteon";
 import { navigate } from "../homeassistant-frontend/src/common/navigate";
 import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
 import { RowClickedEvent, DataTableRowData } from "./data-table/insteon-data-table";
@@ -224,7 +224,6 @@ export class InsteonDevicesPanel extends LitElement {
   }
 
   private async _handleDeviceAdd(address: string, multiple: boolean) {
-    await addInsteonDevice(this.hass, address, multiple);
     showInsteonAddingDeviceDialog(this, {
       hass: this.hass,
       insteon: this.insteon,

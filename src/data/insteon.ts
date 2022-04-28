@@ -131,17 +131,6 @@ export const changeProperty = (
     value: value,
   });
 
-export const addInsteonDevice = (
-  hass: HomeAssistant,
-  address: string | undefined,
-  multiple: boolean
-): Promise<void> =>
-  hass.callWS({
-    type: "insteon/device/add",
-    device_address: address,
-    multiple: multiple,
-  });
-
 export const cancelAddInsteonDevice = (hass: HomeAssistant): Promise<void> =>
   hass.callWS({
     type: "insteon/device/add/cancel",
@@ -274,6 +263,6 @@ export const addDeviceSchema = (multiple: boolean): HaFormSchema[] => [
 ];
 
 export type deviceAddedMessage = {
-  type: string,
-  address: string
-}
+  type: string;
+  address: string;
+};

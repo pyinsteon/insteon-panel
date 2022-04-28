@@ -131,7 +131,9 @@ class DialogInsteonAddingDevice extends LitElement {
     this._subscribed = this.hass.connection.subscribeMessage(
       (message) => this._handleMessage(message),
       {
-        type: "insteon/device/adding",
+        type: "insteon/device/add",
+        multiple: this._multiple,
+        address: this._address,
       }
     );
     this._refreshLinkingTimeoutHandle = window.setTimeout(
