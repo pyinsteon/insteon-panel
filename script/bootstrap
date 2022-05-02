@@ -13,7 +13,7 @@ if [ ! -d "./homeassistant-frontend/src" ]; then
   cd ..
 fi
 
-if [ ! -d "./insteon_frontend"]; then
+if [ ! -d "./insteon_panel" ]; then
   mkdir insteon_frontend
 fi
 
