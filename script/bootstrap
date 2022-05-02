@@ -13,6 +13,10 @@ if [ ! -d "./homeassistant-frontend/src" ]; then
   cd ..
 fi
 
+if [ ! -d "./insteon_frontend"]; then
+  mkdir insteon_frontend
+fi
+
 rm -f yarn.lock
 node ./script/merge_requirements.js
 yarn install
