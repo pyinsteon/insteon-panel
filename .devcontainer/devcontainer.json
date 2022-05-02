@@ -3,7 +3,6 @@
 	"dockerFile": "Dockerfile",
 	"image": "ghcr.io/ludeeus/devcontainer/frontend:stable",
 	"context": "..",
-	"appPort": ["5001:5001"],
 	"postCreateCommand": "make init",
 	"extensions": [
 		"github.vscode-pull-request-github",
