@@ -3,10 +3,12 @@ import { customElement, property, query } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "../../../homeassistant-frontend/src/components/ha-circular-progress";
 import "../../data-table/insteon-data-table";
+
+import "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import type {
-  InsteonDataTable,
+  HaDataTable,
   DataTableColumnContainer,
-} from "../../data-table/insteon-data-table";
+} from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import type { Property } from "../../data/insteon";
 import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
 import { computeRTLDirection } from "../../../homeassistant-frontend/src/common/util/compute_rtl";
@@ -33,7 +35,7 @@ export class InsteonPropertiesDataTable extends LitElement {
 
   @property({ type: Boolean }) public showWait = false;
 
-  @query("insteon-data-table") private _dataTable!: InsteonDataTable;
+  @query("ha-data-table") private _dataTable!: HaDataTable;
 
   private _records = memoizeOne((records: Property[]) => {
     const outputRecords: RecordRowData[] = records;
@@ -139,13 +141,13 @@ export class InsteonPropertiesDataTable extends LitElement {
       `;
     }
     return html`
-      <insteon-data-table
+      <ha-data-table
         .columns=${this._columns(this.narrow)}
         .data=${this._records(this.records!)}
         .id=${"name"}
         .dir=${computeRTLDirection(this.hass!)}
         noDataText="${this.noDataText!}"
-      ></insteon-data-table>
+      ></ha-data-table>
     `;
   }
 
