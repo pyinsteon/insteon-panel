@@ -13,4 +13,4 @@ if [ ! -d "./node_modules" ]; then
 fi
 
 cp ./src/__init__.py ./insteon_frontend/
-./node_modules/.bin/gulp develop
+./node_modules/.bin/gulp develop-insteon

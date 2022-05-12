@@ -8,7 +8,8 @@ import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
-import "./data-table/insteon-data-table";
+//import "./data-table/insteon-data-table";
+import "../homeassistant-frontend/src/components/data-table/ha-data-table";
 import "../homeassistant-frontend/src/components/ha-card";
 import "../homeassistant-frontend/src/components/ha-button-menu";
 import "../homeassistant-frontend/src/layouts/hass-subpage";
@@ -195,12 +196,12 @@ export class InsteonDevicesPanel extends LitElement {
             <div main-title>Insteon Configuration</div>
           </app-toolbar>
         </app-header>
-        <insteon-data-table
+        <ha-data-table
           .hass=${this.hass}
           .data=${this._insteonDevices(this._devices)}
           .columns=${this._columns(this.narrow)}
           @row-click=${this._handleRowClicked}
-        ></insteon-data-table>
+        ></ha-data-table>
         <div id="fab">
           <mwc-fab
             slot="fab"
