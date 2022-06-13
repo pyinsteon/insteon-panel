@@ -69,7 +69,7 @@
       "id": "Record ID",
       "in_use": "In Use",
       "modified": "Modified",
-      "target": "Tartet Address",
+      "target": "Target Address",
       "target_device": "Target Device Name",
       "group": "Group",
       "mode": "Mode"
