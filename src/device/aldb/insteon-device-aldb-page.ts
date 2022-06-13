@@ -268,11 +268,16 @@ class InsteonDeviceALDBPage extends LitElement {
       text: this.insteon.localize("common.warn.load"),
       confirmText: this.hass!.localize("ui.common.yes"),
       dismissText: this.hass!.localize("ui.common.no"),
-      confirm: () => this._load(),
+      confirm: async () => this._load(),
     });
   }
 
-  private _load() {
+  private async _load() {
+    if (this._device!.is_battery) {
+      await showAlertDialog(this, {
+        text: this.insteon.localize("common.warn.wake_up"),
+      });
+    }
     this._subscribe();
     loadALDB(this.hass, this._device!.address);
     this._isLoading = true;
@@ -294,11 +299,16 @@ class InsteonDeviceALDBPage extends LitElement {
       text: this.insteon.localize("common.warn.write"),
       confirmText: this.hass!.localize("ui.common.yes"),
       dismissText: this.hass!.localize("ui.common.no"),
-      confirm: () => this._write(),
+      confirm: async () => this._write(),
     });
   }
 
-  private _write() {
+  private async _write() {
+    if (this._device!.is_battery) {
+      await showAlertDialog(this, {
+        text: this.insteon.localize("common.warn.wake_up"),
+      });
+    }
     this._subscribe();
     writeALDB(this.hass, this._device!.address);
     this._isLoading = true;
@@ -313,11 +323,16 @@ class InsteonDeviceALDBPage extends LitElement {
   private async _onAddDefaultLinksClicked() {
     await showConfirmationDialog(this, {
       text: this.insteon!.localize("common.warn.add_default_links"),
-      confirm: () => this._addDefaultLinks(),
+      confirm: async () => this._addDefaultLinks(),
     });
   }
 
   private async _addDefaultLinks() {
+    if (this._device!.is_battery) {
+      await showAlertDialog(this, {
+        text: this.insteon.localize("common.warn.wake_up"),
+      });
+    }
     this._subscribe();
     addDefaultLinks(this.hass, this._device!.address);
     this._records = [];
