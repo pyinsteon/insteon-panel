@@ -218,6 +218,11 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   private async _load() {
+    if (this._device!.is_battery) {
+      await showAlertDialog(this, {
+        text: this.insteon.localize("common.warn.wake_up"),
+      });
+    }
     this._showWait = true;
     try {
       await loadProperties(this.hass, this._device!.address);
@@ -240,6 +245,11 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   private async _write() {
+    if (this._device!.is_battery) {
+      await showAlertDialog(this, {
+        text: this.insteon.localize("common.warn.wake_up"),
+      });
+    }
     this._showWait = true;
     try {
       await writeProperties(this.hass, this._device!.address);
