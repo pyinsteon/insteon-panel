@@ -103,7 +103,7 @@ export class InsteonDevicesPanel extends LitElement {
       subscribeDeviceRegistry(this.hass.connection, (entries) => {
         this._devices = entries.filter(
           (device) =>
-            device.config_entries && device.config_entries[0] == this.insteon.config_entry.entry_id
+            device.config_entries && device.config_entries.includes(this.insteon.config_entry.entry_id)
         );
       }),
     ];
