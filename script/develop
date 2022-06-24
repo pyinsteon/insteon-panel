@@ -12,5 +12,5 @@ if [ ! -d "./node_modules" ]; then
     yarn install
 fi
 
-cp ./src/__init__.py ./insteon_frontend/
+cp ./src/__init__.py ./build/
 ./node_modules/.bin/gulp develop-insteon
