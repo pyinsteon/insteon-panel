@@ -241,41 +241,48 @@ export class InsteonDevicesPanel extends LitElement {
 
   static get styles(): CSSResultGroup {
     return [
-      haStyle,
       css`
-        :host(:not([narrow])) ha-card:last-child {
-          margin-bottom: 24px;
-        }
-        ha-config-section {
-          margin: auto;
-          margin-top: -32px;
-          max-width: 600px;
-        }
-        ha-card {
-          overflow: hidden;
-        }
-        ha-card a {
-          text-decoration: none;
-          color: var(--primary-text-color);
-        }
-        .title {
-          font-size: 16px;
-          padding: 16px;
-          padding-bottom: 0;
-        }
-        :host([narrow]) ha-card {
-          border-radius: 0;
-          box-shadow: unset;
-        }
-
-        :host(:not([narrow])) insteon-data-table {
-          height: 94vh;
-          display: block;
-        }
-        :host([narrow]) insteon-data-table {
+        ha-data-table {
           width: 100%;
           height: 100%;
           --data-table-border-width: 0;
+        }
+        :host(:not([narrow])) ha-data-table {
+          height: calc(100vh - 1px - var(--header-height));
+          display: block;
+        }
+        :host([narrow]) hass-tabs-subpage {
+          --main-title-margin: 0;
+        }
+        .table-header {
+          display: flex;
+          align-items: center;
+          --mdc-shape-small: 0;
+          height: 56px;
+        }
+        .search-toolbar {
+          display: flex;
+          align-items: center;
+          color: var(--secondary-text-color);
+        }
+        search-input {
+          --mdc-text-field-fill-color: var(--sidebar-background-color);
+          --mdc-text-field-idle-line-color: var(--divider-color);
+          --text-field-overflow: visible;
+          z-index: 5;
+        }
+        .table-header search-input {
+          display: block;
+          position: absolute;
+          top: 0;
+          right: 0;
+          left: 0;
+        }
+        .search-toolbar search-input {
+          display: block;
+          width: 100%;
+          color: var(--secondary-text-color);
+          --mdc-ripple-color: transparant;
         }
         #fab {
           position: fixed;
@@ -300,6 +307,7 @@ export class InsteonDevicesPanel extends LitElement {
           right: auto;
         }
       `,
+      haStyle,
     ];
   }
 }
