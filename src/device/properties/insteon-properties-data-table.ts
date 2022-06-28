@@ -2,21 +2,20 @@ import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "../../../homeassistant-frontend/src/components/ha-circular-progress";
-import "../../data-table/insteon-data-table";
 
 import "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import type {
   HaDataTable,
   DataTableColumnContainer,
 } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
-import type { Property } from "../../data/insteon";
+import type { InsteonProperty } from "../../data/insteon";
 import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
 import { computeRTLDirection } from "../../../homeassistant-frontend/src/common/util/compute_rtl";
 import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
 import { Insteon } from "../../data/insteon";
 
-export interface RecordRowData extends Property {
-  record?: Property;
+export interface RecordRowData {
+  record?: InsteonProperty;
 }
 
 @customElement("insteon-properties-data-table")
@@ -27,7 +26,7 @@ export class InsteonPropertiesDataTable extends LitElement {
 
   @property({ type: Boolean }) public narrow = false;
 
-  @property({ type: Array }) public records: Property[] = [];
+  @property({ type: Array }) public records: InsteonProperty[] = [];
 
   @property() public schema: { [key: string]: HaFormSchema } = {};
 
@@ -37,10 +36,8 @@ export class InsteonPropertiesDataTable extends LitElement {
 
   @query("ha-data-table") private _dataTable!: HaDataTable;
 
-  private _records = memoizeOne((records: Property[]) => {
-    const outputRecords: RecordRowData[] = records;
-
-    return outputRecords.map((record) => ({
+  private _records = memoizeOne((records: InsteonProperty[]) => {
+    return records.map((record) => ({
       description: this._calcDescription(record.name),
       display_value: this._translateValue(record.name, record.value),
       ...record,
@@ -130,10 +127,6 @@ export class InsteonPropertiesDataTable extends LitElement {
           }
   );
 
-  public clearSelection() {
-    this._dataTable.clearSelection();
-  }
-
   protected render(): TemplateResult {
     if (this.showWait) {
       return html`
@@ -151,7 +144,10 @@ export class InsteonPropertiesDataTable extends LitElement {
     `;
   }
 
-  private _translateValue(name: string, value: boolean | number | string | [[number]] | []) {
+  private _translateValue(
+    name: string,
+    value: number | boolean | [number] | [[number]] | [string] | []
+  ) {
     const schema = this.schema[name];
     if (schema.name == "radio_button_groups") {
       return "" + value.length + " groups";
