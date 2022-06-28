@@ -8,8 +8,11 @@ import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
-//import "./data-table/insteon-data-table";
 import "../homeassistant-frontend/src/components/data-table/ha-data-table";
+import {
+  DataTableRowData,
+  RowClickedEvent,
+} from "../homeassistant-frontend/src/components/data-table/ha-data-table";
 import "../homeassistant-frontend/src/components/ha-card";
 import "../homeassistant-frontend/src/components/ha-button-menu";
 import "../homeassistant-frontend/src/layouts/hass-subpage";
@@ -23,17 +26,12 @@ import {
 import { Insteon } from "./data/insteon";
 import { navigate } from "../homeassistant-frontend/src/common/navigate";
 import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
-import { RowClickedEvent, DataTableRowData } from "./data-table/insteon-data-table";
 import {
   AreaRegistryEntry,
   subscribeAreaRegistry,
 } from "../homeassistant-frontend/src/data/area_registry";
 import { showInsteonAddDeviceDialog } from "./device/show-dialog-insteon-add-device";
 import { showInsteonAddingDeviceDialog } from "./device/show-dialog-adding-device";
-import {
-  showConfirmationDialog,
-  showAlertDialog,
-} from "../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
 
 interface DeviceRowData extends DataTableRowData {
   id: string;
