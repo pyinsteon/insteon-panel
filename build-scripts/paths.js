@@ -40,7 +40,7 @@ module.exports = {
   insteon_output_static: path.resolve(__dirname, "../build/static"),
   insteon_output_latest: path.resolve(__dirname, "../build/frontend_latest"),
   insteon_output_es5: path.resolve(__dirname, "../build/frontend_es5"),
-  insteon_publicPath: "/insteon",
+  insteon_publicPath: "/insteon_static",
 
   translations_src: path.resolve(__dirname, "../src/translations"),
 };
