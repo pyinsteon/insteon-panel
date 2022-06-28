@@ -28,7 +28,7 @@ import { HomeAssistant, Route } from "../../../homeassistant-frontend/src/types"
 import { insteonDeviceTabs } from "../insteon-device-router";
 import "./insteon-aldb-data-table";
 import { HASSDomEvent } from "../../../homeassistant-frontend/src/common/dom/fire_event";
-import { RowClickedEvent } from "../../data-table/insteon-data-table";
+import { RowClickedEvent } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import {
   showConfirmationDialog,
   showAlertDialog,

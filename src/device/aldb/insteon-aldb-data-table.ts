@@ -2,9 +2,8 @@ import { html, LitElement, TemplateResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "../../../homeassistant-frontend/src/components/ha-circular-progress";
-import "../../data-table/insteon-data-table";
-//import { InsteonDataTable, DataTableColumnContainer } from "../../data-table/insteon-data-table";
 import "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
+import { DataTableColumnContainer } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import type { ALDBRecord, Insteon } from "../../data/insteon";
 import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
 import { computeRTLDirection } from "../../../homeassistant-frontend/src/common/util/compute_rtl";
@@ -21,13 +20,11 @@ export class InsteonALDBDataTable extends LitElement {
 
   @property({ type: Boolean }) public narrow = false;
 
-  @property() public records: ALDBRecord[] = [];
+  @property({ attribute: false }) public records: ALDBRecord[] = [];
 
   @property({ type: Boolean }) public isLoading = false;
 
   @property({ type: Boolean }) public showWait = false;
-
-  @query("insteon-data-table") private _dataTable!: InsteonDataTable;
 
   private _records = memoizeOne((records: ALDBRecord[]) => {
     if (!records) {
@@ -157,10 +154,6 @@ export class InsteonALDBDataTable extends LitElement {
       return "";
     }
     return this.insteon.localize("aldb.no_data");
-  }
-
-  public clearSelection() {
-    this._dataTable.clearSelection();
   }
 
   protected render(): TemplateResult {
