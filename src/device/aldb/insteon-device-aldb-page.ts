@@ -55,7 +55,7 @@ class InsteonDeviceALDBPage extends LitElement {
 
   @state() private _records?: ALDBRecord[];
 
-  @state() private _allRecords?: ALDBRecord[];
+  @state() private _allRecords?: ALDBRecord[] = [];
 
   @state() private _showHideUnused = "show";
 

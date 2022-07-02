@@ -34,8 +34,6 @@ export class InsteonPropertiesDataTable extends LitElement {
 
   @property({ type: Boolean }) public showWait = false;
 
-  @query("ha-data-table") private _dataTable!: HaDataTable;
-
   private _records = memoizeOne((records: InsteonProperty[]) => {
     return records.map((record) => ({
       description: this._calcDescription(record.name),
