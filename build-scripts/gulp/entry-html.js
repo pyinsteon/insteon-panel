@@ -299,9 +299,9 @@ if (/.*Version\\/(?:11|12)(?:\\.\\d+)*.*Safari\\//.test(navigator.userAgent)) {
     { encoding: "utf-8" }
   );
   fs.writeFileSync(
-    path.resolve("./build/constants.py"),
-    `
-FILE_HASH = '${fileHash}'
+    path.resolve(paths.insteon_output_root, "constants.py"),
+    `FILE_HASH = '${fileHash}'
+
 `,
     { encoding: "utf-8" }
   );

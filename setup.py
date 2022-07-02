@@ -8,7 +8,7 @@ setup(
     description="The Insteon frontend for Home Assistant",
     author="Tom Harris",
     author_email="pyinsteon@harrisnj.net",
-    packages=find_packages(include=["build", "build.*"]),
+    packages=find_packages(include=["insteon_frontend", "insteon_frontend.*"]),
     include_package_data=True,
     zip_safe=False,
 )
