@@ -1,2 +1,2 @@
-graft insteon_frontend
+graft build
 global-exclude *.py[cod]

@@ -2,7 +2,7 @@
   "name": "insteon-panel-frontend",
   "description": "Frontend of Insteon Panel",
   "source": "src/entrypoint.ts",
-  "main": "insteon_frontend/entrypoint.js",
+  "main": "build/entrypoint.js",
   "scripts": {
     "develop": "./script/develop",
     "build": "./script/build",
