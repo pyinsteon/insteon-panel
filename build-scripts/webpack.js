@@ -134,7 +134,7 @@ const createWebpackConfig = ({
         if (!isProdBuild || isStatsBuild || dontHash.has(chunk.name)) {
           return `${chunk.name}-dev.js`;
         }
-        return `${chunk.name}.${chunk.hash.substr(0, 8)}.js`;
+        return `${chunk.name}-${chunk.hash.substr(0, 8)}.js`;
       },
       chunkFilename: isProdBuild && !isStatsBuild ? "[chunkhash:8].js" : "[id].chunk.js",
       path: outputPath,
@@ -148,29 +148,9 @@ const createWebpackConfig = ({
   };
 };
 
-const createAppConfig = ({ isProdBuild, latestBuild, isStatsBuild }) =>
-  createWebpackConfig(bundle.config.app({ isProdBuild, latestBuild, isStatsBuild }));
-
-const createDemoConfig = ({ isProdBuild, latestBuild, isStatsBuild }) =>
-  createWebpackConfig(bundle.config.demo({ isProdBuild, latestBuild, isStatsBuild }));
-
-const createCastConfig = ({ isProdBuild, latestBuild }) =>
-  createWebpackConfig(bundle.config.cast({ isProdBuild, latestBuild }));
-
-const createHassioConfig = ({ isProdBuild, latestBuild }) =>
-  createWebpackConfig(bundle.config.hassio({ isProdBuild, latestBuild }));
-
 const createInsteonConfig = ({ isProdBuild, latestBuild }) =>
   createWebpackConfig(bundle.config.insteon({ isProdBuild, latestBuild }));
 
-const createGalleryConfig = ({ isProdBuild, latestBuild }) =>
-  createWebpackConfig(bundle.config.gallery({ isProdBuild, latestBuild }));
-
 module.exports = {
-  createAppConfig,
-  createDemoConfig,
-  createCastConfig,
-  createHassioConfig,
   createInsteonConfig,
-  createGalleryConfig,
 };

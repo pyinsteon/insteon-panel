@@ -116,102 +116,8 @@ const outputPath = (outputRoot, latestBuild) =>
 const publicPath = (latestBuild, root = "") =>
   latestBuild ? `${root}/frontend_latest/` : `${root}/frontend_es5/`;
 
-/*
-BundleConfig {
-  // Object with entrypoints that need to be bundled
-  entry: { [name: string]: pathToFile },
-  // Folder where bundled files need to be written
-  outputPath: string,
-  // absolute url-path where bundled files can be found
-  publicPath: string,
-  // extra definitions that we need to replace in source
-  defineOverlay: {[name: string]: value },
-  // if this is a production build
-  isProdBuild: boolean,
-  // If we're targeting latest browsers
-  latestBuild: boolean,
-  // If we're doing a stats build (create nice chunk names)
-  isStatsBuild: boolean,
-  // Names of entrypoints that should not be hashed
-  dontHash: Set<string>
-}
-*/
 
 module.exports.config = {
-  app({ isProdBuild, latestBuild, isStatsBuild, isWDS }) {
-    return {
-      entry: {
-        service_worker: "./src/entrypoints/service_worker.ts",
-        app: "./src/entrypoints/app.ts",
-        authorize: "./src/entrypoints/authorize.ts",
-        onboarding: "./src/entrypoints/onboarding.ts",
-        core: "./src/entrypoints/core.ts",
-        "custom-panel": "./src/entrypoints/custom-panel.ts",
-      },
-      outputPath: outputPath(paths.app_output_root, latestBuild),
-      publicPath: publicPath(latestBuild),
-      isProdBuild,
-      latestBuild,
-      isStatsBuild,
-      isWDS,
-    };
-  },
-
-  demo({ isProdBuild, latestBuild, isStatsBuild }) {
-    return {
-      entry: {
-        main: path.resolve(paths.demo_dir, "src/entrypoint.ts"),
-      },
-      outputPath: outputPath(paths.demo_output_root, latestBuild),
-      publicPath: publicPath(latestBuild),
-      defineOverlay: {
-        __VERSION__: JSON.stringify(`DEMO-${env.version()}`),
-        __DEMO__: true,
-      },
-      isProdBuild,
-      latestBuild,
-      isStatsBuild,
-    };
-  },
-
-  cast({ isProdBuild, latestBuild }) {
-    const entry = {
-      launcher: path.resolve(paths.cast_dir, "src/launcher/entrypoint.ts"),
-      media: path.resolve(paths.cast_dir, "src/media/entrypoint.ts"),
-    };
-
-    if (latestBuild) {
-      entry.receiver = path.resolve(paths.cast_dir, "src/receiver/entrypoint.ts");
-    }
-
-    return {
-      entry,
-      outputPath: outputPath(paths.cast_output_root, latestBuild),
-      publicPath: publicPath(latestBuild),
-      isProdBuild,
-      latestBuild,
-      defineOverlay: {
-        __BACKWARDS_COMPAT__: true,
-      },
-    };
-  },
-
-  hassio({ isProdBuild, latestBuild }) {
-    return {
-      entry: {
-        entrypoint: path.resolve(paths.hassio_dir, "src/entrypoint.ts"),
-      },
-      outputPath: outputPath(paths.hassio_output_root, latestBuild),
-      publicPath: publicPath(latestBuild, paths.hassio_publicPath),
-      isProdBuild,
-      latestBuild,
-      isHassioBuild: true,
-      defineOverlay: {
-        __SUPERVISOR__: true,
-      },
-    };
-  },
-
   insteon({ isProdBuild, latestBuild }) {
     return {
       entry: {
@@ -222,21 +128,6 @@ module.exports.config = {
       isProdBuild,
       latestBuild,
       isHassioBuild: true,
-    };
-  },
-
-  gallery({ isProdBuild, latestBuild }) {
-    return {
-      entry: {
-        entrypoint: path.resolve(paths.gallery_dir, "src/entrypoint.js"),
-      },
-      outputPath: outputPath(paths.gallery_output_root, latestBuild),
-      publicPath: publicPath(latestBuild),
-      isProdBuild,
-      latestBuild,
-      defineOverlay: {
-        __DEMO__: true,
-      },
     };
   },
 };

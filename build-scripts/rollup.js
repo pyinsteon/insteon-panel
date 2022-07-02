@@ -102,42 +102,9 @@ const createRollupConfig = ({
   },
 });
 
-const createAppConfig = ({ isProdBuild, latestBuild, isStatsBuild, isWDS }) =>
-  createRollupConfig(
-    bundle.config.app({
-      isProdBuild,
-      latestBuild,
-      isStatsBuild,
-      isWDS,
-    })
-  );
-
-const createDemoConfig = ({ isProdBuild, latestBuild, isStatsBuild }) =>
-  createRollupConfig(
-    bundle.config.demo({
-      isProdBuild,
-      latestBuild,
-      isStatsBuild,
-    })
-  );
-
-const createCastConfig = ({ isProdBuild, latestBuild }) =>
-  createRollupConfig(bundle.config.cast({ isProdBuild, latestBuild }));
-
-const createHassioConfig = ({ isProdBuild, latestBuild }) =>
-  createRollupConfig(bundle.config.hassio({ isProdBuild, latestBuild }));
-
 const createInsteonConfig = ({ isProdBuild, latestBuild }) =>
   createRollupConfig(bundle.config.insteon({ isProdBuild, latestBuild }));
 
-const createGalleryConfig = ({ isProdBuild, latestBuild }) =>
-  createRollupConfig(bundle.config.gallery({ isProdBuild, latestBuild }));
-
 module.exports = {
-  createAppConfig,
-  createDemoConfig,
-  createCastConfig,
-  createHassioConfig,
   createInsteonConfig,
-  createGalleryConfig,
 };
