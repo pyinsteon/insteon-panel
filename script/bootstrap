@@ -13,6 +13,4 @@ if [ ! -d "./homeassistant-frontend/src" ]; then
   cd ..
 fi
 
-rm -f yarn.lock
-node ./script/merge_requirements.js
 yarn install
