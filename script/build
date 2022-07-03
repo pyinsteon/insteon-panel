@@ -1,16 +1,10 @@
 #!/bin/sh
-# Run the frontend development server
+# Builds the frontend for production
 
 # Stop on errors
 set -e
 
 cd "$(dirname "$0")/.."
 
-if [ ! -d "./node_modules" ]; then
-    echo "Directory /node_modules DOES NOT exists."
-    echo "Running yarn install"
-    yarn install
-fi
-
+./node_modules/.bin/gulp build-insteon
 cp ./src/__init__.py ./insteon_frontend/
-./node_modules/.bin/gulp build

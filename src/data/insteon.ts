@@ -1,10 +1,5 @@
 import { HomeAssistant } from "../../homeassistant-frontend/src/types";
-import type {
-  HaFormSchema,
-  HaFormBooleanSchema,
-  HaFormStringSchema,
-  HaFormConstantSchema,
-} from "../../homeassistant-frontend/src/components/ha-form/types";
+import type { HaFormSchema } from "../../homeassistant-frontend/src/components/ha-form/types";
 import { Repository, Status, Message } from "./common";
 import { ConfigEntry } from "../..//homeassistant-frontend/src/data/config_entries";
 
@@ -30,7 +25,7 @@ export interface InsteonDevice {
   aldb_status: string;
 }
 
-export type Property =
+export type InsteonProperty =
   | PropertyNumber
   | PropertyBoolean
   | PropertySelect
@@ -64,11 +59,9 @@ export interface PropertyRadioButtons extends PropertyBase {
 }
 
 export interface PropertiesInfo {
-  properties: Property[];
+  properties: InsteonProperty[];
   schema: { [key: string]: HaFormSchema }; // HaFormSchema };
 }
-
-// export const AddressRegex = RegExp(/(?<!.)[A-Fa-f0-9]{2}\.?[A-Fa-f0-9]{2}\.?[A-Fa-f0-9]{2}$/);
 
 export interface ALDBRecord {
   mem_addr: number;

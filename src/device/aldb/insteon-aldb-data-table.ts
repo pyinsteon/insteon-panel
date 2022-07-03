@@ -2,8 +2,8 @@ import { html, LitElement, TemplateResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "../../../homeassistant-frontend/src/components/ha-circular-progress";
-import "../../data-table/insteon-data-table";
-import { InsteonDataTable, DataTableColumnContainer } from "../../data-table/insteon-data-table";
+import "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
+import { DataTableColumnContainer } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import type { ALDBRecord, Insteon } from "../../data/insteon";
 import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
 import { computeRTLDirection } from "../../../homeassistant-frontend/src/common/util/compute_rtl";
@@ -20,13 +20,11 @@ export class InsteonALDBDataTable extends LitElement {
 
   @property({ type: Boolean }) public narrow = false;
 
-  @property() public records: ALDBRecord[] = [];
+  @property({ attribute: false }) public records: ALDBRecord[] = [];
 
   @property({ type: Boolean }) public isLoading = false;
 
   @property({ type: Boolean }) public showWait = false;
-
-  @query("insteon-data-table") private _dataTable!: InsteonDataTable;
 
   private _records = memoizeOne((records: ALDBRecord[]) => {
     if (!records) {
@@ -158,16 +156,12 @@ export class InsteonALDBDataTable extends LitElement {
     return this.insteon.localize("aldb.no_data");
   }
 
-  public clearSelection() {
-    this._dataTable.clearSelection();
-  }
-
   protected render(): TemplateResult {
     if (this.showWait) {
       return html` <ha-circular-progress active alt="Loading"></ha-circular-progress> `;
     }
     return html`
-      <insteon-data-table
+      <ha-data-table
         .columns=${this._columns(this.narrow)}
         .data=${this._records(this.records)}
         .id=${"mem_addr"}
@@ -176,7 +170,7 @@ export class InsteonALDBDataTable extends LitElement {
         .noDataText="${this._noDataText(this.isLoading)}"
       >
         <ha-circular-progress active alt="Loading"></ha-circular-progress>
-      </insteon-data-table>
+      </ha-data-table>
     `;
   }
 }

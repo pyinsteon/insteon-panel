@@ -6,37 +6,40 @@ import { InsteonLogger } from "./tools/insteon-logger";
 import { localize } from "./localize/localize";
 import { ProvideHassLitMixin } from "../homeassistant-frontend/src/mixins/provide-hass-lit-mixin";
 import { getConfigEntries } from "../homeassistant-frontend/src/data/config_entries";
+import { HomeAssistant } from "../homeassistant-frontend/src/types";
 
 export class insteonElement extends ProvideHassLitMixin(LitElement) {
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property({ attribute: false }) public insteon!: Insteon;
 
   public connectedCallback() {
     super.connectedCallback();
 
-    if (this.insteon === undefined) {
-      getConfigEntries(this.hass).then((configEntries) => {
-        const insteonEntry = configEntries.filter((entry) => entry.domain === "insteon")[0];
-        this.insteon = {
-          language: "en",
-          messages: [],
-          updates: [],
-          resources: [],
-          repositories: [],
-          removed: [],
-          sections: [],
-          config_entry: insteonEntry,
-          status: {} as any,
-          addedToLovelace,
-          localize: (string: string, replace?: Record<string, any>) =>
-            localize(this.insteon?.language || "en", string, replace),
-          log: new InsteonLogger(),
-        };
-      });
-    }
-
     this.addEventListener("update-insteon", (e) =>
       this._updateInsteon((e as any).detail as Partial<Insteon>)
     );
+  }
+
+  protected _getInsteonConfigEntry() {
+    getConfigEntries(this.hass).then((configEntries) => {
+      const insteonEntry = configEntries.filter((entry) => entry.domain === "insteon")[0];
+      this.insteon = {
+        language: "en",
+        messages: [],
+        updates: [],
+        resources: [],
+        repositories: [],
+        removed: [],
+        sections: [],
+        config_entry: insteonEntry,
+        status: {} as any,
+        addedToLovelace,
+        localize: (string: string, replace?: Record<string, any>) =>
+          localize(this.insteon?.language || "en", string, replace),
+        log: new InsteonLogger(),
+      };
+    });
   }
 
   protected _updateInsteon(obj: Partial<Insteon>) {
