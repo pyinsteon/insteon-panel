@@ -9,7 +9,7 @@ import "./insteon-properties-data-table";
 import {
   Insteon,
   InsteonDevice,
-  Property,
+  InsteonProperty,
   fetchInsteonDevice,
   fetchInsteonProperties,
   changeProperty,
@@ -23,12 +23,8 @@ import {
   showConfirmationDialog,
   showAlertDialog,
 } from "../../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
-import type {
-  HaFormSchema,
-  HaFormMultiSelectSchema,
-  HaFormDataContainer,
-} from "../../../homeassistant-frontend/src/components/ha-form/types";
-import { RowClickedEvent } from "../../data-table/insteon-data-table";
+import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
+import { RowClickedEvent } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import "../../../homeassistant-frontend/src/layouts/hass-tabs-subpage";
 import { insteonDeviceTabs } from "../insteon-device-router";
 import { navigate } from "../../../homeassistant-frontend/src/common/navigate";
@@ -50,7 +46,7 @@ class InsteonDevicePropertiesPage extends LitElement {
 
   @state() private _device?: InsteonDevice;
 
-  @state() private _properties: Property[] = [];
+  @state() private _properties: InsteonProperty[] = [];
 
   @state() private _schema?: { [key: string]: HaFormSchema };
 

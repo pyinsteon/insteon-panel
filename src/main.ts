@@ -22,6 +22,9 @@ class InsteonFrontend extends insteonElement {
     if (!this.hass) {
       return;
     }
+    if (!this.insteon) {
+      this._getInsteonConfigEntry();
+    }
     //this.insteon.language = this.hass.language;
     this.addEventListener("insteon-location-changed", (e) =>
       this._setRoute(e as LocationChangedEvent)

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="insteon-frontend-home-assistant",
-    version="0.1.1",
+    version="0.2.0",
     url="https://github.com/teharris1/insteon-panel",
     license="MIT License",
     description="The Insteon frontend for Home Assistant",

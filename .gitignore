@@ -4,7 +4,7 @@ package-lock.json
 src/localize/generated.ts
 
 yarn-error.log
-
+.yarn
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -16,9 +16,9 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-insteon_frontend/*
 env/
 build/
+insteon_frontend/
 develop-eggs/
 dist/
 downloads/

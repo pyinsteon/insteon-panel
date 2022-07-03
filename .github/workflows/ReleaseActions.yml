@@ -54,11 +54,11 @@ jobs:
         run: |
           export version=${{ github.ref }}
           sed -i "s|main|${version##*/}|" ./setup.py
-          sed -i "s|main|${version##*/}|" ./insteon_frontend/version.py
+          sed -i "s|main|${version##*/}|" ./build/version.py
           sed -i "s|main|${version##*/}|" ./src/version.ts
 
           cat ./setup.py
-          cat ./insteon_frontend/version.py
+          cat ./build/version.py
           cat ./src/version.ts
 
       - name: Install dependencies

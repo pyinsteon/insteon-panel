@@ -14,13 +14,15 @@ function recursiveFlatten(prefix, data) {
         ...recursiveFlatten(prefix + key + ".", data[key]),
       };
     } else {
-      output[prefix + key] = data[key].replace(/'{/g, "''{").replace(/}'/g, "}''");
+      output[prefix + key] = data[key]
+        .replace(/'{/g, "''{")
+        .replace(/}'/g, "}''");
     }
   });
   return Object.fromEntries(Object.entries(output).sort());
 }
 
-gulp.task("generate-translations", async function (task) {
+gulp.task("generate-translations-insteon", async function (task) {
   del.sync("./src/localize/generated.ts");
   const files = await fs.readdir("./src/localize/languages");
   const languages = {};
