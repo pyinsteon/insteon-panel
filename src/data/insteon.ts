@@ -25,6 +25,38 @@ export interface InsteonDevice {
   aldb_status: string;
 }
 
+export interface InsteonDeviceEntities {
+  [address: string]: {
+    [group: number]: {
+      entity_id: string;
+      registry_id: string;
+    };
+  };
+}
+
+export interface EntitiesInsteonDevice {
+  [registry_id: string]: {
+    address: string;
+    group: number;
+  };
+}
+
+export interface InsteonScene {
+  name: string;
+  group: number;
+  devices: InsteonSceneDeviceData[];
+}
+
+export interface InsteonSceneDeviceData {
+  address: string;
+  device_cat: number | null;
+  data1: number | null;
+  data2: number | null;
+  data3: number | null;
+  has_controller: boolean;
+  has_responder: boolean;
+}
+
 export type InsteonProperty =
   | PropertyNumber
   | PropertyBoolean
@@ -76,6 +108,22 @@ export interface ALDBRecord {
   data3: number;
   dirty: boolean;
 }
+
+export const fetchInsteonScenes = (hass: HomeAssistant): Promise<InsteonScene[]> =>
+  hass.callWS({
+    type: "insteon/scenes/get",
+  });
+
+export const fetchInsteonScene = (hass: HomeAssistant, id: number): Promise<InsteonScene> =>
+  hass.callWS({
+    type: "insteon/scene/get",
+    scene_id: id,
+  });
+
+export const fetchInsteonEntities = (hass: HomeAssistant): Promise<InsteonDeviceEntities> =>
+  hass.callWS({
+    type: "insteon/entities/get",
+  });
 
 export const fetchInsteonDevice = (hass: HomeAssistant, id: string): Promise<InsteonDevice> =>
   hass.callWS({
@@ -252,6 +300,24 @@ export const addDeviceSchema = (multiple: boolean): HaFormSchema[] => [
     name: "address",
     required: false,
     type: multiple ? "constant" : "string",
+  },
+];
+
+export const sceneDataSchema: HaFormSchema[] = [
+  {
+    name: "data1",
+    required: true,
+    type: "integer",
+  },
+  {
+    name: "data2",
+    required: true,
+    type: "integer",
+  },
+  {
+    name: "data3",
+    required: true,
+    type: "integer",
   },
 ];
 
