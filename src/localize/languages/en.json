@@ -1,5 +1,34 @@
 {
   "title": "Insteon",
+  "devices": {
+    "caption": "Insteon Devices",
+    "add_device": "Add device"
+  },
+  "scenes": {
+    "caption": "Insteon Scenes",
+    "add_scene": "Add scene",
+    "scene": {
+      "introduction": "Some intro text",
+      "default_name": "New Insteon scene",
+      "name": "Scene name",
+      "icon": "Icon",
+      "area": "Area",
+      "delete": "Delete scene",
+      "save": "Save scene",
+      "devices": {
+        "header": "Add device",
+        "introduction": "Add device intro",
+        "remove": "Remove device",
+        "add": "Add device",
+        "data1": "Data 1",
+        "data2": "Data 2",
+        "data3": "Data 3",
+        "on_level": "On level",
+        "ramp_rate": "Ramp rate",
+        "button": "Button"
+      }
+    }
+  },
   "common": {
     "actions": {
       "load": "Load from device",
