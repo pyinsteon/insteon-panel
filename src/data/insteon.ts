@@ -49,10 +49,10 @@ export interface InsteonScene {
 
 export interface InsteonSceneDeviceData {
   address: string;
-  device_cat: number | null;
-  data1: number | null;
-  data2: number | null;
-  data3: number | null;
+  device_cat: number;
+  data1: number;
+  data2: number;
+  data3: number;
   has_controller: boolean;
   has_responder: boolean;
 }
