@@ -82,16 +82,17 @@ interface DeviceEntitiesLookup {
 interface InsteonSceneEntity {
   entity_id: string;
   name: string;
-  group: number;
   is_in_scene: boolean;
-  state: EntityRegistryEntry;
+  data1: number;
+  data2: number;
+  data3: number;
 }
 
 interface InsteonSceneDevice {
   address: string;
-  ha_id: string;
-  name: string;
-  entities: { [entityId: string]: InsteonSceneEntity };
+  name: string | null | undefined;
+  device_cat: number;
+  entities: InsteonSceneEntity[];
 }
 
 @customElement("insteon-scene-editor")
@@ -112,6 +113,8 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
 
   @state() private _dirty = false;
 
+  @state() private _errors?: string;
+
   @state() private _deviceRegistryEntries: DeviceRegistryEntry[] = [];
 
   @state() private _entityRegistryEntries: EntityRegistryEntry[] = [];
@@ -122,25 +125,7 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
 
   @state() private _deviceEntityLookup: DeviceEntitiesLookup = {};
 
-  private _activateContextId?: string;
-
   @state() private _saving = false;
-
-  // undefined means not set in this session
-  // null means picked nothing.
-  @state() private _updatedAreaId?: string | null;
-
-  private _getRegistryAreaId = memoizeOne((entries: EntityRegistryEntry[], entity_id: string) => {
-    const entry = entries.find((ent) => ent.entity_id === entity_id);
-    return entry ? entry.area_id : null;
-  });
-
-  private _sceneDevicesInfo = memoizeOne((insteonSceneDevices: InsteonSceneDevice[]) => {
-    const outputData = [];
-    insteonSceneDevices.map((device) => {
-      device.entities.map((Entity))
-    })
-  });
 
   public disconnectedCallback() {
     super.disconnectedCallback();
@@ -170,17 +155,11 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
     if (!this.hass || !this._scene) {
       return html``;
     }
-    //const { devices } = this._getDevicesEntities(
-    //  this.insteonScene!,
-    //  this._devices,
-    //  this._deviceEntityLookup,
-    //  this._deviceRegistryEntries
-    //);
     const name = this._scene
       ? this._scene.name
       : this.insteon.localize("scenes.scene.default_name");
 
-    const devices = this._scene?.devices || [];
+    const devices = this._setSceneDevices();
     return html`
       <hass-tabs-subpage
         .hass=${this.hass}
@@ -254,24 +233,24 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
                       <ha-icon-button
                         .path=${mdiDelete}
                         .label=${this.hass.localize("ui.panel.config.scene.editor.devices.delete")}
-                        .device=${device.id}
+                        .device=${device.address}
                         @click=${this._deleteDevice}
                       ></ha-icon-button>
                     </h1>
-                    ${!device.entityId
+                    ${!device.entities
                       ? html` <ha-form .schema=${sceneDataSchema}></ha-form> `
-                      : !entityStateObj
-                      ? html``
-                      : html`
+                      : html`` // !entityStateObj
+                    }
+                    ${device.entities.map((entity) =>
+                      html`
                           <paper-icon-item
-                            .entityId=${device.entityId}
+                            .entityId=${entity.entity_id}
                             @click=${this._showMoreInfo}
                             class="device-entity"
                           >
-                            <state-badge .stateObj=${entityStateObj} slot="item-icon"></state-badge>
-                            <paper-item-body> ${computeStateName(entityStateObj)} </paper-item-body>
+                            <paper-item-body> ${entity.name} </paper-item-body>
                           </paper-icon-item>
-                        `};
+                        `)};
                   </ha-card>
                 `
             )}
@@ -300,6 +279,45 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
         </ha-fab>
       </hass-tabs-subpage>
     `;
+  }
+
+  private _setSceneDevices(): InsteonSceneDevice[] {
+    const outputDevices: InsteonSceneDevice[] = [];
+    this._scene?.devices.map((device) => {
+      const haDevice = this._deviceRegistryEntries.find((haCurrDevice) => {
+        return haCurrDevice.identifiers[0][0] == device.address;
+      });
+      const deviceEntities = this._insteonEntities ? this._insteonEntities[device.address] : {};
+      const theseEntities: InsteonSceneEntity[] = [];
+      Object.keys(deviceEntities).forEach((group) => {
+        const entity: EntityRegistryEntry =
+          this._entityRegistryEntries[deviceEntities[group].entity_id];
+        const insteonEntityData: InsteonSceneDeviceData | undefined = this._scene?.devices.find(
+          (curr_device) => {
+            return curr_device.data3 == +group;
+          }
+        );
+        const data1 = insteonEntityData?.data1 || 255;
+        const data2 = insteonEntityData?.data2 || 28;
+        const data3 = insteonEntityData?.data3 || group;
+        theseEntities.push({
+          entity_id: entity.entity_id,
+          name: entity.name || "None",
+          is_in_scene: true,
+          data1: data1,
+          data2: data2,
+          data3: +data3,
+        });
+      });
+      const thisDevice: InsteonSceneDevice = {
+        address: device.address,
+        name: haDevice?.name_by_user || haDevice?.name || "Insteon Device " + device.address,
+        device_cat: device.device_cat!,
+        entities: theseEntities,
+      };
+      outputDevices.push(thisDevice);
+    });
+    return outputDevices;
   }
 
   protected updated(changedProps: PropertyValues): void {
@@ -349,9 +367,9 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
       if (!this._deviceEntityLookup[entity.device_id].includes(entity.entity_id)) {
         this._deviceEntityLookup[entity.device_id].push(entity.entity_id);
       }
-      if (this._entities.includes(entity.entity_id) && !this._devices.includes(entity.device_id)) {
-        this._devices = [...this._devices, entity.device_id];
-      }
+      // if (this._entities.includes(entity.entity_id) && !this._devices.includes(entity.device_id)) {
+      //   this._devices = [...this._devices, entity.device_id];
+      // }
     }
   }
 
@@ -497,36 +515,6 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
     await deleteScene(this.hass, this.sceneId!);
     applyScene(this.hass, this._storedStates);
     history.back();
-  }
-
-  private _calculateStates(): SceneEntities {
-    const output: SceneEntities = {};
-    this._entities.forEach((entityId) => {
-      const entityState = this._getCurrentState(entityId);
-      if (entityState) {
-        output[entityId] = entityState;
-      }
-    });
-    return output;
-  }
-
-  private _storeState(entityId: string): void {
-    if (entityId in this._storedStates) {
-      return;
-    }
-    const entityState = this._getCurrentState(entityId);
-    if (!entityState) {
-      return;
-    }
-    this._storedStates[entityId] = entityState;
-  }
-
-  private _getCurrentState(entityId: string) {
-    const stateObj = this.hass.states[entityId];
-    if (!stateObj) {
-      return undefined;
-    }
-    return { ...stateObj.attributes, state: stateObj.state };
   }
 
   private async _saveScene(): Promise<void> {
