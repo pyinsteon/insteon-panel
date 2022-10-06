@@ -23,6 +23,7 @@ import "../../homeassistant-frontend/src/components/ha-icon-button";
 import "../../homeassistant-frontend/src/components/ha-icon-picker";
 import "../../homeassistant-frontend/src/components/ha-svg-icon";
 import "../../homeassistant-frontend/src/components/ha-textfield";
+import "../../homeassistant-frontend/src/components/ha-checkbox";
 import {
   computeDeviceName,
   DeviceRegistryEntry,
@@ -90,6 +91,7 @@ interface InsteonSceneEntity {
 
 interface InsteonSceneDevice {
   address: string;
+  device_id: string;
   name: string | null | undefined;
   device_cat: number;
   entities: InsteonSceneEntity[];
@@ -109,7 +111,7 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
 
   @property() public sceneId: string | null = null;
 
-  @state() public _scene: InsteonScene | null = null;
+  @state() public _scene?: InsteonScene;
 
   @state() private _dirty = false;
 
@@ -119,11 +121,15 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
 
   @state() private _entityRegistryEntries: EntityRegistryEntry[] = [];
 
-  private _insteonEntities?: InsteonDeviceEntities;
+  private _insteonToHaDeviceMap: { [address: string]: DeviceRegistryEntry } = {};
+
+  private _haToinsteonDeviceMap: { [deviceId: string]: string } = {};
+
+  private _insteonEntities: InsteonDeviceEntities = {};
 
   private _unsubscribeEvents?: () => void;
 
-  @state() private _deviceEntityLookup: DeviceEntitiesLookup = {};
+  private _deviceEntityLookup: DeviceEntitiesLookup = {};
 
   @state() private _saving = false;
 
@@ -239,18 +245,28 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
                     </h1>
                     ${!device.entities
                       ? html` <ha-form .schema=${sceneDataSchema}></ha-form> `
-                      : html`` // !entityStateObj
-                    }
-                    ${device.entities.map((entity) =>
-                      html`
-                          <paper-icon-item
-                            .entityId=${entity.entity_id}
-                            @click=${this._showMoreInfo}
-                            class="device-entity"
-                          >
-                            <paper-item-body> ${entity.name} </paper-item-body>
-                          </paper-icon-item>
-                        `)};
+                      : device.entities.map(
+                          (entity) =>
+                            html`
+                              <paper-icon-item
+                                .entityId=${entity.entity_id}
+                                @click=${this._showMoreInfo}
+                                class="device-entity"
+                              >
+                                <paper-item-body>
+                                  <table>
+                                    <tr>
+                                      <td>
+                                        <ha-checkbox .checked=${entity.is_in_scene}></ha-checkbox>
+                                      </td>
+                                      <td>${entity.name}</td>
+                                      <td>${entity.data1}</td>
+                                    </tr>
+                                  </table>
+                                </paper-item-body>
+                              </paper-icon-item>
+                            `
+                        )};
                   </ha-card>
                 `
             )}
@@ -283,27 +299,26 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
 
   private _setSceneDevices(): InsteonSceneDevice[] {
     const outputDevices: InsteonSceneDevice[] = [];
-    this._scene?.devices.map((device) => {
-      const haDevice = this._deviceRegistryEntries.find((haCurrDevice) => {
-        return haCurrDevice.identifiers[0][0] == device.address;
-      });
-      const deviceEntities = this._insteonEntities ? this._insteonEntities[device.address] : {};
+    this._scene!.devices.map((device) => {
+      const haDevice = this._insteonToHaDeviceMap[device.address] || undefined;
+      const deviceEntities = this._insteonEntities[device.address] || {};
       const theseEntities: InsteonSceneEntity[] = [];
       Object.keys(deviceEntities).forEach((group) => {
-        const entity: EntityRegistryEntry =
-          this._entityRegistryEntries[deviceEntities[group].entity_id];
+        const entityInfo = deviceEntities[group];
+        const entity = this._entityRegistryEntries.find(
+          (currEntity) => currEntity.entity_id == entityInfo.entity_id
+        )!;
         const insteonEntityData: InsteonSceneDeviceData | undefined = this._scene?.devices.find(
-          (curr_device) => {
-            return curr_device.data3 == +group;
-          }
+          (curr_device) => curr_device.address == device.address && curr_device.data3 == +group
         );
         const data1 = insteonEntityData?.data1 || 255;
         const data2 = insteonEntityData?.data2 || 28;
         const data3 = insteonEntityData?.data3 || group;
+        const is_in_scene = insteonEntityData ? true : false;
         theseEntities.push({
-          entity_id: entity.entity_id,
-          name: entity.name || "None",
-          is_in_scene: true,
+          entity_id: entityInfo.entity_id,
+          name: entity.name || entity.original_name || "Device button " + group,
+          is_in_scene: is_in_scene,
           data1: data1,
           data2: data2,
           data3: +data3,
@@ -311,6 +326,7 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
       });
       const thisDevice: InsteonSceneDevice = {
         address: device.address,
+        device_id: haDevice?.id || "No HA device",
         name: haDevice?.name_by_user || haDevice?.name || "Insteon Device " + device.address,
         device_cat: device.device_cat!,
         entities: theseEntities,
@@ -320,19 +336,30 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
     return outputDevices;
   }
 
-  protected updated(changedProps: PropertyValues): void {
+  protected firstUpdated(_changedProperties: Map<string | number | symbol, unknown>): void {
+    super.firstUpdated(_changedProperties);
+
     if (!this.hass || !this.insteon) {
       return;
     }
 
+    if (!this._scene && this.sceneId) {
+      this._loadScene();
+    } else {
+      this._initNewScene();
+    }
+    this.hassSubscribe();
+  }
+
+  protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
 
-    if (!this._scene && this.sceneId && this.hass) {
-      this._loadScene();
+    if (!this.hass || !this.insteon) {
+      return;
     }
 
-    if (changedProps.has("sceneId") && !this.sceneId && this.hass) {
-      this._initNewScene();
+    if (changedProps.has("_deviceRegistryEntries")) {
+      this._mapDeviceEntities();
     }
 
     if (changedProps.has("_entityRegistryEntries")) {
@@ -354,6 +381,16 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
     }
     this._dirty =
       initData !== undefined && (initData.areaId !== undefined || initData.config !== undefined);
+  }
+
+  private _mapDeviceEntities() {
+    this._insteonToHaDeviceMap = {};
+    this._haToinsteonDeviceMap = {};
+    this._deviceRegistryEntries.map((haDevice) => {
+      const address: string = haDevice.identifiers[0][1];
+      this._insteonToHaDeviceMap[address] = haDevice;
+      this._haToinsteonDeviceMap[haDevice.id] = address;
+    });
   }
 
   private _loadEntityRegistryEntries() {
@@ -388,25 +425,17 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
 
   private async _loadScene() {
     // let config: SceneConfig;
-    this._scene = await fetchInsteonScene(this.hass, +this.sceneId!);
     this._insteonEntities = await fetchInsteonEntities(this.hass);
-
+    this._scene = await fetchInsteonScene(this.hass, +this.sceneId!);
     this._scene.devices.map((device) => {
       const ha_device = this._deviceRegistryEntries.find(
         (haDevice) => haDevice.identifiers[0][1] === device.address
       );
-      device.ha_id = ha_device?.id || undefined;
-      if (device.ha_id) {
-        this._pickDevice(device.ha_id);
+      const device_id = ha_device?.id || undefined;
+      if (device_id) {
+        this._pickDevice(device_id);
       }
-      const findEntityId = this._insteonEntities[device.address][device.data3].entity_id;
-      const entity = this._entityRegistryEntries.find(
-        (haEntity) => haEntity.entity_id === findEntityId
-      );
-      device.entityName = entity?.name || entity?.original_name;
-      device.entityId = entity?.entity_id;
     });
-    // this._setScene();
     this._dirty = false;
   }
 
@@ -428,26 +457,34 @@ export class InsteonSceneEditor extends SubscribeMixin(KeyboardShortcutMixin(Lit
     }
   }
 
-  private _pickDevice(device_id: string) {
-    if (this._devices.includes(device_id)) {
-      return;
-    }
-    this._devices = [...this._devices, device_id];
-    const deviceEntities = this._deviceEntityLookup[device_id];
-    if (!deviceEntities) {
-      return;
-    }
-    this._entities = [...this._entities, ...deviceEntities];
-    deviceEntities.forEach((entityId) => {
-      this._storeState(entityId);
+  private _pickDevice(deviceId: string) {
+    const haDevice = this._deviceRegistryEntries.find((haCurrDevice) => {
+      return haCurrDevice.id == deviceId;
     });
+    const address = haDevice?.identifiers[0][1];
+    if (!address) {
+      return;
+    }
+    if (this._scene!.devices.find((device) => device.address == address)) {
+      return;
+    }
+    const data: InsteonSceneDeviceData = {
+      address: address,
+      device_cat: 0,
+      data1: 0,
+      data2: 0,
+      data3: 0,
+      has_controller: false,
+      has_responder: false,
+    };
+    this._scene?.devices.push(data);
     this._dirty = true;
   }
 
   private _devicePicked(ev: CustomEvent) {
-    const device = ev.detail.value;
+    const deviceId = ev.detail.value;
     (ev.target as any).value = "";
-    this._pickDevice(device);
+    this._pickDevice(deviceId);
   }
 
   private _deleteDevice(ev: Event) {
