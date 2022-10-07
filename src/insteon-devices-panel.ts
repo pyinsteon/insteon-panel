@@ -1,21 +1,17 @@
-import "@polymer/app-layout/app-header/app-header";
-import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "@material/mwc-list/mwc-list-item";
-import "@material/mwc-button";
-import "@material/mwc-fab";
-import { mdiPlus, mdiDotsVertical } from "@mdi/js";
+import { mdiPlus } from "@mdi/js";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "../homeassistant-frontend/src/components/data-table/ha-data-table";
+import "../homeassistant-frontend/src/components/ha-fab";
 import {
   DataTableRowData,
   RowClickedEvent,
 } from "../homeassistant-frontend/src/components/data-table/ha-data-table";
 import "../homeassistant-frontend/src/components/ha-card";
 import "../homeassistant-frontend/src/components/ha-button-menu";
-import "../homeassistant-frontend/src/layouts/hass-subpage";
+// import "../homeassistant-frontend/src/layouts/hass-subpage";
 import "../homeassistant-frontend/src/layouts/ha-app-layout";
 import { haStyle } from "../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
@@ -102,7 +98,8 @@ export class InsteonDevicesPanel extends LitElement {
       subscribeDeviceRegistry(this.hass.connection, (entries) => {
         this._devices = entries.filter(
           (device) =>
-            device.config_entries && device.config_entries.includes(this.insteon.config_entry.entry_id)
+            device.config_entries &&
+            device.config_entries.includes(this.insteon.config_entry.entry_id)
         );
       }),
     ];
@@ -201,13 +198,14 @@ export class InsteonDevicesPanel extends LitElement {
           @row-click=${this._handleRowClicked}
         ></ha-data-table>
         <div id="fab">
-          <mwc-fab
+          <ha-fab
             slot="fab"
-            title="${this.insteon.localize("aldb.actions.create")}"
+            .label=${this.insteon.localize("device.actions.add")}
             @click=${this._addDevice}
+            extended
           >
             <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-          </mwc-fab>
+          </ha-fab>
         </div>
       </ha-app-layout>
     `;

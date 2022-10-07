@@ -5,6 +5,8 @@ import "../homeassistant-frontend/src/resources/roboto";
 import "../homeassistant-frontend/src/resources/safari-14-attachshadow-patch";
 import "./main";
 
+setCancelSyntheticClickEvents(false);
+
 const styleEl = document.createElement("style");
 styleEl.innerHTML = `
 body {

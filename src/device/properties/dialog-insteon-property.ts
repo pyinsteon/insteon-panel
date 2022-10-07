@@ -1,4 +1,4 @@
-import "@material/mwc-button/mwc-button";
+// import "@material/mwc-button/mwc-button";
 // import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
@@ -6,7 +6,7 @@ import "../../../homeassistant-frontend/src/components/ha-code-editor";
 import { createCloseHeading } from "../../../homeassistant-frontend/src/components/ha-dialog";
 import { haStyleDialog } from "../../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant } from "../../../homeassistant-frontend/src/types";
-import { Property, Insteon, PropertyRadioButtons } from "../../data/insteon";
+import { Insteon, InsteonProperty, PropertyRadioButtons } from "../../data/insteon";
 import "../../../homeassistant-frontend/src/components/ha-form/ha-form";
 import type {
   HaFormSchema,
@@ -24,7 +24,7 @@ class DialogInsteonProperty extends LitElement {
 
   @property({ type: Boolean }) public narrow?: boolean;
 
-  @state() private _record!: Property;
+  @state() private _record!: InsteonProperty;
 
   @state() private _schema!: HaFormSchema[];
 
