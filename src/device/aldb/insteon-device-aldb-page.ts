@@ -107,6 +107,7 @@ class InsteonDeviceALDBPage extends LitElement {
         .tabs=${insteonDeviceTabs}
         .localizeFunc=${this.insteon.localize}
         .backCallback=${() => this._handleBackTapped()}
+        hasFab
       >
         ${this.narrow
           ? html`
@@ -212,9 +213,10 @@ class InsteonDeviceALDBPage extends LitElement {
         </div>
         <ha-fab
           slot="fab"
+          .title="${this.insteon.localize("aldb.actions.create")}"
           .label="${this.insteon.localize("aldb.actions.create")}"
           @click=${this._createRecord}
-          extended
+          .extended=${!this.narrow}
         >
           <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
@@ -465,7 +467,7 @@ class InsteonDeviceALDBPage extends LitElement {
       }
 
       :host(:not([narrow])) {
-        --aldb-table-height: 80vh;
+        --aldb-table-height: 76vh;
       }
 
       .header {

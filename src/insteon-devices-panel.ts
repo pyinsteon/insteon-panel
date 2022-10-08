@@ -184,7 +184,7 @@ export class InsteonDevicesPanel extends LitElement {
 
   protected render(): TemplateResult | void {
     return html`
-      <ha-app-layout>
+      <ha-app-layout hasFab>
         <app-header fixed slot="header">
           <app-toolbar>
             <ha-menu-button .hass=${this.hass} .narrow=${this.narrow}></ha-menu-button>
@@ -200,9 +200,10 @@ export class InsteonDevicesPanel extends LitElement {
         <div id="fab">
           <ha-fab
             slot="fab"
+            .title=${this.insteon.localize("device.actions.add")}
             .label=${this.insteon.localize("device.actions.add")}
             @click=${this._addDevice}
-            extended
+            .extended=${!this.narrow}
           >
             <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
           </ha-fab>
