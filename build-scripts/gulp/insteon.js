@@ -17,6 +17,7 @@ gulp.task(
       process.env.NODE_ENV = "development";
     },
     "clean-insteon",
+    "gen-dummy-icons-json",
     "gen-index-insteon-dev",
     "generate-translations-insteon",
     "webpack-watch-insteon"
@@ -30,6 +31,7 @@ gulp.task(
       process.env.NODE_ENV = "production";
     },
     "clean-insteon",
+    "gen-dummy-icons-json",
     "ensure-insteon-build-dir",
     "generate-translations-insteon",
     "webpack-prod-insteon",

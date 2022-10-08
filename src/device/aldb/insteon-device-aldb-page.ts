@@ -1,13 +1,14 @@
 import type { ActionDetail } from "@material/mwc-list";
-import "@material/mwc-fab";
+// import "@material/mwc-fab";
 import { mdiPlus, mdiDotsVertical } from "@mdi/js";
-import "@material/mwc-button";
+// import "@material/mwc-button";
 import "../../../homeassistant-frontend/src/components/ha-icon-button";
 import "../../../homeassistant-frontend/src/components/ha-circular-progress";
 import { css, CSSResultGroup, html, LitElement, TemplateResult, PropertyValues } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import "../../../homeassistant-frontend/src/components/ha-service-description";
-import "@polymer/paper-input/paper-textarea";
+import "../../../homeassistant-frontend/src/components/ha-fab";
+//import "@polymer/paper-input/paper-textarea";
 import {
   Insteon,
   InsteonDevice,
@@ -106,6 +107,7 @@ class InsteonDeviceALDBPage extends LitElement {
         .tabs=${insteonDeviceTabs}
         .localizeFunc=${this.insteon.localize}
         .backCallback=${() => this._handleBackTapped()}
+        hasFab
       >
         ${this.narrow
           ? html`
@@ -209,13 +211,15 @@ class InsteonDeviceALDBPage extends LitElement {
             .isLoading=${this._isLoading}
           ></insteon-aldb-data-table>
         </div>
-        <mwc-fab
+        <ha-fab
           slot="fab"
-          title="${this.insteon.localize("aldb.actions.create")}"
+          .title="${this.insteon.localize("aldb.actions.create")}"
+          .label="${this.insteon.localize("aldb.actions.create")}"
           @click=${this._createRecord}
+          .extended=${!this.narrow}
         >
           <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
-        </mwc-fab>
+        </ha-fab>
       </hass-tabs-subpage>
     `;
   }
@@ -463,7 +467,7 @@ class InsteonDeviceALDBPage extends LitElement {
       }
 
       :host(:not([narrow])) {
-        --aldb-table-height: 80vh;
+        --aldb-table-height: 76vh;
       }
 
       .header {

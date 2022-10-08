@@ -3,14 +3,12 @@ const path = require("path");
 const fs = require("fs");
 const hash = require("object-hash");
 
-const ICON_PACKAGE_PATH = path.resolve(
-  __dirname,
-  "../../node_modules/@mdi/svg/"
-);
+const ICON_PACKAGE_PATH = path.resolve(__dirname, "../../node_modules/@mdi/svg/");
 const META_PATH = path.resolve(ICON_PACKAGE_PATH, "meta.json");
 const PACKAGE_PATH = path.resolve(ICON_PACKAGE_PATH, "package.json");
 const ICON_PATH = path.resolve(ICON_PACKAGE_PATH, "svg");
 const OUTPUT_DIR = path.resolve(__dirname, "../../build/mdi");
+const HA_OUTPUT_DIR = path.resolve(__dirname, "../../homeassistant-frontend/build/mdi");
 const REMOVED_ICONS_PATH = path.resolve(__dirname, "../removedIcons.json");
 
 const encoding = "utf8";
@@ -47,12 +45,8 @@ const addRemovedMeta = (meta) => {
 const homeAutomationTag = "Home Automation";
 
 const orderMeta = (meta) => {
-  const homeAutomationMeta = meta.filter((icon) =>
-    icon.tags.includes(homeAutomationTag)
-  );
-  const otherMeta = meta.filter(
-    (icon) => !icon.tags.includes(homeAutomationTag)
-  );
+  const homeAutomationMeta = meta.filter((icon) => icon.tags.includes(homeAutomationTag));
+  const otherMeta = meta.filter((icon) => !icon.tags.includes(homeAutomationTag));
   return [...homeAutomationMeta, ...otherMeta];
 };
 
@@ -127,10 +121,7 @@ gulp.task("gen-icons-json", (done) => {
     });
     const filename = hash(output);
     parts.push({ start: startKey, file: filename });
-    fs.writeFileSync(
-      path.resolve(OUTPUT_DIR, `${filename}.json`),
-      JSON.stringify(output)
-    );
+    fs.writeFileSync(path.resolve(OUTPUT_DIR, `${filename}.json`), JSON.stringify(output));
   });
 
   const file = fs.readFileSync(PACKAGE_PATH, { encoding });
@@ -154,5 +145,14 @@ gulp.task("gen-icons-json", (done) => {
     )
   );
 
+  done();
+});
+
+gulp.task("gen-dummy-icons-json", (done) => {
+  if (!fs.existsSync(HA_OUTPUT_DIR)) {
+    fs.mkdirSync(HA_OUTPUT_DIR, { recursive: true });
+  }
+
+  fs.writeFileSync(path.resolve(HA_OUTPUT_DIR, "iconList.json"), "[]");
   done();
 });
