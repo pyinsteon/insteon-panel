@@ -40,42 +40,27 @@ class InsteonRouter extends HassRouterPage {
     routes: {
       device: {
         tag: "insteon-device-router",
-        load: () => {
-          // eslint-disable-next-line no-console
-          console.info("Importing insteon-device-router");
-          return import("./device/insteon-device-router");
-        },
+        load: () => import("./device/insteon-device-router"),
       },
       devices: {
         tag: "insteon-devices-panel",
-        load: () => {
-          // eslint-disable-next-line no-console
-          console.info("Importing insteon-devices-panel");
-          return import("./insteon-devices-panel");
-        },
+        load: () => import("./insteon-devices-panel"),
       },
       scene: {
         tag: "insteon-scene-editor",
-        load: () => {
-          // eslint-disable-next-line no-console
-          console.info("Importing insteon-scenes-panel");
-          return import("./scene/insteon-scene-editor");
-        },
+        load: () => import("./scene/insteon-scene-editor"),
       },
       scenes: {
         tag: "insteon-scenes-panel",
-        load: () => {
-          // eslint-disable-next-line no-console
-          console.info("Importing insteon-scenes-panel");
-          return import("./insteon-scenes-panel");
-        },
+        load: () => import("./insteon-scenes-panel"),
       },
     },
   };
 
   protected updatePageEl(el) {
     const section = this.route.path.replace("/", "");
-    const isWide = this.hass.dockedSidebar === "docked" ? this._wideSidebar : this._wide;
+    const isWide =
+      this.hass.dockedSidebar === "docked" ? this._wideSidebar : this._wide;
     el.hass = this.hass;
     el.route = this.routeTail;
     el.narrow = this.narrow;
