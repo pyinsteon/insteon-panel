@@ -14,6 +14,7 @@ fs.writeFileSync(
       resolutions: { ...core.resolutions, ...insteon.resolutionsOverride },
       dependencies: { ...core.dependencies, ...insteon.dependenciesOverride },
       devDependencies: { ...core.devDependencies, ...insteon.devDependenciesOverride },
+      prettier: { ...core.devDependencies, ...insteon.devDependenciesOverride },
     },
     null,
     2
