@@ -1,11 +1,10 @@
 import "@material/mwc-list/mwc-list-item";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { html, LitElement, PropertyValues, TemplateResult } from "lit";
-import { ComboBoxLitRenderer } from "lit-vaadin-helpers";
+import { ComboBoxLitRenderer } from "@vaadin/combo-box/lit";
 import { customElement, property, query, state } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import { fireEvent } from "../../homeassistant-frontend/src/common/dom/fire_event";
-import { computeDomain } from "../../homeassistant-frontend/src/common/entity/compute_domain";
 import { stringCompare } from "../../homeassistant-frontend/src/common/string/compare";
 import {
   AreaRegistryEntry,
@@ -27,6 +26,7 @@ import { HomeAssistant } from "../../homeassistant-frontend/src/types";
 import "../../homeassistant-frontend/src/components/ha-combo-box";
 import type { HaComboBox } from "../../homeassistant-frontend/src/components/ha-combo-box";
 import { Insteon } from "../data/insteon";
+import { computeDomain } from "../../homeassistant-frontend/src/common/entity/compute_domain";
 
 interface Device {
   name: string;
@@ -34,7 +34,9 @@ interface Device {
   id: string;
 }
 
-export type HaDevicePickerDeviceFilterFunc = (device: DeviceRegistryEntry) => boolean;
+export type HaDevicePickerDeviceFilterFunc = (
+  device: DeviceRegistryEntry
+) => boolean;
 
 const rowRenderer: ComboBoxLitRenderer<Device> = (item) => html`<mwc-list-item
   .twoline=${!!item.area}
@@ -60,6 +62,12 @@ export class InsteonDevicePicker extends SubscribeMixin(LitElement) {
   @property() public areas?: AreaRegistryEntry[];
 
   @property() public entities?: EntityRegistryEntry[];
+
+  @property({ type: Array, attribute: "includedDomains" })
+  public includedDomains?: string[];
+
+  @property({ type: Array, attribute: "excludedDomains" })
+  public excludedDomains?: string[];
 
   /**
    * Show the modem in the list of devices.
@@ -100,7 +108,19 @@ export class InsteonDevicePicker extends SubscribeMixin(LitElement) {
 
       const deviceEntityLookup: DeviceEntityLookup = {};
 
-      for (const entity of entities) {
+      const filtered_included_entities = entities.filter(
+        (entity) =>
+          !this.includedDomains ||
+          this.includedDomains.includes(computeDomain(entity.entity_id))
+      );
+
+      const filtered_entities = filtered_included_entities.filter(
+        (entity) =>
+          !this.excludedDomains ||
+          !this.excludedDomains.includes(computeDomain(entity.entity_id))
+      );
+
+      for (const entity of filtered_entities) {
         if (!entity.device_id) {
           continue;
         }
@@ -115,14 +135,20 @@ export class InsteonDevicePicker extends SubscribeMixin(LitElement) {
         areaLookup[area.area_id] = area;
       }
 
-      const outputDevices = devices.map((device) => ({
-        id: device.id,
-        name: computeDeviceName(device, this.hass, deviceEntityLookup[device.id]),
-        area:
-          device.area_id && areaLookup[device.area_id]
-            ? areaLookup[device.area_id].name
-            : this.hass.localize("ui.components.device-picker.no_area"),
-      }));
+      const outputDevices = devices
+        .filter((device) => deviceEntityLookup.hasOwnProperty(device.id))
+        .map((device) => ({
+          id: device.id,
+          name: computeDeviceName(
+            device,
+            this.hass,
+            deviceEntityLookup[device.id]
+          ),
+          area:
+            device.area_id && areaLookup[device.area_id]
+              ? areaLookup[device.area_id].name
+              : this.hass.localize("ui.components.device-picker.no_area"),
+        }));
       if (!outputDevices.length) {
         return [
           {
@@ -135,7 +161,9 @@ export class InsteonDevicePicker extends SubscribeMixin(LitElement) {
       if (outputDevices.length === 1) {
         return outputDevices;
       }
-      return outputDevices.sort((a, b) => stringCompare(a.name || "", b.name || ""));
+      return outputDevices.sort((a, b) =>
+        stringCompare(a.name || "", b.name || "")
+      );
     }
   );
 
@@ -153,7 +181,9 @@ export class InsteonDevicePicker extends SubscribeMixin(LitElement) {
         this.devices = devices.filter(
           (device) =>
             device.config_entries &&
-            device.config_entries.includes(this.insteon.config_entry.entry_id) &&
+            device.config_entries.includes(
+              this.insteon.config_entry.entry_id
+            ) &&
             (!this.excludeModem || !device.model?.includes("(0x03"))
         );
       }),
@@ -172,7 +202,11 @@ export class InsteonDevicePicker extends SubscribeMixin(LitElement) {
       (changedProps.has("_opened") && this._opened)
     ) {
       this._init = true;
-      (this.comboBox as any).items = this._getDevices(this.devices!, this.areas!, this.entities!);
+      (this.comboBox as any).items = this._getDevices(
+        this.devices!,
+        this.areas!,
+        this.entities!
+      );
     }
   }
 
