@@ -1,8 +1,5 @@
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "@material/mwc-list/mwc-list-item";
-import "@material/mwc-button";
-import "@material/mwc-fab";
 import { mdiCheck, mdiPlus, mdiLightbulbGroup, mdiLightbulbGroupOff } from "@mdi/js";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
@@ -13,10 +10,6 @@ import {
   SelectionChangedEvent,
   SortingChangedEvent,
 } from "../homeassistant-frontend/src/components/data-table/ha-data-table";
-import "../homeassistant-frontend/src/components/ha-card";
-import "../homeassistant-frontend/src/components/ha-button-menu";
-import "../homeassistant-frontend/src/layouts/hass-subpage";
-import "../homeassistant-frontend/src/layouts/ha-app-layout";
 import "../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
 import { haStyle } from "../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
