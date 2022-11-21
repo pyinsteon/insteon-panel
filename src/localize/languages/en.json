@@ -17,14 +17,11 @@
       "save": "Save scene",
       "devices": {
         "header": "Add device",
-        "introduction": "Add device intro",
+        "introduction": "Add or remove devices from the scene. Select the entities associated with each device that you want the scene to control.",
         "remove": "Remove device",
         "add": "Add device",
-        "data1": "Data 1",
-        "data2": "Data 2",
-        "data3": "Data 3",
         "on_level": "On level",
-        "ramp_rate": "Ramp rate",
+        "ramp_rate": "Ramp rate in seconds",
         "button": "Button"
       }
     }

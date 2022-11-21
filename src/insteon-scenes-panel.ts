@@ -1,6 +1,11 @@
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import { mdiCheck, mdiPlus, mdiLightbulbGroup, mdiLightbulbGroupOff } from "@mdi/js";
+import {
+  mdiCheck,
+  mdiPlus,
+  mdiLightbulbGroup,
+  mdiLightbulbGroupOff,
+} from "@mdi/js";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
@@ -13,7 +18,12 @@ import {
 import "../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
 import { haStyle } from "../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
-import { Insteon, InsteonScene, fetchInsteonScenes } from "./data/insteon";
+import {
+  Insteon,
+  InsteonScene,
+  InsteonScenes,
+  fetchInsteonScenes,
+} from "./data/insteon";
 import { navigate } from "../homeassistant-frontend/src/common/navigate";
 import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
 import { insteonMainTabs } from "./insteon-router";
@@ -53,7 +63,7 @@ export class InsteonScenesPanel extends LitElement {
 
   @property({ type: Boolean }) public narrow = false;
 
-  @property({ type: Array }) private _scenes: InsteonScene[] = [];
+  @property({ type: Array }) private _scenes: InsteonScenes = {};
 
   public firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);
@@ -116,13 +126,17 @@ export class InsteonScenesPanel extends LitElement {
           ha_scene: {
             title: "HA Scene",
             template: (ha_scene) =>
-              ha_scene ? html`<ha-svg-icon .path=${mdiCheck}></ha-svg-icon>` : html`—`,
+              ha_scene
+                ? html`<ha-svg-icon .path=${mdiCheck}></ha-svg-icon>`
+                : html`—`,
             width: "10%",
           },
           ha_script: {
             title: "HA Script",
             template: (ha_script) =>
-              ha_script ? html`<ha-svg-icon .path=${mdiCheck}></ha-svg-icon>` : html`—`,
+              ha_script
+                ? html`<ha-svg-icon .path=${mdiCheck}></ha-svg-icon>`
+                : html`—`,
             width: "10%",
           },
           actions: {
@@ -133,14 +147,18 @@ export class InsteonScenesPanel extends LitElement {
                 <ha-icon-button
                   .scene=${scene}
                   .hass=${this.hass}
-                  .label=${this.hass.localize("ui.panel.config.scene.picker.activate_scene")}
+                  .label=${this.hass.localize(
+                    "ui.panel.config.scene.picker.activate_scene"
+                  )}
                   .path=${mdiLightbulbGroup}
                   @click=${this._activateScene}
                 ></ha-icon-button>
                 <ha-icon-button
                   .scene=${scene}
                   .hass=${this.hass}
-                  .label=${this.hass.localize("ui.panel.config.scene.picker.activate_scene")}
+                  .label=${this.hass.localize(
+                    "ui.panel.config.scene.picker.activate_scene"
+                  )}
                   .path=${mdiLightbulbGroupOff}
                   @click=${this._deactivateScene}
                 ></ha-icon-button>
@@ -168,18 +186,21 @@ export class InsteonScenesPanel extends LitElement {
     hass.callService("insteon", "scene_off", { group: scene.group });
   }
 
-  private _records = memoizeOne((scenes: InsteonScene[]) => {
-    if (scenes.length == 0) {
+  private _records = memoizeOne((scenes: InsteonScenes) => {
+    if (Object.keys(scenes).length == 0) {
       return [];
     }
-    let outputScenes: SceneRowData[] = scenes;
-    outputScenes = outputScenes.map((scene) => ({
-      ...scene,
-      num_devices: scene.devices.length,
-      ha_scene: true,
-      ha_script: false,
-      actions: "",
-    }));
+    const outputScenes: SceneRowData[] = [];
+    for (const [scene_num, scene] of Object.entries(scenes)) {
+      const scene_data = {
+        ...scene,
+        num_devices: Object.keys(scene.devices).length,
+        ha_scene: true, // to be replace later
+        ha_script: false, // to be replace later
+        actions: "",
+      };
+      outputScenes.push(scene_data);
+    }
     return outputScenes;
   });
 
@@ -215,7 +236,9 @@ export class InsteonScenesPanel extends LitElement {
     navigate("/insteon/scene/");
   }
 
-  private async _handleRowClicked(ev: HASSDomEvent<RowClickedEvent>): Promise<void> {
+  private async _handleRowClicked(
+    ev: HASSDomEvent<RowClickedEvent>
+  ): Promise<void> {
     const id = ev.detail.id;
     // eslint-disable-next-line no-console
     console.info("Row clicked received: " + id);
