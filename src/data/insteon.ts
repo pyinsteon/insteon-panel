@@ -200,7 +200,7 @@ export const saveInsteonScene = (
     links: links,
   });
 
-  export const deletensteonScene = (
+  export const deleteInsteonScene = (
     hass: HomeAssistant,
     scene_id: number
   ): Promise<void> =>
