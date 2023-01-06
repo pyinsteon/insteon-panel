@@ -51,6 +51,11 @@ export interface InsteonScenes {
   [scene: number]: InsteonScene;
 }
 
+export interface SceneSaveResult {
+  scene_id: number;
+  result: boolean;
+}
+
 export interface InsteonSceneDeviceData {
   data1: number;
   data2: number;
@@ -192,7 +197,7 @@ export const saveInsteonScene = (
   scene_id: number,
   links: InsteonSceneLinkData[],
   scene_name: string
-): Promise<void> =>
+): Promise<SceneSaveResult> =>
   hass.callWS({
     type: "insteon/scene/save",
     name: scene_name,
@@ -200,14 +205,14 @@ export const saveInsteonScene = (
     links: links,
   });
 
-  export const deleteInsteonScene = (
-    hass: HomeAssistant,
-    scene_id: number
-  ): Promise<void> =>
-    hass.callWS({
-      type: "insteon/scene/delete",
-      scene_id: scene_id,
-    });
+export const deleteInsteonScene = (
+  hass: HomeAssistant,
+  scene_id: number
+): Promise<SceneSaveResult> =>
+  hass.callWS({
+    type: "insteon/scene/delete",
+    scene_id: scene_id,
+  });
 
 export const cancelAddInsteonDevice = (hass: HomeAssistant): Promise<void> =>
   hass.callWS({
