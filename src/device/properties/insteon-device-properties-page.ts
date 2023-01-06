@@ -1,8 +1,18 @@
 import { mdiDotsVertical } from "@mdi/js";
 import type { ActionDetail } from "@material/mwc-list";
-import { css, CSSResultGroup, html, LitElement, TemplateResult, PropertyValues } from "lit";
+import {
+  css,
+  CSSResultGroup,
+  html,
+  LitElement,
+  TemplateResult,
+  PropertyValues,
+} from "lit";
 import { customElement, property, state } from "lit/decorators";
-import { HomeAssistant, Route } from "../../../homeassistant-frontend/src/types";
+import {
+  HomeAssistant,
+  Route,
+} from "../../../homeassistant-frontend/src/types";
 import "../../../homeassistant-frontend/src/components/ha-icon-button";
 import "../../../homeassistant-frontend/src/components/ha-service-description";
 import "./insteon-properties-data-table";
@@ -72,7 +82,10 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   protected _dirty() {
-    return this._properties?.reduce((modified, prop) => modified || prop.modified, false);
+    return this._properties?.reduce(
+      (modified, prop) => modified || prop.modified,
+      false
+    );
   }
 
   protected render(): TemplateResult {
@@ -90,7 +103,9 @@ class InsteonDevicePropertiesPage extends LitElement {
             ? html`
                 <!-- <span slot="header"> -->
                 <div slot="header" class="header fullwidth">
-                  <div slot="header" class="narrow-header-left">${this._device?.name}</div>
+                  <div slot="header" class="narrow-header-left">
+                    ${this._device?.name}
+                  </div>
                   <div slot="header" class="narrow-header-right">
                     <ha-button-menu
                       corner="BOTTOM_START"
@@ -104,7 +119,9 @@ class InsteonDevicePropertiesPage extends LitElement {
                       ></ha-icon-button>
 
                       <mwc-list-item>
-                        ${this.insteon!.localize("properties.actions." + this._showHideAdvanced)}
+                        ${this.insteon!.localize(
+                          "properties.actions." + this._showHideAdvanced
+                        )}
                       </mwc-list-item>
                       <mwc-list-item>
                         ${this.insteon!.localize("common.actions.load")}
@@ -225,7 +242,7 @@ class InsteonDevicePropertiesPage extends LitElement {
     } catch (err) {
       showAlertDialog(this, {
         text: this.insteon!.localize("common.error.load"),
-        confirmText: this.hass!.localize("ui.common.ok"),
+        confirmText: this.hass!.localize("ui.common.close"),
       });
     }
     this._showWait = false;
@@ -252,7 +269,7 @@ class InsteonDevicePropertiesPage extends LitElement {
     } catch (err) {
       showAlertDialog(this, {
         text: this.insteon!.localize("common.error.write"),
-        confirmText: this.hass!.localize("ui.common.ok"),
+        confirmText: this.hass!.localize("ui.common.close"),
       });
     }
     this._getProperties();
@@ -300,7 +317,9 @@ class InsteonDevicePropertiesPage extends LitElement {
   private async _handleBackTapped(): Promise<void> {
     if (this._dirty()) {
       await showConfirmationDialog(this, {
-        text: this.hass!.localize("ui.panel.config.common.editor.confirm_unsaved"),
+        text: this.hass!.localize(
+          "ui.panel.config.common.editor.confirm_unsaved"
+        ),
         confirmText: this.hass!.localize("ui.common.yes"),
         dismissText: this.hass!.localize("ui.common.no"),
         confirm: () => this._goBack(),
@@ -350,35 +369,43 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   private _translateSchema(schema: { [key: string]: HaFormSchema }) {
-    const new_schema: { [key: string]: HaFormSchema | HaFormSchema[] } = { ...schema };
-    Object.entries(new_schema as { [key: string]: HaFormSchema }).forEach(([prop, prop_schema]) => {
-      if (!prop_schema.description) {
-        prop_schema.description = {};
+    const new_schema: { [key: string]: HaFormSchema | HaFormSchema[] } = {
+      ...schema,
+    };
+    Object.entries(new_schema as { [key: string]: HaFormSchema }).forEach(
+      ([prop, prop_schema]) => {
+        if (!prop_schema.description) {
+          prop_schema.description = {};
+        }
+        prop_schema.description[prop] = this.insteon!.localize(
+          "properties.descriptions." + prop
+        );
+        if (prop_schema.type === "multi_select") {
+          Object.entries(prop_schema.options).forEach(([option, value]) => {
+            if (isNaN(+value)) {
+              prop_schema.options[option] = this.insteon!.localize(
+                "properties.form_options." + value
+              );
+            } else {
+              prop_schema.options[option] = value;
+            }
+          });
+        }
+        if (prop_schema.type === "select") {
+          Object.entries(prop_schema.options).forEach(
+            ([item, [_key, value]]) => {
+              if (isNaN(+value)) {
+                prop_schema.options[item][1] = this.insteon!.localize(
+                  "properties.form_options." + value
+                );
+              } else {
+                prop_schema.options[item][1] = value;
+              }
+            }
+          );
+        }
       }
-      prop_schema.description[prop] = this.insteon!.localize("properties.descriptions." + prop);
-      if (prop_schema.type === "multi_select") {
-        Object.entries(prop_schema.options).forEach(([option, value]) => {
-          if (isNaN(+value)) {
-            prop_schema.options[option] = this.insteon!.localize(
-              "properties.form_options." + value
-            );
-          } else {
-            prop_schema.options[option] = value;
-          }
-        });
-      }
-      if (prop_schema.type === "select") {
-        Object.entries(prop_schema.options).forEach(([item, [_key, value]]) => {
-          if (isNaN(+value)) {
-            prop_schema.options[item][1] = this.insteon!.localize(
-              "properties.form_options." + value
-            );
-          } else {
-            prop_schema.options[item][1] = value;
-          }
-        });
-      }
-    });
+    );
     return schema;
   }
 
@@ -419,7 +446,9 @@ class InsteonDevicePropertiesPage extends LitElement {
       h1 {
         margin: 0;
         font-family: var(--paper-font-headline_-_font-family);
-        -webkit-font-smoothing: var(--paper-font-headline_-_-webkit-font-smoothing);
+        -webkit-font-smoothing: var(
+          --paper-font-headline_-_-webkit-font-smoothing
+        );
         font-size: var(--paper-font-headline_-_font-size);
         font-weight: var(--paper-font-headline_-_font-weight);
         letter-spacing: var(--paper-font-headline_-_letter-spacing);
