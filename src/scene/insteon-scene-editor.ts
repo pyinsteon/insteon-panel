@@ -19,6 +19,7 @@ import { computeDomain } from "../../homeassistant-frontend/src/common/entity/co
 import { computeStateName } from "../../homeassistant-frontend/src/common/entity/compute_state_name";
 import { computeRTL } from "../../homeassistant-frontend/src/common/util/compute_rtl";
 import "../device/insteon-device-picker";
+import "../../homeassistant-frontend/src/layouts/hass-subpage";
 import "../../homeassistant-frontend/src/components/ha-area-picker";
 import "../../homeassistant-frontend/src/components/ha-card";
 import "../../homeassistant-frontend/src/components/ha-fab";
@@ -41,13 +42,15 @@ import {
   getSceneEditorInitData,
   SCENE_IGNORED_DOMAINS,
 } from "../../homeassistant-frontend/src/data/scene";
-import { showConfirmationDialog } from "../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
+import {
+  showConfirmationDialog,
+  showAlertDialog,
+} from "../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
 import { KeyboardShortcutMixin } from "../../homeassistant-frontend/src/mixins/keyboard-shortcut-mixin";
 import { SubscribeMixin } from "../../homeassistant-frontend/src/mixins/subscribe-mixin";
 import { haStyle } from "../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../../homeassistant-frontend/src/types";
 import "../../homeassistant-frontend/src/panels/config/ha-config-section";
-import { insteonMainTabs } from "../insteon-router";
 import {
   Insteon,
   InsteonScene,
@@ -60,6 +63,7 @@ import {
 } from "../data/insteon";
 import "../../homeassistant-frontend/src/components/ha-form/ha-form";
 import { showInsteonSetOnLevelDialog } from "./show-dialog-insteon-scene-set-on-level";
+import { navigate } from "../../homeassistant-frontend/src/common/navigate";
 
 interface DeviceEntitiesLookup {
   [deviceId: string]: string[];
@@ -162,12 +166,12 @@ export class InsteonSceneEditor extends SubscribeMixin(
 
     const devices = this._setSceneDevices();
     return html`
-      <hass-tabs-subpage
+      <hass-subpage
         .hass=${this.hass}
         .narrow=${this.narrow}
         .route=${this.route}
         .backCallback=${this._backTapped}
-        .tabs=${insteonMainTabs}
+        .header=${name}
       >
         <ha-button-menu
           corner="BOTTOM_START"
@@ -197,7 +201,7 @@ export class InsteonSceneEditor extends SubscribeMixin(
           </mwc-list-item>
         </ha-button-menu>
         ${this._errors ? html` <div class="errors">${this._errors}</div> ` : ""}
-        ${this.narrow ? html` <span slot="header">${name}</span> ` : ""}
+        ${!this.narrow ? html` <span slot="header">${name}</span> ` : ""}
         <div
           id="root"
           class=${classMap({
@@ -205,91 +209,14 @@ export class InsteonSceneEditor extends SubscribeMixin(
           })}
         >
           <ha-config-section vertical .isWide=${this.isWide}>
-            ${!this.narrow ? html` <span slot="header">${name}</span> ` : ""}
-            <div slot="introduction">
-              ${this.insteon.localize("scenes.scene.introduction")}
-            </div>
-            <ha-card outlined>
-              <div class="card-content">
-                <ha-textfield
-                  .value=${name}
-                  .name=${"name"}
-                  @change=${this._valueChanged}
-                  .label=${this.insteon.localize("scenes.scene.name")}
-                ></ha-textfield>
-              </div>
-            </ha-card>
-          </ha-config-section>
-
-          <ha-config-section vertical .isWide=${this.isWide}>
-            <div slot="header">
-              ${this.insteon.localize("scenes.scene.devices.header")}
-            </div>
-            <div slot="introduction">
-              ${this.insteon.localize("scenes.scene.devices.introduction")}
-            </div>
-
-            ${devices.map(
-              (device) =>
-                html`
-                  <ha-card outlined>
-                    <h1 class="card-header">
-                      ${device.name}
-                      <ha-icon-button
-                        .path=${mdiDelete}
-                        .label=${this.hass.localize(
-                          "ui.panel.config.scene.editor.devices.delete"
-                        )}
-                        .device_address=${device.address}
-                        @click=${this._deleteDevice}
-                      ></ha-icon-button>
-                    </h1>
-                    ${!device.entities
-                      ? html` <ha-form .schema=${sceneDataSchema}></ha-form> `
-                      : device.entities.map(
-                          (entity) =>
-                            html`
-                              <paper-icon-item class="device-entity">
-                                <ha-checkbox
-                                  .checked=${entity.is_in_scene}
-                                  @change=${this._toggleSelection}
-                                  .device_address=${device.address}
-                                  .group=${entity.data3}
-                                ></ha-checkbox>
-                                <paper-item-body
-                                  @click=${this._showSetOnLevel}
-                                  .device_address=${device.address}
-                                  .group=${entity.data3}
-                                >
-                                  ${entity.name}
-                                </paper-item-body>
-                                <ha-switch
-                                  .checked=${entity.data1 > 0}
-                                  @change=${this._toggleOnLevel}
-                                  .device_address=${device.address}
-                                  .group=${entity.data3}
-                                ></ha-switch>
-                              </paper-icon-item>
-                            `
-                        )};
-                  </ha-card>
-                `
-            )}
-
-            <ha-card
-              outlined
-              .header=${this.insteon.localize("scenes.scene.devices.add")}
-            >
-              <div class="card-content">
-                <insteon-device-picker
-                  @value-changed=${this._devicePicked}
-                  .hass=${this.hass}
-                  .insteon=${this.insteon}
-                  .label=${this.insteon.localize("scenes.scene.devices.add")}
-                  .excludedDomains=${SCENE_IGNORED_DOMAINS}
-                ></insteon-device-picker>
-              </div>
-            </ha-card>
+            ${this._saving
+              ? html`<div>
+                  <ha-circular-progress
+                    active
+                    alt="Loading"
+                  ></ha-circular-progress>
+                </div>`
+              : this._showEditorArea(name, devices)}
           </ha-config-section>
         </div>
         <ha-fab
@@ -302,8 +229,95 @@ export class InsteonSceneEditor extends SubscribeMixin(
         >
           <ha-svg-icon slot="icon" .path=${mdiContentSave}></ha-svg-icon>
         </ha-fab>
-      </hass-tabs-subpage>
+      </hass-subpage>
     `;
+  }
+
+  private _showEditorArea(name, devices) {
+    return html`<div slot="introduction">
+        ${this.insteon.localize("scenes.scene.introduction")}
+      </div>
+      <ha-card outlined>
+        <div class="card-content">
+          <ha-textfield
+            .value=${name}
+            .name=${"name"}
+            @change=${this._nameChanged}
+            .label=${this.insteon.localize("scenes.scene.name")}
+          ></ha-textfield>
+        </div>
+      </ha-card>
+
+      <ha-config-section vertical .isWide=${this.isWide}>
+        <div slot="header">
+          ${this.insteon.localize("scenes.scene.devices.header")}
+        </div>
+        <div slot="introduction">
+          ${this.insteon.localize("scenes.scene.devices.introduction")}
+        </div>
+
+        ${devices.map(
+          (device) =>
+            html`
+              <ha-card outlined>
+                <h1 class="card-header">
+                  ${device.name}
+                  <ha-icon-button
+                    .path=${mdiDelete}
+                    .label=${this.hass.localize(
+                      "ui.panel.config.scene.editor.devices.delete"
+                    )}
+                    .device_address=${device.address}
+                    @click=${this._deleteDevice}
+                  ></ha-icon-button>
+                </h1>
+                ${!device.entities
+                  ? html` <ha-form .schema=${sceneDataSchema}></ha-form> `
+                  : device.entities.map(
+                      (entity) =>
+                        html`
+                          <paper-icon-item class="device-entity">
+                            <ha-checkbox
+                              .checked=${entity.is_in_scene}
+                              @change=${this._toggleSelection}
+                              .device_address=${device.address}
+                              .group=${entity.data3}
+                            ></ha-checkbox>
+                            <paper-item-body
+                              @click=${this._showSetOnLevel}
+                              .device_address=${device.address}
+                              .group=${entity.data3}
+                            >
+                              ${entity.name}
+                            </paper-item-body>
+                            <ha-switch
+                              .checked=${entity.data1 > 0}
+                              @change=${this._toggleOnLevel}
+                              .device_address=${device.address}
+                              .group=${entity.data3}
+                            ></ha-switch>
+                          </paper-icon-item>
+                        `
+                    )};
+              </ha-card>
+            `
+        )}
+
+        <ha-card
+          outlined
+          .header=${this.insteon.localize("scenes.scene.devices.add")}
+        >
+          <div class="card-content">
+            <insteon-device-picker
+              @value-changed=${this._devicePicked}
+              .hass=${this.hass}
+              .insteon=${this.insteon}
+              .label=${this.insteon.localize("scenes.scene.devices.add")}
+              .excludedDomains=${SCENE_IGNORED_DOMAINS}
+            ></insteon-device-picker>
+          </div>
+        </ha-card>
+      </ha-config-section>`;
   }
 
   private _setSceneDevices(): InsteonSceneDevice[] {
@@ -367,6 +381,24 @@ export class InsteonSceneEditor extends SubscribeMixin(
     } else {
       this._initNewScene();
     }
+
+    //Copied from ha-panel-config to retain consistancy
+    this.style.setProperty(
+      "--app-header-background-color",
+      "var(--sidebar-background-color)"
+    );
+    this.style.setProperty(
+      "--app-header-text-color",
+      "var(--sidebar-text-color)"
+    );
+    this.style.setProperty(
+      "--app-header-border-bottom",
+      "1px solid var(--divider-color)"
+    );
+    this.style.setProperty(
+      "--ha-card-border-radius",
+      "var(--ha-config-card-border-radius, 8px)"
+    );
   }
 
   protected updated(changedProps: PropertyValues): void {
@@ -490,6 +522,7 @@ export class InsteonSceneEditor extends SubscribeMixin(
           ramp_rate_out
         ),
     });
+    history.back();
   }
 
   private _handleSetOnLevel(
@@ -500,9 +533,17 @@ export class InsteonSceneEditor extends SubscribeMixin(
   ) {
     const device = this._scene!.devices[address];
     const existing_link = device.find((link) => link.data3 == +group);
-    existing_link!.data1 = on_level;
-    existing_link!.data2 = ramp_rate;
-    this._scene = { ...this._scene! };
+    if (existing_link!.data1 != on_level) {
+      existing_link!.data1 = on_level;
+      this._dirty = true;
+    }
+    if (existing_link!.data2 != ramp_rate) {
+      existing_link!.data2 = ramp_rate;
+      this._dirty = true;
+    }
+    if (this._dirty) {
+      this._scene = { ...this._scene! };
+    }
   }
 
   private async _loadScene() {
@@ -616,7 +657,7 @@ export class InsteonSceneEditor extends SubscribeMixin(
     this._dirty = true;
   }
 
-  private _valueChanged(ev: Event) {
+  private _nameChanged(ev: Event) {
     ev.stopPropagation();
     const target = ev.target as any;
     const name = target.name;
@@ -677,14 +718,34 @@ export class InsteonSceneEditor extends SubscribeMixin(
       dismissText: this.hass!.localize("ui.common.cancel"),
       confirm: () => this._delete(),
     });
+    history.back();
   }
 
   private async _delete(): Promise<void> {
-    await deleteInsteonScene(this.hass, this.sceneId!);
+    this._saving = true;
+    const sceneId: number = +this.sceneId!;
+    const result = await deleteInsteonScene(this.hass, sceneId!);
+    this._saving = false;
+    if (!result.result) {
+      showAlertDialog(this, {
+        text: this.insteon!.localize("common.error.scene_write"),
+        confirmText: this.hass!.localize("ui.common.close"),
+      });
+      history.back();
+    }
     history.back();
   }
 
   private async _saveScene(): Promise<void> {
+    if (!this._checkDeviceEntitySelections()) {
+      showAlertDialog(this, {
+        text: this.insteon!.localize("common.error.scene_device_no_entities"),
+        confirmText: this.hass!.localize("ui.common.close"),
+      });
+      history.back();
+      return;
+    }
+    this._saving = true;
     const links: InsteonSceneLinkData[] = [];
     Object.keys(this._scene!.devices).forEach((address) => {
       const link_data = this._scene!.devices[address];
@@ -698,12 +759,34 @@ export class InsteonSceneEditor extends SubscribeMixin(
         links.push(link);
       });
     });
-    await saveInsteonScene(
+    const result = await saveInsteonScene(
       this.hass,
       this._scene!.group,
       links,
       this._scene!.name
     );
+    this._saving = false;
+    this._dirty = false;
+    if (!result.result) {
+      showAlertDialog(this, {
+        text: this.insteon!.localize("common.error.scene_write"),
+        confirmText: this.hass!.localize("ui.common.close"),
+      });
+      history.back();
+    } else {
+      if (!this.sceneId) {
+        navigate(`/insteon/scene/${result.scene_id}`, { replace: true });
+      }
+    }
+  }
+
+  private _checkDeviceEntitySelections(): boolean {
+    for (const [_, links] of Object.entries(this._scene!.devices)) {
+      if (links.length == 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected handleKeyboardSave() {
