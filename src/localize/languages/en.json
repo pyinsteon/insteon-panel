@@ -8,7 +8,7 @@
     "caption": "Insteon Scenes",
     "add_scene": "Add scene",
     "scene": {
-      "introduction": "Some intro text",
+      "introduction": "An Insteon scene allows you to control multiple Insteon devices simultaniously.",
       "default_name": "New Insteon scene",
       "name": "Scene name",
       "icon": "Icon",
@@ -37,6 +37,8 @@
       "address": "Invalid Insteon device address.",
       "load": "The device did not respond as expected to the read request.",
       "write": "The device did not respond as expected to the write request.",
+      "scene_write": "The scene did not save to one or more devices correctly.",
+      "scene_device_no_entities": "There are one or more devices without any entities selected. Please select an entity or remove the device from the scene.",
       "device_not_found": "An Insteon device was not found."
     },
     "warn": {
