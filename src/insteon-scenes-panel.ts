@@ -123,22 +123,6 @@ export class InsteonScenesPanel extends LitElement {
             direction: "asc",
             width: "10%",
           },
-          ha_scene: {
-            title: "HA Scene",
-            template: (ha_scene) =>
-              ha_scene
-                ? html`<ha-svg-icon .path=${mdiCheck}></ha-svg-icon>`
-                : html`—`,
-            width: "10%",
-          },
-          ha_script: {
-            title: "HA Script",
-            template: (ha_script) =>
-              ha_script
-                ? html`<ha-svg-icon .path=${mdiCheck}></ha-svg-icon>`
-                : html`—`,
-            width: "10%",
-          },
           actions: {
             title: "Actions",
             type: "icon-button",
@@ -169,7 +153,7 @@ export class InsteonScenesPanel extends LitElement {
   );
 
   private async _activateScene(ev): Promise<void> {
-    // ev.stopPropagation();
+    ev.stopPropagation();
     const scene = ev.currentTarget.scene as InsteonScene;
     const hass = ev.currentTarget.hass as HomeAssistant;
     // eslint-disable-next-line no-console
