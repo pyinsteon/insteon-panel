@@ -1,10 +1,25 @@
 import { customElement, property, state } from "lit/decorators";
+import { mdiNetwork, mdiFolderMultipleOutline } from "@mdi/js";
 import {
   HassRouterPage,
   RouterOptions,
 } from "../homeassistant-frontend/src/layouts/hass-router-page";
+import { PageNavigation } from "../homeassistant-frontend/src/layouts/hass-tabs-subpage";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
 import { Insteon } from "./data/insteon";
+
+export const insteonMainTabs: PageNavigation[] = [
+  {
+    translationKey: "devices.caption",
+    path: `/insteon/devices`,
+    iconPath: mdiFolderMultipleOutline,
+  },
+  {
+    translationKey: "scenes.caption",
+    path: `/insteon/scenes`,
+    iconPath: mdiNetwork,
+  },
+];
 
 @customElement("insteon-router")
 class InsteonRouter extends HassRouterPage {
@@ -25,26 +40,27 @@ class InsteonRouter extends HassRouterPage {
     routes: {
       device: {
         tag: "insteon-device-router",
-        load: () => {
-          // eslint-disable-next-line no-console
-          console.info("Importing insteon-device-router");
-          return import("./device/insteon-device-router");
-        },
+        load: () => import("./device/insteon-device-router"),
       },
       devices: {
         tag: "insteon-devices-panel",
-        load: () => {
-          // eslint-disable-next-line no-console
-          console.info("Importing insteon-devices-panel");
-          return import("./insteon-devices-panel");
-        },
+        load: () => import("./insteon-devices-panel"),
+      },
+      scene: {
+        tag: "insteon-scene-editor",
+        load: () => import("./scene/insteon-scene-editor"),
+      },
+      scenes: {
+        tag: "insteon-scenes-panel",
+        load: () => import("./insteon-scenes-panel"),
       },
     },
   };
 
   protected updatePageEl(el) {
     const section = this.route.path.replace("/", "");
-    const isWide = this.hass.dockedSidebar === "docked" ? this._wideSidebar : this._wide;
+    const isWide =
+      this.hass.dockedSidebar === "docked" ? this._wideSidebar : this._wide;
     el.hass = this.hass;
     el.route = this.routeTail;
     el.narrow = this.narrow;
@@ -57,12 +73,20 @@ class InsteonRouter extends HassRouterPage {
     // eslint-disable-next-line no-console
     console.info("Route " + this.route.path + " in insteon-router");
 
-    if (this._currentPage != "devices") {
+    if (this._currentPage == "device") {
       const routeSplit = this.routeTail.path.split("/");
       el.deviceId = routeSplit[routeSplit.length - 1];
 
       // eslint-disable-next-line no-console
       console.info("Device ID: " + el.deviceId + " in insteon-router");
+    }
+
+    if (this._currentPage == "scene") {
+      const routeSplit = this.routeTail.path.split("/");
+      el.sceneId = routeSplit[routeSplit.length - 1];
+
+      // eslint-disable-next-line no-console
+      console.info("Scene ID: " + el.sceneId + " in insteon-router");
     }
     el.insteon = this.insteon;
   }

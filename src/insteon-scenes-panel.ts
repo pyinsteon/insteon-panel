@@ -1,48 +1,60 @@
-import { mdiPlus } from "@mdi/js";
-import { UnsubscribeFunc } from "home-assistant-js-websocket";
+import "@polymer/app-layout/app-header/app-header";
+import "@polymer/app-layout/app-toolbar/app-toolbar";
+import {
+  mdiCheck,
+  mdiPlus,
+  mdiLightbulbGroup,
+  mdiLightbulbGroupOff,
+} from "@mdi/js";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "../homeassistant-frontend/src/components/data-table/ha-data-table";
-import "../homeassistant-frontend/src/components/ha-fab";
 import {
-  DataTableRowData,
   RowClickedEvent,
+  SelectionChangedEvent,
+  SortingChangedEvent,
 } from "../homeassistant-frontend/src/components/data-table/ha-data-table";
-import "../homeassistant-frontend/src/components/ha-card";
-import "../homeassistant-frontend/src/components/ha-button-menu";
-// import "../homeassistant-frontend/src/layouts/hass-subpage";
-import "../homeassistant-frontend/src/layouts/ha-app-layout";
 import "../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
 import { haStyle } from "../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
 import {
-  subscribeDeviceRegistry,
-  DeviceRegistryEntry,
-} from "../homeassistant-frontend/src/data/device_registry";
-import { Insteon } from "./data/insteon";
+  Insteon,
+  InsteonScene,
+  InsteonScenes,
+  fetchInsteonScenes,
+} from "./data/insteon";
 import { navigate } from "../homeassistant-frontend/src/common/navigate";
 import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
-import {
-  AreaRegistryEntry,
-  subscribeAreaRegistry,
-} from "../homeassistant-frontend/src/data/area_registry";
-import { showInsteonAddDeviceDialog } from "./device/show-dialog-insteon-add-device";
-import { showInsteonAddingDeviceDialog } from "./device/show-dialog-adding-device";
 import { insteonMainTabs } from "./insteon-router";
 import "../homeassistant-frontend/src/components/ha-fab";
 
-interface DeviceRowData extends DataTableRowData {
-  id: string;
-  name: string;
-  address: string;
-  description: string;
-  model: string;
-  area: string;
+declare global {
+  // for fire event
+  interface HASSDomEvents {
+    "selection-changed": SelectionChangedEvent;
+    "row-click": RowClickedEvent;
+    "sorting-changed": SortingChangedEvent;
+    "scene-trigger": InsteonSceneTriggeredEvent;
+  }
 }
 
-@customElement("insteon-devices-panel")
-export class InsteonDevicesPanel extends LitElement {
+interface SceneRowData extends InsteonScene {
+  record?: InsteonScene;
+  num_devices?: number;
+  ha_scene?: boolean;
+  ha_script?: boolean;
+  actions?: string;
+}
+
+export interface InsteonSceneTriggeredEvent {
+  scene: {
+    group: number;
+  };
+}
+
+@customElement("insteon-scenes-panel")
+export class InsteonScenesPanel extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ type: Object }) public insteon!: Insteon;
@@ -51,11 +63,7 @@ export class InsteonDevicesPanel extends LitElement {
 
   @property({ type: Boolean }) public narrow = false;
 
-  @property({ type: Array }) private _devices: DeviceRegistryEntry[] = [];
-
-  private _areas: AreaRegistryEntry[] = [];
-
-  private _unsubs?: UnsubscribeFunc[];
+  @property({ type: Array }) private _scenes: InsteonScenes = {};
 
   public firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);
@@ -63,126 +71,121 @@ export class InsteonDevicesPanel extends LitElement {
     if (!this.hass || !this.insteon) {
       return;
     }
-    if (!this._unsubs) {
-      this._getDevices();
-    }
-  }
-
-  public updated(changedProperties) {
-    super.updated(changedProperties);
-
-    if (!this.hass || !this.insteon) {
-      return;
-    }
-    if (!this._unsubs) {
-      this._getDevices();
-    }
-  }
-
-  public disconnectedCallback() {
-    super.disconnectedCallback();
-    if (this._unsubs) {
-      while (this._unsubs.length) {
-        this._unsubs.pop()!();
-      }
-      this._unsubs = undefined;
-    }
-  }
-
-  private _getDevices() {
-    if (!this.insteon || !this.hass) {
-      return;
-    }
-
-    this._unsubs = [
-      subscribeAreaRegistry(this.hass.connection, (areas) => {
-        this._areas = areas;
-      }),
-      subscribeDeviceRegistry(this.hass.connection, (entries) => {
-        this._devices = entries.filter(
-          (device) =>
-            device.config_entries &&
-            device.config_entries.includes(this.insteon.config_entry.entry_id)
-        );
-      }),
-    ];
+    fetchInsteonScenes(this.hass).then((scenes) => {
+      this._scenes = scenes;
+    });
   }
 
   private _columns = memoizeOne((narrow: boolean) =>
     narrow
       ? {
+          group: {
+            title: "Scene",
+            sortable: true,
+            filterable: true,
+            direction: "asc",
+            width: "10%",
+          },
           name: {
-            title: "Device",
+            title: "Name",
             sortable: true,
             filterable: true,
             direction: "asc",
             grows: true,
           },
-          address: {
-            title: "Address",
+          num_devices: {
+            title: "Devices",
             sortable: true,
             filterable: true,
             direction: "asc",
-            width: "5hv",
+            width: "10%",
           },
         }
       : {
+          group: {
+            title: "Scene",
+            sortable: true,
+            filterable: true,
+            direction: "asc",
+            width: "10%",
+          },
           name: {
-            title: "Device",
+            title: "Name",
             sortable: true,
             filterable: true,
             direction: "asc",
             grows: true,
           },
-          address: {
-            title: "Address",
+          num_devices: {
+            title: "Devices",
             sortable: true,
             filterable: true,
             direction: "asc",
-            width: "20%",
+            width: "10%",
           },
-          description: {
-            title: "Description",
-            sortable: true,
-            filterable: true,
-            direction: "asc",
-            width: "15%",
-          },
-          model: {
-            title: "Model",
-            sortable: true,
-            filterable: true,
-            direction: "asc",
-            width: "15%",
-          },
-          area: {
-            title: "Area",
-            sortable: true,
-            filterable: true,
-            direction: "asc",
-            width: "15%",
+          actions: {
+            title: "Actions",
+            type: "icon-button",
+            template: (_toggle, scene) =>
+              html`
+                <ha-icon-button
+                  .scene=${scene}
+                  .hass=${this.hass}
+                  .label=${this.hass.localize(
+                    "ui.panel.config.scene.picker.activate_scene"
+                  )}
+                  .path=${mdiLightbulbGroup}
+                  @click=${this._activateScene}
+                ></ha-icon-button>
+                <ha-icon-button
+                  .scene=${scene}
+                  .hass=${this.hass}
+                  .label=${this.hass.localize(
+                    "ui.panel.config.scene.picker.activate_scene"
+                  )}
+                  .path=${mdiLightbulbGroupOff}
+                  @click=${this._deactivateScene}
+                ></ha-icon-button>
+              `,
+            width: "150px",
           },
         }
   );
 
-  private _insteonDevices = memoizeOne((devices: DeviceRegistryEntry[]) => {
-    const areaLookup: { [areaId: string]: AreaRegistryEntry } = {};
-    for (const area of this._areas) {
-      areaLookup[area.area_id] = area;
-    }
+  private async _activateScene(ev): Promise<void> {
+    ev.stopPropagation();
+    const scene = ev.currentTarget.scene as InsteonScene;
+    const hass = ev.currentTarget.hass as HomeAssistant;
+    // eslint-disable-next-line no-console
+    console.info("Scene activate clicked received: " + scene.group);
+    hass.callService("insteon", "scene_on", { group: scene.group });
+  }
 
-    const insteonDevices: DeviceRowData[] = devices.map((device) => {
-      const deviceRowdata: DeviceRowData = {
-        id: device.id,
-        name: device.name_by_user || device.name || "No device name",
-        address: device.name?.substring(device.name.length - 8) || "",
-        description: device.name?.substring(0, device.name.length - 8) || "",
-        model: device.model || "",
-        area: device.area_id ? areaLookup[device.area_id].name : "",
+  private async _deactivateScene(ev): Promise<void> {
+    ev.stopPropagation();
+    const hass = ev.currentTarget.hass as HomeAssistant;
+    const scene = ev.currentTarget.scene as InsteonScene;
+    // eslint-disable-next-line no-console
+    console.info("Scene activate clicked received: " + scene.group);
+    hass.callService("insteon", "scene_off", { group: scene.group });
+  }
+
+  private _records = memoizeOne((scenes: InsteonScenes) => {
+    if (Object.keys(scenes).length == 0) {
+      return [];
+    }
+    const outputScenes: SceneRowData[] = [];
+    for (const [scene_num, scene] of Object.entries(scenes)) {
+      const scene_data = {
+        ...scene,
+        num_devices: Object.keys(scene.devices).length,
+        ha_scene: true, // to be replace later
+        ha_script: false, // to be replace later
+        actions: "",
       };
-      return deviceRowdata;
-    });
-    return insteonDevices;
+      outputScenes.push(scene_data);
+    }
+    return outputScenes;
   });
 
   protected render(): TemplateResult | void {
@@ -192,7 +195,8 @@ export class InsteonDevicesPanel extends LitElement {
         .narrow=${this.narrow}
         .tabs=${insteonMainTabs}
         .route=${this.route}
-        .data=${this._insteonDevices(this._devices)}
+        id="group"
+        .data=${this._records(this._scenes)}
         .columns=${this._columns(this.narrow)}
         @row-click=${this._handleRowClicked}
         clickable
@@ -202,9 +206,9 @@ export class InsteonDevicesPanel extends LitElement {
       >
         <ha-fab
           slot="fab"
-          .label=${this.insteon.localize("devices.add_device")}
+          .label=${this.insteon.localize("scenes.add_scene")}
           extended
-          @click=${this._addDevice}
+          @click=${this._addScene}
         >
           <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
         </ha-fab>
@@ -212,30 +216,17 @@ export class InsteonDevicesPanel extends LitElement {
     `;
   }
 
-  private async _addDevice(): Promise<void> {
-    showInsteonAddDeviceDialog(this, {
-      hass: this.hass,
-      insteon: this.insteon,
-      title: this.insteon.localize("device.actions.add"),
-      callback: async (address, multiple) => this._handleDeviceAdd(address, multiple),
-    });
+  private async _addScene(): Promise<void> {
+    navigate("/insteon/scene/");
   }
 
-  private async _handleDeviceAdd(address: string, multiple: boolean) {
-    showInsteonAddingDeviceDialog(this, {
-      hass: this.hass,
-      insteon: this.insteon,
-      multiple: multiple,
-      address: address,
-      title: "Adding Insteon Device",
-    });
-  }
-
-  private async _handleRowClicked(ev: HASSDomEvent<RowClickedEvent>): Promise<void> {
-    // eslint-disable-next-line no-console
-    // console.info("Row clicked received");
+  private async _handleRowClicked(
+    ev: HASSDomEvent<RowClickedEvent>
+  ): Promise<void> {
     const id = ev.detail.id;
-    navigate("/insteon/device/properties/" + id);
+    // eslint-disable-next-line no-console
+    console.info("Row clicked received: " + id);
+    navigate("/insteon/scene/" + id);
   }
 
   static get styles(): CSSResultGroup {
@@ -313,6 +304,6 @@ export class InsteonDevicesPanel extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "insteon-devices-panel": InsteonDevicesPanel;
+    "insteon-scenes-panel": InsteonScenesPanel;
   }
 }

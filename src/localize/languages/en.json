@@ -1,5 +1,31 @@
 {
   "title": "Insteon",
+  "devices": {
+    "caption": "Insteon Devices",
+    "add_device": "Add device"
+  },
+  "scenes": {
+    "caption": "Insteon Scenes",
+    "add_scene": "Add scene",
+    "scene": {
+      "introduction": "An Insteon scene allows you to control multiple Insteon devices simultaniously.",
+      "default_name": "New Insteon scene",
+      "name": "Scene name",
+      "icon": "Icon",
+      "area": "Area",
+      "delete": "Delete scene",
+      "save": "Save scene",
+      "devices": {
+        "header": "Add device",
+        "introduction": "Add or remove devices from the scene. Select the entities associated with each device that you want the scene to control.",
+        "remove": "Remove device",
+        "add": "Add device",
+        "on_level": "On level",
+        "ramp_rate": "Ramp rate in seconds",
+        "button": "Button"
+      }
+    }
+  },
   "common": {
     "actions": {
       "load": "Load from device",
@@ -11,6 +37,8 @@
       "address": "Invalid Insteon device address.",
       "load": "The device did not respond as expected to the read request.",
       "write": "The device did not respond as expected to the write request.",
+      "scene_write": "The scene did not save to one or more devices correctly.",
+      "scene_device_no_entities": "There are one or more devices without any entities selected. Please select an entity or remove the device from the scene.",
       "device_not_found": "An Insteon device was not found."
     },
     "warn": {

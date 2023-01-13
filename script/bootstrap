@@ -12,5 +12,5 @@ if [ ! -d "./homeassistant-frontend/src" ]; then
   git submodule update
   cd ..
 fi
-
+pip install --upgrade twine build
 yarn install
