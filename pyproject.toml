@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools~=62.3", "wheel~=0.37.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name         = "insteon-frontend-home-assistant"
+version      = "0.3.0"
+license      = {text = "MIT License"}
+description  = "The Insteon frontend for Home Assistant"
+readme       = "README.md"
+authors      = [
+    {name = "Tom Harris", email = "hello@home-assistant.io"}
+]
+requires-python = ">=3.4.0"
+
+[project.urls]
+"Homepage" = "https://github.com/home-assistant/frontend"
+
+[tool.setuptools]
+platforms = ["any"]
+zip-safe  = false
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["insteon_frontend*"]
