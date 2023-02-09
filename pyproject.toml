@@ -9,12 +9,12 @@ license      = {text = "MIT License"}
 description  = "The Insteon frontend for Home Assistant"
 readme       = "README.md"
 authors      = [
-    {name = "Tom Harris", email = "hello@home-assistant.io"}
+    {name = "Tom Harris", email = "pyinsteon@harrisnj.net"}
 ]
 requires-python = ">=3.4.0"
 
 [project.urls]
-"Homepage" = "https://github.com/home-assistant/frontend"
+"Homepage" = "https://github.com/pyinsteon/insteon-panel"
 
 [tool.setuptools]
 platforms = ["any"]
