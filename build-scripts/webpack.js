@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const webpack = require("webpack");
 const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
@@ -40,7 +39,9 @@ const createWebpackConfig = ({
   return {
     mode: isProdBuild ? "production" : "development",
     target: ["web", latestBuild ? "es2017" : "es5"],
-    devtool: isProdBuild ? "cheap-module-source-map" : "eval-cheap-module-source-map",
+    devtool: isProdBuild
+      ? "cheap-module-source-map"
+      : "eval-cheap-module-source-map",
     entry,
     node: false,
     module: {
@@ -79,7 +80,9 @@ const createWebpackConfig = ({
         // Only include the JS of entrypoints
         filter: (file) => file.isInitial && !file.name.endsWith(".map"),
       }),
-      new webpack.DefinePlugin(bundle.definedVars({ isProdBuild, latestBuild, defineOverlay })),
+      new webpack.DefinePlugin(
+        bundle.definedVars({ isProdBuild, latestBuild, defineOverlay })
+      ),
       new webpack.IgnorePlugin({
         checkResource(resource, context) {
           // Only use ignore to intercept imports that we don't control
@@ -99,17 +102,27 @@ const createWebpackConfig = ({
               ? path.resolve(context, resource)
               : require.resolve(resource);
           } catch (err) {
-            // eslint-disable-next-line no-console
-            console.error("Error in Home Assistant ignore plugin", resource, context);
+            console.error(
+              "Error in Home Assistant ignore plugin",
+              resource,
+              context
+            );
             throw err;
           }
 
-          return ignorePackages.some((toIgnorePath) => fullPath.startsWith(toIgnorePath));
+          return ignorePackages.some((toIgnorePath) =>
+            fullPath.startsWith(toIgnorePath)
+          );
         },
       }),
       new webpack.NormalModuleReplacementPlugin(
-        new RegExp(bundle.emptyPackages({ latestBuild, isHassioBuild }).join("|")),
-        path.resolve(paths.polymer_dir, "homeassistant-frontend/src/util/empty.js")
+        new RegExp(
+          bundle.emptyPackages({ latestBuild, isHassioBuild }).join("|")
+        ),
+        path.resolve(
+          paths.polymer_dir,
+          "homeassistant-frontend/src/util/empty.js"
+        )
       ),
       !isProdBuild && new LogStartCompilePlugin(),
     ].filter(Boolean),
@@ -126,7 +139,8 @@ const createWebpackConfig = ({
         "lit/directives/cache$": "lit/directives/cache.js",
         "lit/directives/repeat$": "lit/directives/repeat.js",
         "lit/polyfill-support$": "lit/polyfill-support.js",
-        "@lit-labs/virtualizer/layouts/grid": "@lit-labs/virtualizer/layouts/grid.js",
+        "@lit-labs/virtualizer/layouts/grid":
+          "@lit-labs/virtualizer/layouts/grid.js",
       },
     },
     output: {
@@ -136,7 +150,8 @@ const createWebpackConfig = ({
         }
         return `${chunk.name}-${chunk.hash.substr(0, 8)}.js`;
       },
-      chunkFilename: isProdBuild && !isStatsBuild ? "[chunkhash:8].js" : "[id].chunk.js",
+      chunkFilename:
+        isProdBuild && !isStatsBuild ? "[chunkhash:8].js" : "[id].chunk.js",
       path: outputPath,
       publicPath,
       // To silence warning in worker plugin

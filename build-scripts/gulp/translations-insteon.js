@@ -1,6 +1,6 @@
 const gulp = require("gulp");
 const fs = require("fs-extra");
-const del = require("del");
+const del = import("del");
 const log = require("fancy-log");
 
 const changeLang = { et_EE: "et", "zh-Hans": "zh_Hans", "pt-BR": "pt_BR" };
@@ -23,7 +23,7 @@ function recursiveFlatten(prefix, data) {
 }
 
 gulp.task("generate-translations-insteon", async function (task) {
-  del.sync("./src/localize/generated.ts");
+  (await del).deleteSync("./src/localize/generated.ts");
   const files = await fs.readdir("./src/localize/languages");
   const languages = {};
   files.forEach((file) => {
