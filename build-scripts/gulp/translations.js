@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-
+const del = import("del");
 const crypto = require("crypto");
-const del = require("del");
 const path = require("path");
 const source = require("vinyl-source-stream");
 const vinylBuffer = require("vinyl-buffer");

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 // Tasks to run webpack.
 const fs = require("fs");
 const gulp = require("gulp");
@@ -23,7 +22,10 @@ const bothBuilds = (createConfigFunc, params) => [
 
 const isWsl =
   fs.existsSync("/proc/version") &&
-  fs.readFileSync("/proc/version", "utf-8").toLocaleLowerCase().includes("microsoft");
+  fs
+    .readFileSync("/proc/version", "utf-8")
+    .toLocaleLowerCase()
+    .includes("microsoft");
 
 /**
  * @param {{
@@ -33,7 +35,12 @@ const isWsl =
  *   listenHost?: string
  * }}
  */
-const runDevServer = async ({ compiler, contentBase, port, listenHost = "localhost" }) => {
+const runDevServer = async ({
+  compiler,
+  contentBase,
+  port,
+  listenHost = "localhost",
+}) => {
   const server = new WebpackDevServer(
     {
       open: true,
@@ -51,8 +58,6 @@ const runDevServer = async ({ compiler, contentBase, port, listenHost = "localho
   // Server listening
   log("[webpack-dev-server]", `Project is running at http://localhost:${port}`);
 };
-
-
 
 gulp.task("ensure-insteon-build-dir", (done) => {
   if (!fs.existsSync(paths.insteon_output_root)) {
@@ -74,7 +79,6 @@ const doneHandler = (done) => (err, stats) => {
   }
 
   if (stats.hasErrors() || stats.hasWarnings()) {
-    // eslint-disable-next-line no-console
     console.log(stats.toString("minimal"));
   }
 
