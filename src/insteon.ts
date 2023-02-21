@@ -23,7 +23,12 @@ export class insteonElement extends ProvideHassLitMixin(LitElement) {
 
   protected _getInsteonConfigEntry() {
     getConfigEntries(this.hass).then((configEntries) => {
-      const insteonEntry = configEntries.filter((entry) => entry.domain === "insteon")[0];
+      const insteonEntry = configEntries.filter(
+        (entry) =>
+          entry.domain === "insteon" &&
+          entry.disabled_by == null &&
+          entry.source != "ignore"
+      )[0];
       this.insteon = {
         language: "en",
         messages: [],
