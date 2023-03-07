@@ -4,7 +4,11 @@ import "../../homeassistant-frontend/src/components/ha-code-editor";
 import { createCloseHeading } from "../../homeassistant-frontend/src/components/ha-dialog";
 import { haStyleDialog } from "../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant } from "../../homeassistant-frontend/src/types";
-import { Insteon, cancelAddInsteonDevice, deviceAddedMessage } from "../data/insteon";
+import {
+  Insteon,
+  cancelAddInsteonDevice,
+  deviceAddedMessage,
+} from "../data/insteon";
 import "../../homeassistant-frontend/src/components/ha-form/ha-form";
 import { InsteonAddingDeviceDialogParams } from "./show-dialog-adding-device";
 
@@ -34,7 +38,9 @@ class DialogInsteonAddingDevice extends LitElement {
 
   private _refreshLinkingTimeoutHandle?: number;
 
-  public async showDialog(params: InsteonAddingDeviceDialogParams): Promise<void> {
+  public async showDialog(
+    params: InsteonAddingDeviceDialogParams
+  ): Promise<void> {
     this.hass = params.hass;
     this.insteon = params.insteon;
     this._address = params.address;
@@ -69,7 +75,8 @@ class DialogInsteonAddingDevice extends LitElement {
   }
 
   private _showInstructions() {
-    if (this.insteon && !this._subscribed) return this.insteon.localize("device.add.complete");
+    if (this.insteon && !this._subscribed)
+      return this.insteon.localize("device.add.complete");
     if (this._address) return this._addressText(this._address);
     if (this._multiple) return this.insteon!.localize("device.add.multiple");
     return this.insteon!.localize("device.add.single");
@@ -133,7 +140,7 @@ class DialogInsteonAddingDevice extends LitElement {
       {
         type: "insteon/device/add",
         multiple: this._multiple,
-        address: this._address,
+        device_address: this._address,
       }
     );
     this._refreshLinkingTimeoutHandle = window.setTimeout(

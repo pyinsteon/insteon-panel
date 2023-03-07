@@ -354,7 +354,7 @@ export const addDeviceSchema = (multiple: boolean): HaFormSchema[] => [
     type: "boolean",
   },
   {
-    name: "address",
+    name: "device_address",
     required: false,
     type: multiple ? "constant" : "string",
   },

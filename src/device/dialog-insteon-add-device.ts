@@ -22,11 +22,14 @@ class DialogInsteonAddDevice extends LitElement {
 
   @state() private _title?: string;
 
-  @state() private _callback?: (address: string, multiple: boolean) => Promise<void>;
+  @state() private _callback?: (
+    device_address: string | undefined,
+    multiple: boolean
+  ) => Promise<void>;
 
   @state() private _errors?: { [key: string]: string };
 
-  @state() private _formData = { multiple: false, address: "" };
+  @state() private _formData = { multiple: false, device_address: "" };
 
   @state() private _opened = false;
 
@@ -37,7 +40,7 @@ class DialogInsteonAddDevice extends LitElement {
     this._title = params.title;
     this._errors = {};
     this._opened = true;
-    this._formData = { multiple: false, address: "" };
+    this._formData = { multiple: false, device_address: "" };
   }
 
   private _schema(multiple: boolean): HaFormSchema[] {
@@ -89,8 +92,11 @@ class DialogInsteonAddDevice extends LitElement {
       // eslint-disable-next-line no-console
       console.info("Should be calling callback");
       this._close();
-      const address = this._formData.address == "" ? undefined : this._formData.address;
-      await this._callback!(address, this._formData.multiple);
+      const device_address =
+        this._formData.device_address == ""
+          ? undefined
+          : this._formData.device_address;
+      await this._callback!(device_address, this._formData.multiple);
     } else {
       this._errors!.base = this.insteon!.localize("common.error.base");
     }
@@ -105,10 +111,16 @@ class DialogInsteonAddDevice extends LitElement {
   }
 
   private _checkData(): boolean {
-    if (this._formData.address == "" || check_address(this._formData.address)) return true;
+    if (
+      this._formData.device_address == "" ||
+      check_address(this._formData.device_address)
+    )
+      return true;
 
     this._errors = {};
-    this._errors.address = this.insteon!.localize("common.error.address");
+    this._errors.device_address = this.insteon!.localize(
+      "common.error.address"
+    );
     return false;
   }
 

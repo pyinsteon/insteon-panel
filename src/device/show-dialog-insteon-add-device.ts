@@ -6,11 +6,13 @@ export interface InsteonAddDeviceDialogParams {
   hass: HomeAssistant;
   insteon: Insteon;
   title: string;
-  callback: (address: string, multiple: boolean) => Promise<void>;
+  callback: (address: string | undefined, multiple: boolean) => Promise<void>;
 }
 
 export const loadInsteonAddDeviceDialog = () =>
-  import(/* webpackChunkName: "dialog-insteon-add-device" */ "./dialog-insteon-add-device");
+  import(
+    /* webpackChunkName: "dialog-insteon-add-device" */ "./dialog-insteon-add-device"
+  );
 
 export const showInsteonAddDeviceDialog = (
   element: HTMLElement,
