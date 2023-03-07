@@ -55,7 +55,7 @@
       "stop": "Stop"
     },
     "fields": {
-      "address": "Insteon device address (optional)",
+      "device_address": "Insteon device address (optional)",
       "multiple": "Link mutiple devices"
     },
     "add": {
