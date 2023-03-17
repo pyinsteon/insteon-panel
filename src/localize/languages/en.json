@@ -300,7 +300,28 @@
       "on_level_5": "Default on level for button 5 (Button E: 8 button KPL or C: 6 button KPL))",
       "on_level_6": "Default on level for button 6 (Button F: 8 button KPL or D: 6 button KPL))",
       "on_level_7": "Default on level for button 7 (Button G: 8 button KPL)",
-      "on_level_8": "Default on level for button 8 (Button H: 8 button KPL)"
+      "on_level_8": "Default on level for button 8 (Button H: 8 button KPL)",
+      "night_mode_on": "turn on night mode ",
+      "led_blink_on_error_on": "The LED should blink on errors",
+      "disable_buttons": "Disable all buttons",
+      "ack_a_scene": "ACK a scene - Allow the clean up messages tell other devices a scene is active",
+      "yakety_yak": "yakety_yak don't talk back?",
+      "red_led_off": "Turn the red LED off",
+      "green_led_off": "Turn the green LED off",
+      "blue_led_off": "Turn the blue LED off",
+      "no_cache": "Do not use device configuration cache (very slow)",
+      "skip_some_hops": "skip_some_hops",
+      "brightness_max": "Maximum brightness level",
+      "brightness_min": "Miniumum brightness level",
+      "brightness_start": "Starting brightness level",
+      "night_mode_max_level": "Night mode maximum brightness level",
+      "night_mode_led_brightness": "Night mode LED brightness level",
+      "night_mode_ramp_rate": "Night mode ramp rate",
+      "mod_sync_sync": "mod_sync_sync",
+      "ops_flags_property": "ops_flags_property",
+      "night_leds_on": "Night mode LEDs on",
+      "use_local_profile": "use_local_profile",
+      "relay_mode_off": "Relay Mode: true = on/off switch  false = dimmer switch"
     }
   }
 }
