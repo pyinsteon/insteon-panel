@@ -20,7 +20,6 @@ import { computeStateName } from "../../homeassistant-frontend/src/common/entity
 import { computeRTL } from "../../homeassistant-frontend/src/common/util/compute_rtl";
 import "../device/insteon-device-picker";
 import "../../homeassistant-frontend/src/layouts/hass-subpage";
-import "../../homeassistant-frontend/src/components/ha-area-picker";
 import "../../homeassistant-frontend/src/components/ha-card";
 import "../../homeassistant-frontend/src/components/ha-fab";
 import "../../homeassistant-frontend/src/components/ha-icon-button";
@@ -32,22 +31,18 @@ import "../../homeassistant-frontend/src/components/ha-switch";
 import {
   computeDeviceName,
   DeviceRegistryEntry,
-  subscribeDeviceRegistry,
+  fetchDeviceRegistry,
 } from "../../homeassistant-frontend/src/data/device_registry";
 import {
   EntityRegistryEntry,
+  fetchEntityRegistry,
   subscribeEntityRegistry,
 } from "../../homeassistant-frontend/src/data/entity_registry";
-import {
-  getSceneEditorInitData,
-  SCENE_IGNORED_DOMAINS,
-} from "../../homeassistant-frontend/src/data/scene";
 import {
   showConfirmationDialog,
   showAlertDialog,
 } from "../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
 import { KeyboardShortcutMixin } from "../../homeassistant-frontend/src/mixins/keyboard-shortcut-mixin";
-import { SubscribeMixin } from "../../homeassistant-frontend/src/mixins/subscribe-mixin";
 import { haStyle } from "../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../../homeassistant-frontend/src/types";
 import "../../homeassistant-frontend/src/panels/config/ha-config-section";
@@ -90,12 +85,11 @@ interface InsteonToHaDeviceMap {
   entities: { [group: number]: EntityRegistryEntry };
 }
 
+const INCLUDED_DOMAINS = ["switch", "fan", "light", "lock"];
 const DIMMABLE_DOMAINS = ["light", "fan"];
 
 @customElement("insteon-scene-editor")
-export class InsteonSceneEditor extends SubscribeMixin(
-  KeyboardShortcutMixin(LitElement)
-) {
+export class InsteonSceneEditor extends KeyboardShortcutMixin(LitElement) {
   @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property({ attribute: false }) public insteon!: Insteon;
@@ -123,37 +117,60 @@ export class InsteonSceneEditor extends SubscribeMixin(
 
   private _haToinsteonDeviceMap: { [deviceId: string]: string } = {};
 
-  private _unsubscribeEvents?: () => void;
-
   private _deviceEntityLookup: DeviceEntitiesLookup = {};
 
   @state() private _saving = false;
 
-  public disconnectedCallback() {
-    super.disconnectedCallback();
-    if (this._unsubscribeEvents) {
-      this._unsubscribeEvents();
-      this._unsubscribeEvents = undefined;
+  protected firstUpdated(
+    _changedProperties: Map<string | number | symbol, unknown>
+  ): void {
+    super.firstUpdated(_changedProperties);
+
+    if (!this.hass || !this.insteon) {
+      return;
     }
+
+    if (!this._scene && this.sceneId) {
+      this._loadScene();
+    } else {
+      this._initNewScene();
+    }
+
+    this._getDeviceRegistryEntries();
+    this._getEntityRegistryEntries();
+
+    //Copied from ha-panel-config to retain consistancy
+    this.style.setProperty(
+      "--app-header-background-color",
+      "var(--sidebar-background-color)"
+    );
+    this.style.setProperty(
+      "--app-header-text-color",
+      "var(--sidebar-text-color)"
+    );
+    this.style.setProperty(
+      "--app-header-border-bottom",
+      "1px solid var(--divider-color)"
+    );
+    this.style.setProperty(
+      "--ha-card-border-radius",
+      "var(--ha-config-card-border-radius, 8px)"
+    );
   }
 
-  public hassSubscribe() {
-    return [
-      subscribeEntityRegistry(this.hass.connection, (entries) => {
-        this._entityRegistryEntries = entries.filter(
-          (entity) =>
-            entity.config_entry_id == this.insteon.config_entry.entry_id &&
-            !SCENE_IGNORED_DOMAINS.includes(computeDomain(entity.entity_id))
-        );
-      }),
-      subscribeDeviceRegistry(this.hass.connection, (entries) => {
-        this._deviceRegistryEntries = entries.filter(
-          (device) =>
-            device.config_entries &&
-            device.config_entries.includes(this.insteon.config_entry.entry_id)
-        );
-      }),
-    ];
+  protected updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+
+    if (!this.hass || !this.insteon) {
+      return;
+    }
+
+    if (
+      changedProps.has("_deviceRegistryEntries") ||
+      changedProps.has("_entityRegistryEntries")
+    ) {
+      this._mapDeviceEntities();
+    }
   }
 
   protected render(): TemplateResult {
@@ -231,6 +248,25 @@ export class InsteonSceneEditor extends SubscribeMixin(
         </ha-fab>
       </hass-subpage>
     `;
+  }
+
+  private async _getDeviceRegistryEntries(): Promise<void> {
+    const allDevices = await fetchDeviceRegistry(this.hass.connection);
+    this._deviceRegistryEntries = allDevices.filter(
+      (device) =>
+        device.config_entries &&
+        device.config_entries.includes(this.insteon.config_entry.entry_id)
+    );
+  }
+
+  private async _getEntityRegistryEntries(): Promise<void> {
+    const allEntities = await fetchEntityRegistry(this.hass.connection);
+    this._entityRegistryEntries = allEntities.filter(
+      (entity) =>
+        entity.entity_category == null &&
+        entity.config_entry_id == this.insteon.config_entry.entry_id &&
+        INCLUDED_DOMAINS.includes(computeDomain(entity.entity_id))
+    );
   }
 
   private _showEditorArea(name, devices) {
@@ -313,7 +349,8 @@ export class InsteonSceneEditor extends SubscribeMixin(
               .hass=${this.hass}
               .insteon=${this.insteon}
               .label=${this.insteon.localize("scenes.scene.devices.add")}
-              .excludedDomains=${SCENE_IGNORED_DOMAINS}
+              .includedDomains=${INCLUDED_DOMAINS}
+              .excludeModem=${true}
             ></insteon-device-picker>
           </div>
         </ha-card>
@@ -327,7 +364,7 @@ export class InsteonSceneEditor extends SubscribeMixin(
     }
     for (const [address, links] of Object.entries(this._scene.devices)) {
       const haDevice = this._insteonToHaDeviceMap[address] || undefined;
-      const deviceEntities = haDevice.entities || {};
+      const deviceEntities = haDevice ? haDevice.entities : {};
       const theseEntities: InsteonSceneEntity[] = [];
       let thisDevice: InsteonSceneDevice | undefined = undefined;
 
@@ -336,13 +373,16 @@ export class InsteonSceneEditor extends SubscribeMixin(
           links.find((link) => link.data3 == +group);
         const data1 = insteonEntityData?.data1 || 0;
         const data2 = insteonEntityData?.data2 || 28;
-        const data3 = insteonEntityData?.data3 || group;
+        const data3 = insteonEntityData?.data3 || +group;
         const is_in_scene = insteonEntityData ? true : false;
+        const stateObj = this.hass.states[entity.entity_id];
         theseEntities.push({
           entity_id: entity.entity_id,
-          name:
-            computeStateName(this.hass.states[entity.entity_id]) ||
-            "Device button " + group,
+          name: stateObj
+            ? computeStateName(stateObj)
+            : entity.name
+            ? entity.name
+            : entity.original_name,
           is_in_scene: is_in_scene,
           data1: data1,
           data2: data2,
@@ -366,70 +406,13 @@ export class InsteonSceneEditor extends SubscribeMixin(
     return outputDevices;
   }
 
-  protected firstUpdated(
-    _changedProperties: Map<string | number | symbol, unknown>
-  ): void {
-    super.firstUpdated(_changedProperties);
-
-    if (!this.hass || !this.insteon) {
-      return;
-    }
-    this.hassSubscribe();
-
-    if (!this._scene && this.sceneId) {
-      this._loadScene();
-    } else {
-      this._initNewScene();
-    }
-
-    //Copied from ha-panel-config to retain consistancy
-    this.style.setProperty(
-      "--app-header-background-color",
-      "var(--sidebar-background-color)"
-    );
-    this.style.setProperty(
-      "--app-header-text-color",
-      "var(--sidebar-text-color)"
-    );
-    this.style.setProperty(
-      "--app-header-border-bottom",
-      "1px solid var(--divider-color)"
-    );
-    this.style.setProperty(
-      "--ha-card-border-radius",
-      "var(--ha-config-card-border-radius, 8px)"
-    );
-  }
-
-  protected updated(changedProps: PropertyValues): void {
-    super.updated(changedProps);
-
-    if (!this.hass || !this.insteon) {
-      return;
-    }
-
-    if (
-      changedProps.has("_deviceRegistryEntries") ||
-      changedProps.has("_entityRegistryEntries")
-    ) {
-      this._mapDeviceEntities();
-    }
-  }
-
   private _initNewScene() {
     this._dirty = false;
-    const initData = getSceneEditorInitData();
     this._scene = {
       name: this.insteon.localize("scenes.scene.default_name"),
       devices: {},
       group: -1,
     };
-    // if (initData?.areaId) {
-    //   this._updatedAreaId = initData.areaId;
-    // }
-    this._dirty =
-      initData !== undefined &&
-      (initData.areaId !== undefined || initData.config !== undefined);
   }
 
   private _mapDeviceEntities() {
@@ -441,8 +424,10 @@ export class InsteonSceneEditor extends SubscribeMixin(
       this._entityRegistryEntries
         .filter((entity) => entity.device_id == haDevice.id)
         .map((entity) => {
-          const stateobj = this.hass.states[entity.entity_id];
-          const group = stateobj.attributes.insteon_group;
+          let group = +entity.unique_id.split("_")[1];
+          if (Number.isNaN(group)) {
+            group = 1;
+          }
           entities[group] = entity;
         });
       this._insteonToHaDeviceMap[address] = {
@@ -452,10 +437,7 @@ export class InsteonSceneEditor extends SubscribeMixin(
       this._haToinsteonDeviceMap[haDevice.id] = address;
     });
     for (const entity of this._entityRegistryEntries) {
-      if (
-        !entity.device_id ||
-        SCENE_IGNORED_DOMAINS.includes(computeDomain(entity.entity_id))
-      ) {
+      if (!entity.device_id) {
         continue;
       }
       if (!(entity.device_id in this._deviceEntityLookup)) {
@@ -863,7 +845,6 @@ export class InsteonSceneEditor extends SubscribeMixin(
           opacity: var(--light-disabled-opacity);
         }
         ha-icon-picker,
-        ha-area-picker,
         ha-entity-picker {
           display: block;
           margin-top: 8px;
