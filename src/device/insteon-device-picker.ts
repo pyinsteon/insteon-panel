@@ -191,7 +191,11 @@ export class InsteonDevicePicker extends SubscribeMixin(LitElement) {
         this.areas = areas;
       }),
       subscribeEntityRegistry(this.hass.connection!, (entities) => {
-        this.entities = entities;
+        this.entities = entities.filter(
+          (entity) =>
+            entity.entity_category == null &&
+            entity.config_entry_id == this.insteon.config_entry.entry_id
+        );
       }),
     ];
   }
