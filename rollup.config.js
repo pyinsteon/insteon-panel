@@ -1,10 +1,10 @@
-const rollup = require("../build-scripts/rollup.js");
-const env = require("../build-scripts/env.js");
+import rollup from "../build-scripts/rollup.cjs";
+import env from "../build-scripts/env.cjs";
 
-const config = rollup.createHassioConfig({
+const config = rollup.createAppConfig({
   isProdBuild: env.isProdBuild(),
-  latestBuild: false,
+  latestBuild: true,
   isStatsBuild: env.isStatsBuild(),
 });
 
-module.exports = { ...config.inputOptions, output: config.outputOptions };
+export default { ...config.inputOptions, output: config.outputOptions };

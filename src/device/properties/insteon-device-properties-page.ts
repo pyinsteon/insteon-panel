@@ -14,7 +14,7 @@ import {
   Route,
 } from "../../../homeassistant-frontend/src/types";
 import "../../../homeassistant-frontend/src/components/ha-icon-button";
-import "../../../homeassistant-frontend/src/components/ha-service-description";
+//import "../../../homeassistant-frontend/src/components/ha-service-description";
 import "./insteon-properties-data-table";
 import {
   Insteon,
@@ -76,7 +76,7 @@ class InsteonDevicePropertiesPage extends LitElement {
         },
         () => {
           this._noDeviceError();
-        }
+        },
       );
     }
   }
@@ -84,7 +84,7 @@ class InsteonDevicePropertiesPage extends LitElement {
   protected _dirty() {
     return this._properties?.reduce(
       (modified, prop) => modified || prop.modified,
-      false
+      false,
     );
   }
 
@@ -120,7 +120,7 @@ class InsteonDevicePropertiesPage extends LitElement {
 
                       <mwc-list-item>
                         ${this.insteon!.localize(
-                          "properties.actions." + this._showHideAdvanced
+                          "properties.actions." + this._showHideAdvanced,
                         )}
                       </mwc-list-item>
                       <mwc-list-item>
@@ -187,7 +187,7 @@ class InsteonDevicePropertiesPage extends LitElement {
 
                           <mwc-list-item>
                             ${this.insteon!.localize(
-                              "properties.actions." + this._showHideAdvanced
+                              "properties.actions." + this._showHideAdvanced,
                             )}
                           </mwc-list-item>
                         </ha-button-menu>
@@ -280,7 +280,7 @@ class InsteonDevicePropertiesPage extends LitElement {
     const propertiesInfo = await fetchInsteonProperties(
       this.hass,
       this._device!.address,
-      this._showAdvanced
+      this._showAdvanced,
     );
     // eslint-disable-next-line no-console
     console.info("Properties: " + propertiesInfo.properties.length);
@@ -318,7 +318,7 @@ class InsteonDevicePropertiesPage extends LitElement {
     if (this._dirty()) {
       await showConfirmationDialog(this, {
         text: this.hass!.localize(
-          "ui.panel.config.common.editor.confirm_unsaved"
+          "ui.panel.config.common.editor.confirm_unsaved",
         ),
         confirmText: this.hass!.localize("ui.common.yes"),
         dismissText: this.hass!.localize("ui.common.no"),
@@ -378,13 +378,13 @@ class InsteonDevicePropertiesPage extends LitElement {
           prop_schema.description = {};
         }
         prop_schema.description[prop] = this.insteon!.localize(
-          "properties.descriptions." + prop
+          "properties.descriptions." + prop,
         );
         if (prop_schema.type === "multi_select") {
           Object.entries(prop_schema.options).forEach(([option, value]) => {
             if (isNaN(+value)) {
               prop_schema.options[option] = this.insteon!.localize(
-                "properties.form_options." + value
+                "properties.form_options." + value,
               );
             } else {
               prop_schema.options[option] = value;
@@ -396,15 +396,15 @@ class InsteonDevicePropertiesPage extends LitElement {
             ([item, [_key, value]]) => {
               if (isNaN(+value)) {
                 prop_schema.options[item][1] = this.insteon!.localize(
-                  "properties.form_options." + value
+                  "properties.form_options." + value,
                 );
               } else {
                 prop_schema.options[item][1] = value;
               }
-            }
+            },
           );
         }
-      }
+      },
     );
     return schema;
   }

@@ -12,4 +12,4 @@ if [ ! -d "./node_modules" ]; then
     yarn install
 fi
 
-./node_modules/.bin/gulp develop-insteon
+./node_modules/.bin/gulp develop-panel
