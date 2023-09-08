@@ -1,3 +1,4 @@
+import "@material/mwc-button";
 import { mdiDotsVertical } from "@mdi/js";
 import type { ActionDetail } from "@material/mwc-list";
 import {
@@ -39,6 +40,7 @@ import "../../../homeassistant-frontend/src/layouts/hass-tabs-subpage";
 import { insteonDeviceTabs } from "../insteon-device-router";
 import { navigate } from "../../../homeassistant-frontend/src/common/navigate";
 import "../../../homeassistant-frontend/src/components/ha-button-menu";
+import { haStyle } from "@ha/resources/styles";
 
 @customElement("insteon-device-properties-page")
 class InsteonDevicePropertiesPage extends LitElement {
@@ -410,97 +412,107 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   static get styles(): CSSResultGroup {
-    return css`
-      :host {
-        --app-header-background-color: var(--sidebar-background-color);
-        --app-header-text-color: var(--sidebar-text-color);
-        --app-header-border-bottom: 1px solid var(--divider-color);
-      }
+    return [
+      haStyle,
+      css`
+        :host {
+          --app-header-background-color: var(--sidebar-background-color);
+          --app-header-text-color: var(--sidebar-text-color);
+          --app-header-border-bottom: 1px solid var(--divider-color);
+        }
 
-      :host([narrow]) {
-        --properties-table-height: 86vh;
-      }
+        :host([narrow]) {
+          --properties-table-height: 86vh;
+        }
 
-      :host(:not([narrow])) {
-        --properties-table-height: 80vh;
-      }
+        :host(:not([narrow])) {
+          --properties-table-height: 80vh;
+        }
 
-      .header {
-        display: flex;
-        justify-content: space-between;
-      }
+        .header {
+          display: flex;
+          justify-content: space-between;
+        }
 
-      .container {
-        display: flex;
-        flex-wrap: wrap;
-        margin: 0px;
-      }
+        .container {
+          display: flex;
+          flex-wrap: wrap;
+          margin: 0px;
+        }
+        .device-name {
+          display: flex;
+          align-items: left;
+          padding-left: 0px;
+          padding-inline-start: 0px;
+          direction: var(--direction);
+          font-size: 24px;
+        }
+        insteon-properties-data-table {
+          width: 100%;
+          height: var(--properties-table-height);
+          display: block;
+          --data-table-border-width: 0;
+        }
 
-      insteon-properties-data-table {
-        width: 100%;
-        height: var(--properties-table-height);
-        display: block;
-        --data-table-border-width: 0;
-      }
+        h1 {
+          margin: 0;
+          font-family: var(--paper-font-headline_-_font-family);
+          -webkit-font-smoothing: var(
+            --paper-font-headline_-_-webkit-font-smoothing
+          );
+          font-size: var(--paper-font-headline_-_font-size);
+          font-weight: var(--paper-font-headline_-_font-weight);
+          letter-spacing: var(--paper-font-headline_-_letter-spacing);
+          line-height: var(--paper-font-headline_-_line-height);
+          opacity: var(--dark-primary-opacity);
+        }
 
-      h1 {
-        margin: 0;
-        font-family: var(--paper-font-headline_-_font-family);
-        -webkit-font-smoothing: var(
-          --paper-font-headline_-_-webkit-font-smoothing
-        );
-        font-size: var(--paper-font-headline_-_font-size);
-        font-weight: var(--paper-font-headline_-_font-weight);
-        letter-spacing: var(--paper-font-headline_-_letter-spacing);
-        line-height: var(--paper-font-headline_-_line-height);
-        opacity: var(--dark-primary-opacity);
-      }
+        .page-header {
+          padding: 8px;
+          margin-left: 32px;
+          margin-right: 32px;
+          display: flex;
+          justify-content: space-between;
+        }
 
-      .page-header {
-        padding: 8px;
-        margin-left: 32px;
-        margin-right: 32px;
-        display: flex;
-        justify-content: space-between;
-      }
+        .fullwidth {
+          padding: 8px;
+          box-sizing: border-box;
+          width: 100%;
+          flex-grow: 1;
+        }
 
-      .fullwidth {
-        padding: 8px;
-        box-sizing: border-box;
-        width: 100%;
-        flex-grow: 1;
-      }
+        .header-right {
+          align-self: center;
+          display: flex;
+        }
 
-      .header-right {
-        align-self: center;
-        display: flex;
-      }
+        .header-right img {
+          height: 30px;
+        }
 
-      .header-right img {
-        height: 30px;
-      }
+        .header-right:first-child {
+          width: 100%;
+          justify-content: flex-end;
+        }
 
-      .header-right:first-child {
-        width: 100%;
-        justify-content: flex-end;
-      }
+        .actions mwc-button {
+          margin: 8px;
+        }
 
-      .actions mwc-button {
-        margin: 8px;
-      }
+        :host([narrow]) .container {
+          margin-top: 0;
+        }
 
-      :host([narrow]) .container {
-        margin-top: 0;
-      }
-
-      .narrow-header-left {
-        padding: 8px;
-        width: 90%;
-      }
-      .narrow-header-right {
-        align-self: right;
-      }
-    `;
+        .narrow-header-left {
+          padding: 8px;
+          width: 90%;
+        }
+        .narrow-header-right {
+          align-self: right;
+        }
+      `,
+    ];
   }
 }
 
