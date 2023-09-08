@@ -1,10 +1,10 @@
 {
-  "description": "A Home Assistant custom panel template.",
+  "description": "A Home Assistant custom panel for Insteon.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ha-custom-panel/template"
+    "url": "https://github.com/pyinsteon/insteon-panel"
   },
-  "name": "home-assistant-custom-panel-template",
+  "name": "insteon-frontend-home-assistant",
   "version": "1.0.0",
   "scripts": {
     "build": "script/build",
@@ -21,7 +21,7 @@
     "postpack": "pinst --enable",
     "test": "instant-mocha --webpack-config ./test/webpack.config.js --require ./test/setup.cjs \"test/**/*.ts\""
   },
-  "author": "Tom Harris <tomharris@harrisnj.net>",
+  "author": "Tom Harris <pyinsteon@harrisnj.net>",
   "license": "MIT",
   "type": "module",
   "dependencies": {
