@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 // Needs to remain CommonJS until eslint-import-resolver-webpack supports ES modules
-const { createKNXConfig } = require("./build-scripts/webpack.cjs");
+const { createpanelConfig } = require("./build-scripts/webpack.cjs");
 const { isProdBuild, isStatsBuild } = require("./build-scripts/env.cjs");
 
-module.exports = createKNXConfig({
+module.exports = createpanelConfig({
   isProdBuild: isProdBuild(),
   isStatsBuild: isStatsBuild(),
   latestBuild: true,
