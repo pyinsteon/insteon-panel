@@ -1,5 +1,6 @@
 import IntlMessageFormat from "intl-messageformat";
 import * as en from "./languages/en.json";
+import { LocalizeFunc } from "@ha/common/translations/localize";
 
 const languages = {
   en,
@@ -12,6 +13,18 @@ const warnings: { language: string[]; sting: Record<string, string[]> } = {
 };
 
 const _localizationCache = {};
+
+function get_lang_value(keys: string[], language) {
+  let value = language;
+  keys.forEach((key) => {
+    value = value[key];
+    if (!value) {
+      return "";
+    }
+    return value;
+  });
+  return value;
+}
 
 export function localize(
   language: string,
@@ -32,9 +45,11 @@ export function localize(
     }
     lang = DEFAULT_LANGUAGE;
   }
+  const keys = key.split(".");
 
   const translatedValue =
-    languages[lang]?.[key] || languages[DEFAULT_LANGUAGE][key];
+    get_lang_value(keys, languages[lang]) ||
+    get_lang_value(keys, languages[DEFAULT_LANGUAGE]);
 
   if (!translatedValue) {
     return "";
