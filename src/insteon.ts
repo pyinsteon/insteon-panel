@@ -17,7 +17,7 @@ export class insteonElement extends ProvideHassLitMixin(LitElement) {
     super.connectedCallback();
 
     this.addEventListener("update-insteon", (e) =>
-      this._updateInsteon((e as any).detail as Partial<Insteon>)
+      this._updateInsteon((e as any).detail as Partial<Insteon>),
     );
   }
 
@@ -27,10 +27,10 @@ export class insteonElement extends ProvideHassLitMixin(LitElement) {
         (entry) =>
           entry.domain === "insteon" &&
           entry.disabled_by == null &&
-          entry.source != "ignore"
+          entry.source != "ignore",
       )[0];
       this.insteon = {
-        language: "en",
+        language: this.hass.language,
         messages: [],
         updates: [],
         resources: [],
@@ -41,7 +41,7 @@ export class insteonElement extends ProvideHassLitMixin(LitElement) {
         status: {} as any,
         addedToLovelace,
         localize: (string: string, replace?: Record<string, any>) =>
-          localize(this.insteon?.language || "en", string, replace),
+          localize(this.insteon.language || "en", string, replace),
         log: new InsteonLogger(),
       };
     });
