@@ -1,5 +1,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
+const config = require("../config.cjs");
+
+if (!config.publicPath || config.publicPath == "/custom_panel") {
+  throw Error(
+    "publicPath must be changed in config.cjs file and must be unique across Home Assistant.",
+  );
+}
 
 module.exports = {
   polymer_dir: path.resolve(__dirname, ".."),
@@ -23,7 +30,7 @@ module.exports = {
     "../panel_frontend/frontend_latest",
   ),
   panel_output_es5: path.resolve(__dirname, "../panel_frontend/frontend_es5"),
-  panel_publicPath: "/panel_static",
+  panel_publicPath: config.publicPath,
 
   translations_src: path.resolve(__dirname, "../src/translations"),
 };

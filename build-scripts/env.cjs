@@ -11,7 +11,9 @@ module.exports = {
     return process.env.WDS === "1";
   },
   isProdBuild() {
-    return process.env.NODE_ENV === "production" || module.exports.isStatsBuild();
+    return (
+      process.env.NODE_ENV === "production" || module.exports.isStatsBuild()
+    );
   },
   isStatsBuild() {
     return process.env.STATS === "1";
@@ -24,10 +26,11 @@ module.exports = {
   },
   version() {
     const version = fs
-      .readFileSync(path.resolve(paths.polymer_dir, "VERSION"), "utf8")
+      .readFileSync(path.resolve(paths.polymer_dir, "pyproject.toml"), "utf8")
+      .match(/version\W+=\W"(.*?)"/);
     if (!version) {
       throw Error("Version not found");
     }
-    return version.trim();
+    return version[1];
   },
 };
