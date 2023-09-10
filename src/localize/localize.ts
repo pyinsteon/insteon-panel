@@ -1,12 +1,12 @@
+import { InsteonLogger } from "../tools/insteon-logger";
 import IntlMessageFormat from "intl-messageformat";
 import * as en from "./languages/en.json";
-import { LocalizeFunc } from "@ha/common/translations/localize";
 
 const languages = {
   en,
 };
 const DEFAULT_LANGUAGE = "en";
-
+const logger = new InsteonLogger("localize");
 const warnings: { language: string[]; sting: Record<string, string[]> } = {
   language: [],
   sting: {},
@@ -42,6 +42,12 @@ export function localize(
   if (!languages[lang]) {
     if (!warnings.language?.includes(lang)) {
       warnings.language.push(lang);
+      logger.warn(
+        `Language '${lang.replace(
+          "_",
+          "-",
+        )}' is not added to insteon, using '${DEFAULT_LANGUAGE}' instead.`,
+      );
     }
     lang = DEFAULT_LANGUAGE;
   }
@@ -52,6 +58,7 @@ export function localize(
     get_lang_value(keys, languages[DEFAULT_LANGUAGE]);
 
   if (!translatedValue) {
+    logger.error(`Translation problem with '${key}' for '${lang}'`);
     return "";
   }
 
@@ -65,6 +72,7 @@ export function localize(
     try {
       translatedMessage = new IntlMessageFormat(translatedValue, language);
     } catch (err: any) {
+      logger.warn(`Translation problem with '${key}' for '${lang}'`);
       return "";
     }
     _localizationCache[messageKey] = translatedMessage;
@@ -73,6 +81,7 @@ export function localize(
   try {
     return translatedMessage.format<string>(replace) as string;
   } catch (err: any) {
+    logger.warn(`Translation problem with '${key}' for '${lang}'`);
     return "";
   }
 }
