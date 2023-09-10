@@ -1,14 +1,20 @@
+import "@material/mwc-button";
 import type { ActionDetail } from "@material/mwc-list";
 // import "@material/mwc-fab";
 import { mdiPlus, mdiDotsVertical } from "@mdi/js";
 // import "@material/mwc-button";
 import "../../../homeassistant-frontend/src/components/ha-icon-button";
 import "../../../homeassistant-frontend/src/components/ha-circular-progress";
-import { css, CSSResultGroup, html, LitElement, TemplateResult, PropertyValues } from "lit";
+import {
+  css,
+  CSSResultGroup,
+  html,
+  LitElement,
+  TemplateResult,
+  PropertyValues,
+} from "lit";
 import { customElement, property, state } from "lit/decorators";
-import "../../../homeassistant-frontend/src/components/ha-service-description";
 import "../../../homeassistant-frontend/src/components/ha-fab";
-//import "@polymer/paper-input/paper-textarea";
 import {
   Insteon,
   InsteonDevice,
@@ -25,7 +31,10 @@ import {
   aldbNewRecordSchema,
 } from "../../data/insteon";
 import "../../../homeassistant-frontend/src/layouts/hass-tabs-subpage";
-import { HomeAssistant, Route } from "../../../homeassistant-frontend/src/types";
+import {
+  HomeAssistant,
+  Route,
+} from "../../../homeassistant-frontend/src/types";
 import { insteonDeviceTabs } from "../insteon-device-router";
 import "./insteon-aldb-data-table";
 import { HASSDomEvent } from "../../../homeassistant-frontend/src/common/dom/fire_event";
@@ -37,6 +46,8 @@ import {
 import { showInsteonALDBRecordDialog } from "./show-dialog-insteon-aldb-record";
 import { navigate } from "../../../homeassistant-frontend/src/common/navigate";
 import "../../../homeassistant-frontend/src/components/ha-button-menu";
+
+import { haStyle } from "@ha/resources/styles";
 
 @customElement("insteon-device-aldb-page")
 class InsteonDeviceALDBPage extends LitElement {
@@ -80,7 +91,7 @@ class InsteonDeviceALDBPage extends LitElement {
         },
         () => {
           this._noDeviceError();
-        }
+        },
       );
     }
   }
@@ -94,7 +105,10 @@ class InsteonDeviceALDBPage extends LitElement {
     return this._records?.reduce((dirty, rec) => dirty || rec.dirty, false);
   }
 
-  private _filterRecords(records: ALDBRecord[], showUnused: boolean): ALDBRecord[] {
+  private _filterRecords(
+    records: ALDBRecord[],
+    showUnused: boolean,
+  ): ALDBRecord[] {
     return records.filter((record) => record.in_use || showUnused);
   }
 
@@ -113,7 +127,9 @@ class InsteonDeviceALDBPage extends LitElement {
           ? html`
               <!-- <span slot="header"> -->
               <div slot="header" class="header fullwidth">
-                <div slot="header" class="narrow-header-left">${this._device?.name}</div>
+                <div slot="header" class="narrow-header-left">
+                  ${this._device?.name}
+                </div>
                 <div slot="header" class="narrow-header-right">
                   <ha-button-menu
                     corner="BOTTOM_START"
@@ -127,10 +143,14 @@ class InsteonDeviceALDBPage extends LitElement {
                     ></ha-icon-button>
 
                     <mwc-list-item>
-                      ${this.insteon!.localize("aldb.actions." + this._showHideUnused)}
+                      ${this.insteon!.localize(
+                        "aldb.actions." + this._showHideUnused,
+                      )}
                     </mwc-list-item>
                     <mwc-list-item>
-                      ${this.insteon!.localize("aldb.actions.add_default_links")}
+                      ${this.insteon!.localize(
+                        "aldb.actions.add_default_links",
+                      )}
                     </mwc-list-item>
                     <mwc-list-item>
                       ${this.insteon!.localize("common.actions.load")}
@@ -167,7 +187,9 @@ class InsteonDeviceALDBPage extends LitElement {
                   <div class="aldb-status">
                     ALDB Status:
                     ${this._device
-                      ? this.insteon!.localize("aldb.status." + this._device?.aldb_status)
+                      ? this.insteon!.localize(
+                          "aldb.status." + this._device?.aldb_status,
+                        )
                       : ""}
                   </div>
                   <div class="actions header-right">
@@ -175,12 +197,20 @@ class InsteonDeviceALDBPage extends LitElement {
                       ${this.insteon!.localize("common.actions.load")}
                     </mwc-button>
                     <mwc-button @click=${this._onAddDefaultLinksClicked}>
-                      ${this.insteon!.localize("aldb.actions.add_default_links")}
+                      ${this.insteon!.localize(
+                        "aldb.actions.add_default_links",
+                      )}
                     </mwc-button>
-                    <mwc-button .disabled=${!this._dirty()} @click=${this._onWriteALDBClick}>
+                    <mwc-button
+                      .disabled=${!this._dirty()}
+                      @click=${this._onWriteALDBClick}
+                    >
                       ${this.insteon!.localize("common.actions.write")}
                     </mwc-button>
-                    <mwc-button .disabled=${!this._dirty()} @click=${this._onResetALDBClick}>
+                    <mwc-button
+                      .disabled=${!this._dirty()}
+                      @click=${this._onResetALDBClick}
+                    >
                       ${this.insteon!.localize("common.actions.reset")}
                     </mwc-button>
                     <ha-button-menu
@@ -195,7 +225,9 @@ class InsteonDeviceALDBPage extends LitElement {
                       ></ha-icon-button>
 
                       <mwc-list-item>
-                        ${this.insteon!.localize("aldb.actions." + this._showHideUnused)}
+                        ${this.insteon!.localize(
+                          "aldb.actions." + this._showHideUnused,
+                        )}
                       </mwc-list-item>
                     </ha-button-menu>
                   </div>
@@ -372,7 +404,9 @@ class InsteonDeviceALDBPage extends LitElement {
   private async _handleBackTapped(): Promise<void> {
     if (this._dirty()) {
       await showConfirmationDialog(this, {
-        text: this.hass!.localize("ui.panel.config.common.editor.confirm_unsaved"),
+        text: this.hass!.localize(
+          "ui.panel.config.common.editor.confirm_unsaved",
+        ),
         confirmText: this.hass!.localize("ui.common.yes"),
         dismissText: this.hass!.localize("ui.common.no"),
         confirm: () => this._goBack(),
@@ -441,9 +475,12 @@ class InsteonDeviceALDBPage extends LitElement {
       {
         type: "insteon/aldb/notify",
         device_address: this._device?.address,
-      }
+      },
     );
-    this._refreshDevicesTimeoutHandle = window.setTimeout(() => this._unsubscribe(), 1200000);
+    this._refreshDevicesTimeoutHandle = window.setTimeout(
+      () => this._unsubscribe(),
+      1200000,
+    );
   }
 
   private _noDeviceError(): void {
@@ -455,95 +492,107 @@ class InsteonDeviceALDBPage extends LitElement {
   }
 
   static get styles(): CSSResultGroup {
-    return css`
-      :host {
-        --app-header-background-color: var(--sidebar-background-color);
-        --app-header-text-color: var(--sidebar-text-color);
-        --app-header-border-bottom: 1px solid var(--divider-color);
-      }
+    return [
+      haStyle,
+      css`
+        :host {
+          --app-header-background-color: var(--sidebar-background-color);
+          --app-header-text-color: var(--sidebar-text-color);
+          --app-header-border-bottom: 1px solid var(--divider-color);
+        }
 
-      :host([narrow]) {
-        --aldb-table-height: 86vh;
-      }
+        :host([narrow]) {
+          --aldb-table-height: 86vh;
+        }
 
-      :host(:not([narrow])) {
-        --aldb-table-height: 76vh;
-      }
+        :host(:not([narrow])) {
+          --aldb-table-height: 76vh;
+        }
 
-      .header {
-        display: flex;
-        justify-content: space-between;
-      }
+        .header {
+          display: flex;
+          justify-content: space-between;
+        }
 
-      .container {
-        display: flex;
-        flex-wrap: wrap;
-        margin: 0px;
-      }
+        .container {
+          display: flex;
+          flex-wrap: wrap;
+          margin: 0px;
+        }
 
-      insteon-aldb-data-table {
-        width: 100%;
-        height: var(--aldb-table-height);
-        display: block;
-        --data-table-border-width: 0;
-      }
+        insteon-aldb-data-table {
+          width: 100%;
+          height: var(--aldb-table-height);
+          display: block;
+          --data-table-border-width: 0;
+        }
+        .device-name {
+          display: flex;
+          align-items: left;
+          padding-left: 0px;
+          padding-inline-start: 0px;
+          direction: var(--direction);
+          font-size: 24px;
+        }
+        h1 {
+          margin: 0;
+          font-family: var(--paper-font-headline_-_font-family);
+          -webkit-font-smoothing: var(
+            --paper-font-headline_-_-webkit-font-smoothing
+          );
+          font-size: var(--paper-font-headline_-_font-size);
+          font-weight: var(--paper-font-headline_-_font-weight);
+          letter-spacing: var(--paper-font-headline_-_letter-spacing);
+          line-height: var(--paper-font-headline_-_line-height);
+          opacity: var(--dark-primary-opacity);
+        }
 
-      h1 {
-        margin: 0;
-        font-family: var(--paper-font-headline_-_font-family);
-        -webkit-font-smoothing: var(--paper-font-headline_-_-webkit-font-smoothing);
-        font-size: var(--paper-font-headline_-_font-size);
-        font-weight: var(--paper-font-headline_-_font-weight);
-        letter-spacing: var(--paper-font-headline_-_letter-spacing);
-        line-height: var(--paper-font-headline_-_line-height);
-        opacity: var(--dark-primary-opacity);
-      }
+        .page-header {
+          padding: 8px;
+          margin-left: 32px;
+          margin-right: 32px;
+          display: flex;
+          justify-content: space-between;
+        }
 
-      .page-header {
-        padding: 8px;
-        margin-left: 32px;
-        margin-right: 32px;
-        display: flex;
-        justify-content: space-between;
-      }
+        .fullwidth {
+          padding: 8px;
+          box-sizing: border-box;
+          width: 100%;
+          flex-grow: 1;
+        }
 
-      .fullwidth {
-        padding: 8px;
-        box-sizing: border-box;
-        width: 100%;
-        flex-grow: 1;
-      }
+        .header-right {
+          align-self: center;
+          display: flex;
+        }
 
-      .header-right {
-        align-self: center;
-        display: flex;
-      }
+        .header-right img {
+          height: 30px;
+        }
 
-      .header-right img {
-        height: 30px;
-      }
+        .header-right:first-child {
+          width: 100%;
+          justify-content: flex-end;
+        }
 
-      .header-right:first-child {
-        width: 100%;
-        justify-content: flex-end;
-      }
+        .actions mwc-button {
+          margin: 8px;
+        }
 
-      .actions mwc-button {
-        margin: 8px;
-      }
+        :host([narrow]) .container {
+          margin-top: 0;
+        }
 
-      :host([narrow]) .container {
-        margin-top: 0;
-      }
-
-      .narrow-header-left {
-        padding: 8px;
-        width: 90%;
-      }
-      .narrow-header-right {
-        align-self: right;
-      }
-    `;
+        .narrow-header-left {
+          padding: 8px;
+          width: 90%;
+        }
+        .narrow-header-right {
+          align-self: right;
+        }
+      `,
+    ];
   }
 }
 

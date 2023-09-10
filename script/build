@@ -6,5 +6,4 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-./node_modules/.bin/gulp build-insteon
-cp ./src/__init__.py ./insteon_frontend/
+./node_modules/.bin/gulp build-panel

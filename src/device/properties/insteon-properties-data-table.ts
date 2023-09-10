@@ -122,17 +122,22 @@ export class InsteonPropertiesDataTable extends LitElement {
               sortable: true,
               width: "20%",
             },
-          }
+          },
   );
 
   protected render(): TemplateResult {
     if (this.showWait) {
       return html`
-        <ha-circular-progress class="fullwidth" active alt="Loading"></ha-circular-progress>
+        <ha-circular-progress
+          class="fullwidth"
+          active
+          alt="Loading"
+        ></ha-circular-progress>
       `;
     }
     return html`
       <ha-data-table
+        .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._records(this.records!)}
         .id=${"name"}
@@ -144,7 +149,7 @@ export class InsteonPropertiesDataTable extends LitElement {
 
   private _translateValue(
     name: string,
-    value: number | boolean | [number] | [[number]] | [string] | []
+    value: number | boolean | [number] | [[number]] | [string] | [],
   ) {
     const schema = this.schema[name];
     if (schema.name == "radio_button_groups") {
@@ -154,7 +159,10 @@ export class InsteonPropertiesDataTable extends LitElement {
       return value.map((item) => schema.options[item]).join(", ");
     }
     if (schema.type === "select") {
-      const options_dict = schema.options?.reduce((x, item) => ({ ...x, [item[0]]: item[1] }), {});
+      const options_dict = schema.options?.reduce(
+        (x, item) => ({ ...x, [item[0]]: item[1] }),
+        {},
+      );
       return options_dict[value.toString()];
     }
     return value;

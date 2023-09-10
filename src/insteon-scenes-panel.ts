@@ -1,11 +1,4 @@
-import "@polymer/app-layout/app-header/app-header";
-import "@polymer/app-layout/app-toolbar/app-toolbar";
-import {
-  mdiCheck,
-  mdiPlus,
-  mdiLightbulbGroup,
-  mdiLightbulbGroupOff,
-} from "@mdi/js";
+import { mdiPlus, mdiLightbulbGroup, mdiLightbulbGroupOff } from "@mdi/js";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
@@ -126,30 +119,29 @@ export class InsteonScenesPanel extends LitElement {
           actions: {
             title: "Actions",
             type: "icon-button",
-            template: (_toggle, scene) =>
-              html`
-                <ha-icon-button
-                  .scene=${scene}
-                  .hass=${this.hass}
-                  .label=${this.hass.localize(
-                    "ui.panel.config.scene.picker.activate_scene"
-                  )}
-                  .path=${mdiLightbulbGroup}
-                  @click=${this._activateScene}
-                ></ha-icon-button>
-                <ha-icon-button
-                  .scene=${scene}
-                  .hass=${this.hass}
-                  .label=${this.hass.localize(
-                    "ui.panel.config.scene.picker.activate_scene"
-                  )}
-                  .path=${mdiLightbulbGroupOff}
-                  @click=${this._deactivateScene}
-                ></ha-icon-button>
-              `,
+            template: (_toggle, scene) => html`
+              <ha-icon-button
+                .scene=${scene}
+                .hass=${this.hass}
+                .label=${this.hass.localize(
+                  "ui.panel.config.scene.picker.activate_scene",
+                )}
+                .path=${mdiLightbulbGroup}
+                @click=${this._activateScene}
+              ></ha-icon-button>
+              <ha-icon-button
+                .scene=${scene}
+                .hass=${this.hass}
+                .label=${this.hass.localize(
+                  "ui.panel.config.scene.picker.activate_scene",
+                )}
+                .path=${mdiLightbulbGroupOff}
+                @click=${this._deactivateScene}
+              ></ha-icon-button>
+            `,
             width: "150px",
           },
-        }
+        },
   );
 
   private async _activateScene(ev): Promise<void> {
@@ -221,7 +213,7 @@ export class InsteonScenesPanel extends LitElement {
   }
 
   private async _handleRowClicked(
-    ev: HASSDomEvent<RowClickedEvent>
+    ev: HASSDomEvent<RowClickedEvent>,
   ): Promise<void> {
     const id = ev.detail.id;
     // eslint-disable-next-line no-console

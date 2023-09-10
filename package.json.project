@@ -1,0 +1,36 @@
+{
+  "description": "A Home Assistant custom panel for Insteon.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pyinsteon/insteon-panel"
+  },
+  "name": "insteon-frontend-home-assistant",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "script/build",
+    "lint:eslint": "eslint \"**/src/**/*.{js,ts,html}\" --ignore-path .gitignore",
+    "format:eslint": "eslint \"**/src/**/*.{js,ts,html}\" --fix --ignore-path .gitignore",
+    "lint:prettier": "prettier \"**/src/**/*.{js,ts,json,css,md}\" --check",
+    "format:prettier": "prettier \"**/src/**/*.{js,ts,json,css,md}\" --write",
+    "lint:types": "tsc",
+    "lint:lit": "lit-analyzer \"**/src/**/*.ts\" --format markdown --outFile result.md",
+    "lint": "yarn run lint:eslint && yarn run lint:prettier && yarn run lint:types",
+    "format": "yarn run format:eslint && yarn run format:prettier",
+    "postinstall": "husky install",
+    "prepack": "pinst --disable",
+    "postpack": "pinst --enable",
+    "test": "instant-mocha --webpack-config ./test/webpack.config.js --require ./test/setup.cjs \"test/**/*.ts\""
+  },
+  "author": "Tom Harris <pyinsteon@harrisnj.net>",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "tsconfig-paths-webpack-plugin": "^4.0.1"
+  },
+  "resolutions": {
+  },
+  "prettier": {
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "domain": "...",
+  "name": "...",
+  "after_dependencies": ["panel_custom"],
+  "codeowners": [],
+  "dependencies": ["websocket_api"],
+  "documentation": "...",
+  "integration_type": "...",
+  "iot_class": "...",
+  "requirements": ["<panel_package_name>==<versoion>"]
+}

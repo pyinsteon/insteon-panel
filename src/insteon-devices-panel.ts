@@ -11,8 +11,6 @@ import {
 } from "../homeassistant-frontend/src/components/data-table/ha-data-table";
 import "../homeassistant-frontend/src/components/ha-card";
 import "../homeassistant-frontend/src/components/ha-button-menu";
-// import "../homeassistant-frontend/src/layouts/hass-subpage";
-import "../homeassistant-frontend/src/layouts/ha-app-layout";
 import "../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
 import { haStyle } from "../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
@@ -102,7 +100,7 @@ export class InsteonDevicesPanel extends LitElement {
         this._devices = entries.filter(
           (device) =>
             device.config_entries &&
-            device.config_entries.includes(this.insteon.config_entry.entry_id)
+            device.config_entries.includes(this.insteon.config_entry.entry_id),
         );
       }),
     ];
@@ -162,7 +160,7 @@ export class InsteonDevicesPanel extends LitElement {
             direction: "asc",
             width: "15%",
           },
-        }
+        },
   );
 
   private _insteonDevices = memoizeOne((devices: DeviceRegistryEntry[]) => {
@@ -217,7 +215,8 @@ export class InsteonDevicesPanel extends LitElement {
       hass: this.hass,
       insteon: this.insteon,
       title: this.insteon.localize("device.actions.add"),
-      callback: async (address, multiple) => this._handleDeviceAdd(address, multiple),
+      callback: async (address, multiple) =>
+        this._handleDeviceAdd(address!, multiple),
     });
   }
 
@@ -231,7 +230,9 @@ export class InsteonDevicesPanel extends LitElement {
     });
   }
 
-  private async _handleRowClicked(ev: HASSDomEvent<RowClickedEvent>): Promise<void> {
+  private async _handleRowClicked(
+    ev: HASSDomEvent<RowClickedEvent>,
+  ): Promise<void> {
     // eslint-disable-next-line no-console
     // console.info("Row clicked received");
     const id = ev.detail.id;

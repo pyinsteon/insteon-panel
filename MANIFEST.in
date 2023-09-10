@@ -1,2 +1,0 @@
-graft insteon_frontend
-global-exclude *.py[cod]

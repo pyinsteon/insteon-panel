@@ -146,7 +146,7 @@ export class InsteonALDBDataTable extends LitElement {
               sortable: true,
               width: "12%",
             },
-          }
+          },
   );
 
   private _noDataText(loading): string {
@@ -158,10 +158,13 @@ export class InsteonALDBDataTable extends LitElement {
 
   protected render(): TemplateResult {
     if (this.showWait) {
-      return html` <ha-circular-progress active alt="Loading"></ha-circular-progress> `;
+      return html`
+        <ha-circular-progress active alt="Loading"></ha-circular-progress>
+      `;
     }
     return html`
       <ha-data-table
+        .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._records(this.records)}
         .id=${"mem_addr"}
