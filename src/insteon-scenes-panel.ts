@@ -1,11 +1,4 @@
-//import "@polymer/app-layout/app-header/app-header";
-//import "@polymer/app-layout/app-toolbar/app-toolbar";
-import {
-  mdiCheck,
-  mdiPlus,
-  mdiLightbulbGroup,
-  mdiLightbulbGroupOff,
-} from "@mdi/js";
+import { mdiPlus, mdiLightbulbGroup, mdiLightbulbGroupOff } from "@mdi/js";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";

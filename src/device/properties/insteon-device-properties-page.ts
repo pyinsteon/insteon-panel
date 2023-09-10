@@ -15,7 +15,6 @@ import {
   Route,
 } from "../../../homeassistant-frontend/src/types";
 import "../../../homeassistant-frontend/src/components/ha-icon-button";
-//import "../../../homeassistant-frontend/src/components/ha-service-description";
 import "./insteon-properties-data-table";
 import {
   Insteon,

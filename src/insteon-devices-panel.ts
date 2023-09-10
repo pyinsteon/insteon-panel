@@ -11,8 +11,6 @@ import {
 } from "../homeassistant-frontend/src/components/data-table/ha-data-table";
 import "../homeassistant-frontend/src/components/ha-card";
 import "../homeassistant-frontend/src/components/ha-button-menu";
-// import "../homeassistant-frontend/src/layouts/hass-subpage";
-//import "../homeassistant-frontend/src/layouts/ha-app-layout";
 import "../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
 import { haStyle } from "../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
@@ -218,7 +216,7 @@ export class InsteonDevicesPanel extends LitElement {
       insteon: this.insteon,
       title: this.insteon.localize("device.actions.add"),
       callback: async (address, multiple) =>
-        this._handleDeviceAdd(address, multiple),
+        this._handleDeviceAdd(address!, multiple),
     });
   }
 

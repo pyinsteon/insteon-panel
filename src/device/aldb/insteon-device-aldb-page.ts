@@ -14,9 +14,7 @@ import {
   PropertyValues,
 } from "lit";
 import { customElement, property, state } from "lit/decorators";
-//import "../../../homeassistant-frontend/src/components/ha-service-description";
 import "../../../homeassistant-frontend/src/components/ha-fab";
-//import "@polymer/paper-input/paper-textarea";
 import {
   Insteon,
   InsteonDevice,
