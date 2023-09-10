@@ -1,6 +1,7 @@
 # Build files
 build/
-panel_frontend/
+insteon_frontend/
+*.egg-info
 
 # Logs
 logs
