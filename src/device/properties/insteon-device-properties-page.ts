@@ -311,7 +311,7 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   private async _handlePropertyChange(name: string, value: any) {
-    changeProperty(this.hass, this._device!.address, name, value);
+    await changeProperty(this.hass, this._device!.address, name, value);
     this._getProperties();
   }
 

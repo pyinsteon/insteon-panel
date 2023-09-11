@@ -321,7 +321,10 @@
       "ops_flags_property": "ops_flags_property",
       "night_leds_on": "Night mode LEDs on",
       "use_local_profile": "use_local_profile",
-      "relay_mode_off": "Relay Mode: true = on/off switch  false = dimmer switch"
+      "relay_mode_off": "Relay Mode: true = on/off switch  false = dimmer switch",
+      "do_not_rotate_to_off": "Dial should not rotate to off position",
+      "load_button_number": "Button number to control the load",
+      "load_button": "Button to control the load"
     }
   }
 }
