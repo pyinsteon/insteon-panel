@@ -26,6 +26,49 @@
       }
     }
   },
+  "utils": {
+    "caption": "Utilities",
+    "config_modem": {
+      "caption": "Change the modem connection",
+      "success": "Modem successfully reconfigured.",
+      "modem_type": {
+        "title": "Modem type",
+        "plm": "PowerLink Modem (PLM)",
+        "hubv1": "Hub Version 1 (pre 2014)",
+        "hubv2": "Hub Version 2"
+      },
+      "fields": {
+        "host": "Hostname or IP address",
+        "device": "PowerLink Modem port (i.e. /dev/ttyUSB0 or COM1)",
+        "port": "Network port number",
+        "username": "Username",
+        "password": "Password"
+      }
+    },
+    "config_device_overrides": {
+      "caption": "Configure device override",
+      "title": "Overrides"
+    },
+    "config_x10_devices": {
+      "caption": "Configure X10 devices",
+      "title": "X10 Devices",
+      "error": {
+        "duplicate_device": "Duplicate device: A device exists with the same Housecode and Unitcode"
+      },
+      "actions": {
+        "delete": "Delete device",
+        "create": "Add X10 device"
+      },
+      "fields": {
+        "housecode": "Housecode",
+        "unitcode": "Unitcode",
+        "platform": "Home Assistant Platform",
+        "dim_steps": "Dimmer steps",
+        "entity_name": "Entity name"
+      },
+      "no_data": "No X10 devices have been configured"
+    }
+  },
   "common": {
     "actions": {
       "load": "Load from device",
@@ -39,7 +82,9 @@
       "write": "The device did not respond as expected to the write request.",
       "scene_write": "The scene did not save to one or more devices correctly.",
       "scene_device_no_entities": "There are one or more devices without any entities selected. Please select an entity or remove the device from the scene.",
-      "device_not_found": "An Insteon device was not found."
+      "device_not_found": "An Insteon device was not found.",
+      "connect_error": "Could not connect to the modem. Pleaes check the configuration.",
+      "save_config_error": "An unknown error occured saving the configuration. Please retry, and if this issue occures again restart Home Assistant."
     },
     "warn": {
       "load": "Reading from the device may take a while.",
