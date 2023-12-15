@@ -7,10 +7,10 @@ export interface insteonConfigModemDialogParams {
   hass: HomeAssistant;
   insteon: Insteon;
   title: string;
-  schema: HaFormSchema[],
-  data: HaFormDataContainer,
-  callback: (success: boolean) => Promise<void>,
-  error: string | undefined,
+  schema: HaFormSchema[];
+  data: HaFormDataContainer;
+  errors?: string;
+  callback: () => Promise<void>;
 }
 
 export const loadInsteonConfigModem = () =>

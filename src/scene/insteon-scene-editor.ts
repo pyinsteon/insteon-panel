@@ -36,7 +36,6 @@ import {
 import {
   EntityRegistryEntry,
   fetchEntityRegistry,
-  subscribeEntityRegistry,
 } from "../../homeassistant-frontend/src/data/entity_registry";
 import {
   showConfirmationDialog,
@@ -46,8 +45,8 @@ import { KeyboardShortcutMixin } from "../../homeassistant-frontend/src/mixins/k
 import { haStyle } from "../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../../homeassistant-frontend/src/types";
 import "../../homeassistant-frontend/src/panels/config/ha-config-section";
+import { Insteon } from "../data/insteon";
 import {
-  Insteon,
   InsteonScene,
   InsteonSceneDeviceData,
   fetchInsteonScene,
@@ -55,7 +54,7 @@ import {
   saveInsteonScene,
   deleteInsteonScene,
   InsteonSceneLinkData,
-} from "../data/insteon";
+} from "../data/scene";
 import "../../homeassistant-frontend/src/components/ha-form/ha-form";
 import { showInsteonSetOnLevelDialog } from "./show-dialog-insteon-scene-set-on-level";
 import { navigate } from "../../homeassistant-frontend/src/common/navigate";
@@ -94,11 +93,11 @@ export class InsteonSceneEditor extends KeyboardShortcutMixin(LitElement) {
 
   @property({ attribute: false }) public insteon!: Insteon;
 
-  @property() public narrow!: boolean;
+  @property({ type: Boolean }) public narrow!: boolean;
 
-  @property() public isWide!: boolean;
+  @property({ type: Boolean }) public isWide!: boolean;
 
-  @property() public route!: Route;
+  @property({ type: Object }) public route!: Route;
 
   @property() public sceneId: string | null = null;
 
@@ -382,7 +381,7 @@ export class InsteonSceneEditor extends KeyboardShortcutMixin(LitElement) {
             ? computeStateName(stateObj)
             : entity.name
             ? entity.name
-            : entity.original_name,
+            : entity.original_name!,
           is_in_scene: is_in_scene,
           data1: data1,
           data2: data2,

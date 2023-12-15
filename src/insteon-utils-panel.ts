@@ -1,13 +1,11 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import "../homeassistant-frontend/src/layouts/hass-tabs-subpage";
-import { haStyle } from "../homeassistant-frontend/src/resources/styles";
-import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
+import "@ha/layouts/hass-tabs-subpage";
+import { haStyle } from "@ha/resources/styles";
+import { HomeAssistant, Route } from "@ha/types";
 import { Insteon } from "./data/insteon";
-import { navigate } from "../homeassistant-frontend/src/common/navigate";
-import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
 import { insteonMainTabs } from "./insteon-router";
-import "../homeassistant-frontend/src/components/ha-fab";
+import "@ha/components/ha-fab";
 import "./insteon-utils-card";
 import { mdiWrench, mdiCog, mdiDevices } from "@mdi/js";
 import "@ha/components/ha-svg-icon";
@@ -15,18 +13,13 @@ import {
   fetchInsteonConfig,
   fetchModemConfigSchema,
   InsteonModemConfig,
-  InsteonX10Device,
   InsteonDeviceOverride,
-  InsteonPLMConfig,
-  updateModemConfig,
+  modemIsPlm,
 } from "./data/config";
-import { showConfigModemDialog } from "./config/show-dialog-config-modem"
+import { showConfigModemDialog } from "./config/show-dialog-config-modem";
+import { showDeleteDeviceDialog } from "./config/show-dialog-delete-device";
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 import { HaFormDataContainer } from "@ha/components/ha-form/types";
-
-function _modemIsPlm(config: any): config is InsteonPLMConfig {
-  return "device" in config;
-}
 
 @customElement("insteon-utils-panel")
 export class InsteonUtilsPanel extends LitElement {
@@ -42,8 +35,6 @@ export class InsteonUtilsPanel extends LitElement {
 
   @state() private _modem_config?: InsteonModemConfig;
 
-  @state() private _x10_devices?: InsteonX10Device[];
-
   @state() private _device_overrides?: InsteonDeviceOverride[];
 
   @state() private _modem_type_text?: string;
@@ -56,35 +47,36 @@ export class InsteonUtilsPanel extends LitElement {
     }
     fetchInsteonConfig(this.hass).then((config) => {
       this._modem_config = config.modem_config;
-      this._x10_devices = config.x10_config;
       this._device_overrides = config.override_config;
-      if (_modemIsPlm(this._modem_config)) {
-        this._modem_type_text = this.insteon.localize("utils.config_modem.modem_type.plm")
+      if (modemIsPlm(this._modem_config)) {
+        this._modem_type_text = this.insteon.localize(
+          "utils.config_modem.modem_type.plm",
+        );
       } else {
         if (this._modem_config.hub_version == 2) {
-          this._modem_type_text = this.insteon.localize("utils.config_modem.modem_type.hubv2")
+          this._modem_type_text = this.insteon.localize(
+            "utils.config_modem.modem_type.hubv2",
+          );
         } else {
-          this._modem_type_text = this.insteon.localize("utils.config_modem.modem_type.hubv1")
+          this._modem_type_text = this.insteon.localize(
+            "utils.config_modem.modem_type.hubv1",
+          );
         }
       }
     });
   }
 
   protected render(): TemplateResult | void {
-
     if (!this.hass || !this.insteon) {
       return html``;
     }
 
-    const x10_count = this._x10_devices?.length
-    const x10_action = x10_count
-      ? this.insteon.localize("utils.config_x10_devices.title") + ": " + x10_count
-      : undefined
-
-    const override_count = this._device_overrides?.length
+    const override_count = this._device_overrides?.length;
     const override_action = override_count
-      ? this.insteon.localize("utils.config_device_overrides.title") + ": " + override_count
-      : undefined
+      ? this.insteon.localize("utils.config_device_overrides.title") +
+        ": " +
+        override_count
+      : undefined;
 
     return html`
       <hass-tabs-subpage
@@ -109,17 +101,18 @@ export class InsteonUtilsPanel extends LitElement {
           </insteon-utils-card>
           <insteon-utils-card
             .hass=${this.hass}
-            .title=${this.insteon.localize("utils.config_device_overrides.caption")}
-            .action_url=${"/insteon/devices"}
+            .title=${this.insteon.localize(
+              "utils.config_device_overrides.caption",
+            )}
             .action_text=${override_action}
+            .action_url=${"/insteon/device_overrides"}
           >
             <ha-svg-icon slot="icon" .path=${mdiCog}></ha-svg-icon>
           </insteon-utils-card>
           <insteon-utils-card
             .hass=${this.hass}
-            .title=${this.insteon.localize("utils.config_x10_devices.caption")}
-            .action_url=${"/insteon/x10_devices"}
-            .action_text=${x10_action}
+            .title=${this.insteon.localize("device.actions.delete")}
+            @click=${this._showDeleteDeviceDialog}
           >
             <ha-svg-icon slot="icon" .path=${mdiDevices}></ha-svg-icon>
           </insteon-utils-card>
@@ -129,24 +122,36 @@ export class InsteonUtilsPanel extends LitElement {
   }
 
   private async _showModemConfigDialog(error: string | undefined = undefined) {
-    const schema = await fetchModemConfigSchema(this.hass)
+    let schema = await fetchModemConfigSchema(this.hass);
     showConfigModemDialog(this, {
       hass: this.hass,
       insteon: this.insteon,
       title: this.insteon.localize("utils.config_modem.caption"),
       schema: schema,
-      data: this._modem_config,
+      data: this._configData(),
       errors: error,
       callback: this._handleModemConfigChange,
     });
   }
 
+  private _configData(): HaFormDataContainer {
+    return { ...this._modem_config }
+  }
+
   private async _handleModemConfigChange(): Promise<void> {
     await showAlertDialog(this, {
-      title: "Success",
-      text: "The modem connection has been reconfigured."
+      title: this.insteon.localize("utils.config_modem.success"),
+      text: this.insteon.localize("utils.config_modem.success_text"),
     });
     history.back();
+  }
+
+  private async _showDeleteDeviceDialog() {
+    await showDeleteDeviceDialog(this, {
+      hass: this.hass,
+      insteon: this.insteon,
+      title: this.insteon.localize("device.actions.delete"),
+    });
   }
 
   static get styles(): CSSResultGroup {

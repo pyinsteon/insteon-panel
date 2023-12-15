@@ -7,6 +7,7 @@ import "../../../homeassistant-frontend/src/components/data-table/ha-data-table"
 import type {
   HaDataTable,
   DataTableColumnContainer,
+  DataTableRowData,
 } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
 import type { InsteonProperty } from "../../data/insteon";
 import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
@@ -34,7 +35,7 @@ export class InsteonPropertiesDataTable extends LitElement {
 
   @property({ type: Boolean }) public showWait = false;
 
-  private _records = memoizeOne((records: InsteonProperty[]) => {
+  private _records = memoizeOne((records: InsteonProperty[]): DataTableRowData => {
     return records.map((record) => ({
       description: this._calcDescription(record.name),
       display_value: this._translateValue(record.name, record.value),

@@ -4,11 +4,12 @@ import "../../../homeassistant-frontend/src/components/ha-code-editor";
 import { createCloseHeading } from "../../../homeassistant-frontend/src/components/ha-dialog";
 import { haStyleDialog } from "../../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant } from "../../../homeassistant-frontend/src/types";
-import { Insteon, ALDBRecord } from "../../data/insteon";
+import { Insteon } from "../../data/insteon";
+import { ALDBRecord } from "../../data/device";
 import "./insteon-aldb-data-table";
-import { check_address } from "../../tools/check_address";
+import { checkAddress } from "../../tools/address-utils";
 import "../../../homeassistant-frontend/src/components/ha-form/ha-form";
-import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
+import type { HaFormSchema, HaFormData } from "../../../homeassistant-frontend/src/components/ha-form/types";
 import { InsteonALDBRecordDialogParams } from "./show-dialog-insteon-aldb-record";
 
 @customElement("dialog-insteon-aldb-record")
@@ -60,8 +61,8 @@ class DialogInsteonALDBRecord extends LitElement {
       >
         <div class="form">
           <ha-form
-            .data=${this._formData}
-            .schema=${this._schema}
+            .data=${this._haFormData()}
+            .schema=${this._schema!}
             .error=${this._errors}
             @value-changed=${this._valueChanged}
           ></ha-form>
@@ -76,6 +77,10 @@ class DialogInsteonALDBRecord extends LitElement {
         </div>
       </ha-dialog>
     `;
+  }
+
+  private _haFormData(): HaFormData {
+    return {...this._formData}
   }
 
   private _dismiss(): void {
@@ -140,7 +145,7 @@ class DialogInsteonALDBRecord extends LitElement {
   private _checkData(): boolean {
     let success = true;
     this._errors = {};
-    if (!check_address(this._formData!.target)) {
+    if (!checkAddress(this._formData!.target)) {
       if (!this.insteon) {
         // eslint-disable-next-line no-console
         console.info("This should NOT show up");

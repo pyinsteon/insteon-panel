@@ -46,6 +46,10 @@ class InsteonDeviceRouter extends HassRouterPage {
         tag: "insteon-device-properties-page",
         load: () => import("./properties/insteon-device-properties-page"),
       },
+      config: {
+        tag: "insteon-device-redirect",
+        load: () => import("./insteon-device-redirect")
+      }
     },
   };
 

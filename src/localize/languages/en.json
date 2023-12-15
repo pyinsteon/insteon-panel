@@ -2,11 +2,26 @@
   "title": "Insteon",
   "devices": {
     "caption": "Insteon Devices",
-    "add_device": "Add device"
+    "add_device": "Add device",
+    "adding_device": "Adding Insteon Device",
+    "fields": {
+      "name": "Device Name",
+      "address": "Address",
+      "description": "Description",
+      "model": "Model",
+      "area": "Area",
+      "actions": "Actions"
+    }
   },
   "scenes": {
     "caption": "Insteon Scenes",
     "add_scene": "Add scene",
+    "fields": {
+      "group": "Scene",
+      "name": "Name",
+      "num_devices": "Devices",
+      "actions": "Actions"
+    },
     "scene": {
       "introduction": "An Insteon scene allows you to control multiple Insteon devices simultaniously.",
       "default_name": "New Insteon scene",
@@ -30,7 +45,8 @@
     "caption": "Utilities",
     "config_modem": {
       "caption": "Change the modem connection",
-      "success": "Modem successfully reconfigured.",
+      "success": "Success",
+      "success_text": "The modem has been successfully reconfigured.",
       "modem_type": {
         "title": "Modem type",
         "plm": "PowerLink Modem (PLM)",
@@ -42,38 +58,43 @@
         "device": "PowerLink Modem port (i.e. /dev/ttyUSB0 or COM1)",
         "port": "Network port number",
         "username": "Username",
-        "password": "Password"
+        "password": "Password",
+        "manual_config": "Manually configure",
+        "plm_manual_config": "PowerLink Modem port (i.e. /dev/ttyUSB0 or COM1)"
       }
     },
     "config_device_overrides": {
-      "caption": "Configure device override",
-      "title": "Overrides"
-    },
-    "config_x10_devices": {
-      "caption": "Configure X10 devices",
-      "title": "X10 Devices",
-      "error": {
-        "duplicate_device": "Duplicate device: A device exists with the same Housecode and Unitcode"
+      "caption": "Configure device overrides",
+      "title": "Device Overrides",
+      "add_override": "Add override",
+      "fields": {
+        "address": "Device address",
+        "cat": "Device category (i.e. 0x01)",
+        "subcat": "Device subcategory (i.e 0x05)"
+      },
+      "errors": {
+        "invalid_address": "The device address is not a valid format",
+        "invalid_cat": "The device category is not a valid format",
+        "invalid_subcat": "The device subcategory is not a valid format"
       },
       "actions": {
-        "delete": "Delete device",
-        "create": "Add X10 device"
-      },
-      "fields": {
-        "housecode": "Housecode",
-        "unitcode": "Unitcode",
-        "platform": "Home Assistant Platform",
-        "dim_steps": "Dimmer steps",
-        "entity_name": "Entity name"
-      },
-      "no_data": "No X10 devices have been configured"
+        "confirm_delete": "Are you sure you want to delete the device override for ",
+        "delete": "Delete device override"
+      }
     }
   },
   "common": {
     "actions": {
-      "load": "Load from device",
+      "load": "Read from device",
       "write": "Write to device",
-      "reset": "Undo changes"
+      "reset": "Undo changes",
+      "delete_device": "Delete device",
+      "delete_scene": "Delete scene",
+      "add_device": "Add device",
+      "save_scene": "Save scene",
+      "add_default_links": "Add Default Links",
+      "add_override": "Add override",
+      "delete_override": "Delete override"
     },
     "error": {
       "base": "Please check your entries.",
@@ -90,26 +111,52 @@
       "load": "Reading from the device may take a while.",
       "write": "Writing changes to the device may will take a while.",
       "add_default_links": "Changes will be made to this device and your modem.",
-      "wake_up": "Because this is a battery operated device, the process will run in the background the next time the device wakes up."
+      "wake_up": "Because this is a battery operated device, the process will run in the background the next time the device wakes up.",
+      "delete": "This will remove the device from Home Assistant and from the Insteon modem. You will no longer be able to control this device.",
+      "unsaved": "You have changes that have not been writen to the device. Are you sure you want to leave?"
     }
   },
   "device": {
     "caption": "Insteon Device",
+    "remove_all_refs": {
+      "title": "Delete All References",
+      "description": "Do you want to delete all references to this device in all Insteon devices?",
+      "confirm_description": "Yes: All links to this devices will be removed.",
+      "dismiss_description": "No: Only the modem links will be removed."
+    },
     "actions": {
       "add": "Add Insteon Device",
-      "stop": "Stop"
+      "stop": "Stop",
+      "delete": "Delete device"
     },
     "fields": {
       "device_address": "Insteon device address (optional)",
-      "multiple": "Link mutiple devices"
+      "multiple": "Link mutiple devices",
+      "add_x10": "Add X10 Device"
     },
     "add": {
       "caption": "Add Insteon Device",
       "multiple": "The modem is ready to pair. Press the `set` button on the devices you wish to add. When complete press `Stop` below.",
+      "add_x10": "Add X10 Device",
       "single": "The modem is ready to pair. Press the `set` button on the device you wish to add",
       "address": "The modem is ready to pair. Attempting the put device --address-- in pairing mode, however, not all devices respond to this request. If the device does not link in the next minute, press the `set` button on the device.",
       "added": "Device --address-- has been added.",
       "complete": "All-Linking is complete."
+    },
+    "add_x10": {
+      "caption": "Add X10 device",
+      "success": "X10 device successfully added",
+      "error": {
+        "duplicate_device": "Duplicate device: A device exists with the same Housecode and Unitcode"
+      },
+      "fields": {
+        "housecode": "Housecode",
+        "unitcode": "Unitcode",
+        "platform": "Home Assistant Platform",
+        "dim_steps": "Dimmer steps",
+        "entity_name": "Entity name"
+      },
+      "no_data": "No X10 devices have been configured"
     }
   },
   "aldb": {

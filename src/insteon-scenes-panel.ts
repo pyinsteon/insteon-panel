@@ -4,6 +4,7 @@ import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "../homeassistant-frontend/src/components/data-table/ha-data-table";
 import {
+  DataTableRowData,
   RowClickedEvent,
   SelectionChangedEvent,
   SortingChangedEvent,
@@ -11,12 +12,8 @@ import {
 import "../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
 import { haStyle } from "../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
-import {
-  Insteon,
-  InsteonScene,
-  InsteonScenes,
-  fetchInsteonScenes,
-} from "./data/insteon";
+import { Insteon } from "./data/insteon";
+import { InsteonScene, InsteonScenes, fetchInsteonScenes } from "./data/scene";
 import { navigate } from "../homeassistant-frontend/src/common/navigate";
 import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
 import { insteonMainTabs } from "./insteon-router";
@@ -56,7 +53,7 @@ export class InsteonScenesPanel extends LitElement {
 
   @property({ type: Boolean }) public narrow = false;
 
-  @property({ type: Array }) private _scenes: InsteonScenes = {};
+  @property({ type: Object }) private _scenes: InsteonScenes = {};
 
   public firstUpdated(changedProperties) {
     super.firstUpdated(changedProperties);
@@ -73,21 +70,21 @@ export class InsteonScenesPanel extends LitElement {
     narrow
       ? {
           group: {
-            title: "Scene",
+            title: this.insteon.localize("scenes.fields.group"),
             sortable: true,
             filterable: true,
             direction: "asc",
             width: "10%",
           },
           name: {
-            title: "Name",
+            title: this.insteon.localize("scenes.fields.name"),
             sortable: true,
             filterable: true,
             direction: "asc",
             grows: true,
           },
           num_devices: {
-            title: "Devices",
+            title: this.insteon.localize("scenes.fields.num_devices"),
             sortable: true,
             filterable: true,
             direction: "asc",
@@ -96,28 +93,28 @@ export class InsteonScenesPanel extends LitElement {
         }
       : {
           group: {
-            title: "Scene",
+            title: this.insteon.localize("scenes.fields.group"),
             sortable: true,
             filterable: true,
             direction: "asc",
             width: "10%",
           },
           name: {
-            title: "Name",
+            title: this.insteon.localize("scenes.fields.name"),
             sortable: true,
             filterable: true,
             direction: "asc",
             grows: true,
           },
           num_devices: {
-            title: "Devices",
+            title: this.insteon.localize("scenes.fields.num_devices"),
             sortable: true,
             filterable: true,
             direction: "asc",
             width: "10%",
           },
           actions: {
-            title: "Actions",
+            title: this.insteon.localize("scenes.fields.actions"),
             type: "icon-button",
             template: (_toggle, scene) => html`
               <ha-icon-button
@@ -162,12 +159,12 @@ export class InsteonScenesPanel extends LitElement {
     hass.callService("insteon", "scene_off", { group: scene.group });
   }
 
-  private _records = memoizeOne((scenes: InsteonScenes) => {
+  private _records = memoizeOne((scenes: InsteonScenes): DataTableRowData[] => {
     if (Object.keys(scenes).length == 0) {
       return [];
     }
     const outputScenes: SceneRowData[] = [];
-    for (const [scene_num, scene] of Object.entries(scenes)) {
+    for (const [_, scene] of Object.entries(scenes)) {
       const scene_data = {
         ...scene,
         num_devices: Object.keys(scene.devices).length,

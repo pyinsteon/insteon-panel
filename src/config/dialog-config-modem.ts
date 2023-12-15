@@ -5,10 +5,10 @@ import { createCloseHeading } from "../../homeassistant-frontend/src/components/
 import { haStyleDialog } from "../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant } from "../../homeassistant-frontend/src/types";
 import { Insteon } from "../data/insteon";
-import { updateModemConfig } from "data/config";
+import { updateModemConfig, addPlmManualConfig, modemIsPlm } from "data/config";
 import "../../homeassistant-frontend/src/components/ha-form/ha-form";
 import "../../homeassistant-frontend/src/components/ha-button"
-import type { HaFormSchema } from "../../homeassistant-frontend/src/components/ha-form/types";
+import type { HaFormSchema, HaFormSelectSchema } from "../../homeassistant-frontend/src/components/ha-form/types";
 import { insteonConfigModemDialogParams } from "./show-dialog-config-modem";
 import "@ha/components/ha-alert"
 import "@ha/components/ha-circular-progress"
@@ -46,6 +46,16 @@ class DialogInsteonConfigModem extends LitElement {
     this.insteon = params.insteon;
     this._schema = params.schema;
     this._formData = params.data;
+    if (modemIsPlm(this._formData)) {
+      const ports = this._schema.find(o => o.name == "device") as HaFormSelectSchema;
+      if (ports && ports.options && ports.options.length == 0) {
+        this._formData.manual_config = true
+        this._formData.plm_manual_config = this._formData.device
+      } else {
+        this._formData.manual_config = false
+        this._formData.plm_manual_config = undefined
+      }
+    }
     this._initConfig = params.data;
     this._callback = params.callback;
     this._title = params.title;
@@ -60,6 +70,10 @@ class DialogInsteonConfigModem extends LitElement {
     if (!this._opened) {
       return html``;
     }
+    let form_schema: HaFormSchema[] = [...this._schema! ];
+    if (modemIsPlm(this._formData)) {
+      form_schema = addPlmManualConfig(this._formData.manual_config!, this._schema!)
+    }
     return html`
       <ha-dialog
         open
@@ -70,7 +84,7 @@ class DialogInsteonConfigModem extends LitElement {
         <div class="form">
           <ha-form
             .data=${this._formData}
-            .schema=${this._schema}
+            .schema=${form_schema}
             @value-changed=${this._valueChanged}
             .computeLabel=${this._computeLabel(this.insteon?.localize)}
           ></ha-form>
@@ -100,11 +114,20 @@ class DialogInsteonConfigModem extends LitElement {
   private async _submit(): Promise<void> {
     try {
       this._saving = true;
-      await updateModemConfig(this.hass!, this._formData);
+      let config = { ...this._formData }
+      if (modemIsPlm(config)) {
+        if (config.manual_config) {
+          config = { device: config.plm_manual_config! }
+        } else {
+          config = { device: config.device }
+        }
+      }
+      await updateModemConfig(this.hass!, config);
       if (this._callback) {
         this._callback(true)
       }
       this._opened = false;
+      this._formData = [];
     } catch {
       this._error = this.insteon!.localize("common.error.connect_error");
     } finally {

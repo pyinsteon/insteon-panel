@@ -4,7 +4,8 @@ import "../../homeassistant-frontend/src/components/ha-code-editor";
 import { createCloseHeading } from "../../homeassistant-frontend/src/components/ha-dialog";
 import { haStyleDialog } from "../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant } from "../../homeassistant-frontend/src/types";
-import { Insteon, RAMP_RATE_SECONDS, rampRateSchema } from "../data/insteon";
+import { Insteon } from "../data/insteon";
+import { rampRateSchema } from "../data/device";
 import "../../homeassistant-frontend/src/components/ha-slider";
 import "../../homeassistant-frontend/src/components/ha-selector/ha-selector-select";
 import { InsteonSetOnLevelDialogParams } from "./show-dialog-insteon-scene-set-on-level";
@@ -22,8 +23,6 @@ class DialogInsteonSetOnLevel extends LitElement {
 
   @property({ type: Boolean }) public narrow?: boolean;
 
-  @property({ type: Boolean })
-  @state()
   private _title?: string;
 
   @state() private _callback?: (

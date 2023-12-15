@@ -63,9 +63,9 @@ class InsteonRouter extends HassRouterPage {
         tag: "insteon-utils-panel",
         load: () => import("./insteon-utils-panel"),
       },
-      x10_devices: {
-        tag: "x10-devices-page",
-        load: () => import("./config/x10-devices-page")
+      device_overrides: {
+        tag: "device-overrides-panel",
+        load: () => import("./config/device-overrides-panel")
       }
     },
   };

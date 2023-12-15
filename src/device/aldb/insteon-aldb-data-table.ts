@@ -1,11 +1,12 @@
 import { html, LitElement, TemplateResult } from "lit";
-import { customElement, property, query } from "lit/decorators";
+import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "../../../homeassistant-frontend/src/components/ha-circular-progress";
 import "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
-import { DataTableColumnContainer } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
-import type { ALDBRecord, Insteon } from "../../data/insteon";
-import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
+import { DataTableColumnContainer, DataTableRowData } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
+import { Insteon } from "../../data/insteon";
+import { ALDBRecord } from "../../data/device";
+import { HomeAssistant } from "../../../homeassistant-frontend/src/types";
 import { computeRTLDirection } from "../../../homeassistant-frontend/src/common/util/compute_rtl";
 
 export interface RecordRowData extends ALDBRecord {
@@ -26,7 +27,7 @@ export class InsteonALDBDataTable extends LitElement {
 
   @property({ type: Boolean }) public showWait = false;
 
-  private _records = memoizeOne((records: ALDBRecord[]) => {
+  private _records = memoizeOne((records: ALDBRecord[]): DataTableRowData[] => {
     if (!records) {
       return [];
     }
