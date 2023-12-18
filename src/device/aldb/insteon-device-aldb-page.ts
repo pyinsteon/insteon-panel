@@ -3,8 +3,8 @@ import type { ActionDetail } from "@material/mwc-list";
 // import "@material/mwc-fab";
 import { mdiPlus, mdiDotsVertical } from "@mdi/js";
 // import "@material/mwc-button";
-import "../../../homeassistant-frontend/src/components/ha-icon-button";
-import "../../../homeassistant-frontend/src/components/ha-circular-progress";
+import "@ha/components/ha-icon-button";
+import "@ha/components/ha-circular-progress";
 import {
   css,
   CSSResultGroup,
@@ -15,7 +15,7 @@ import {
 } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { classMap } from "lit/directives/class-map";
-import "../../../homeassistant-frontend/src/components/ha-fab";
+import "@ha/components/ha-fab";
 import { Insteon, InsteonDevice } from "../../data/insteon";
 import {
   fetchInsteonDevice,
@@ -31,22 +31,22 @@ import {
   aldbNewRecordSchema,
   removeInsteonDevice,
 } from "../../data/device";
-import "../../../homeassistant-frontend/src/layouts/hass-tabs-subpage";
+import "@ha/layouts/hass-tabs-subpage";
 import {
   HomeAssistant,
   Route,
-} from "../../../homeassistant-frontend/src/types";
+} from "@ha/types";
 import { insteonDeviceTabs } from "../insteon-device-router";
 import "./insteon-aldb-data-table";
-import { HASSDomEvent } from "../../../homeassistant-frontend/src/common/dom/fire_event";
-import { RowClickedEvent } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
+import { HASSDomEvent } from "@ha/common/dom/fire_event";
+import { RowClickedEvent } from "@ha/components/data-table/ha-data-table";
 import {
   showConfirmationDialog,
   showAlertDialog,
-} from "../../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
+} from "@ha/dialogs/generic/show-dialog-box";
 import { showInsteonALDBRecordDialog } from "./show-dialog-insteon-aldb-record";
-import { navigate } from "../../../homeassistant-frontend/src/common/navigate";
-import "../../../homeassistant-frontend/src/components/ha-button-menu";
+import { navigate } from "@ha/common/navigate";
+import "@ha/components/ha-button-menu";
 
 import { haStyle } from "@ha/resources/styles";
 

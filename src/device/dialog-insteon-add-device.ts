@@ -1,15 +1,15 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import "@material/mwc-button";
 import { customElement, property, state } from "lit/decorators";
-import "../../homeassistant-frontend/src/components/ha-code-editor";
-import { createCloseHeading } from "../../homeassistant-frontend/src/components/ha-dialog";
-import { haStyleDialog } from "../../homeassistant-frontend/src/resources/styles";
-import { HomeAssistant } from "../../homeassistant-frontend/src/types";
+import "@ha/components/ha-code-editor";
+import { createCloseHeading } from "@ha/components/ha-dialog";
+import { haStyleDialog } from "@ha/resources/styles";
+import { HomeAssistant } from "@ha/types";
 import { Insteon } from "../data/insteon";
 import { addDeviceSchema } from "../data/device";
 import { checkAddress } from "../tools/address-utils";
-import "../../homeassistant-frontend/src/components/ha-form/ha-form";
-import type { HaFormSchema } from "../../homeassistant-frontend/src/components/ha-form/types";
+import "@ha/components/ha-form/ha-form";
+import type { HaFormSchema } from "@ha/components/ha-form/types";
 import { InsteonAddDeviceDialogParams } from "./show-dialog-insteon-add-device";
 
 @customElement("dialog-insteon-add-device")

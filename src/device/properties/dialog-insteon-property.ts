@@ -2,17 +2,17 @@
 // import "@polymer/paper-input/paper-input";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import "../../../homeassistant-frontend/src/components/ha-code-editor";
-import { createCloseHeading } from "../../../homeassistant-frontend/src/components/ha-dialog";
-import { haStyleDialog } from "../../../homeassistant-frontend/src/resources/styles";
-import { HomeAssistant } from "../../../homeassistant-frontend/src/types";
+import "@ha/components/ha-code-editor";
+import { createCloseHeading } from "@ha/components/ha-dialog";
+import { haStyleDialog } from "@ha/resources/styles";
+import { HomeAssistant } from "@ha/types";
 import { Insteon } from "../../data/insteon";
 import { InsteonProperty, PropertyRadioButtons } from "../../data/device";
-import "../../../homeassistant-frontend/src/components/ha-form/ha-form";
+import "@ha/components/ha-form/ha-form";
 import type {
   HaFormSchema,
   HaFormMultiSelectSchema,
-} from "../../../homeassistant-frontend/src/components/ha-form/types";
+} from "@ha/components/ha-form/types";
 import { InsteonPropertyDialogParams } from "./show-dialog-insteon-property";
 
 @customElement("dialog-insteon-property")

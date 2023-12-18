@@ -1,13 +1,13 @@
 import { html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
-import "../../../homeassistant-frontend/src/components/ha-circular-progress";
-import "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
-import { DataTableColumnContainer, DataTableRowData } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
+import "@ha/components/ha-circular-progress";
+import "@ha/components/data-table/ha-data-table";
+import { DataTableColumnContainer, DataTableRowData } from "@ha/components/data-table/ha-data-table";
 import { Insteon } from "../../data/insteon";
 import { ALDBRecord } from "../../data/device";
-import { HomeAssistant } from "../../../homeassistant-frontend/src/types";
-import { computeRTLDirection } from "../../../homeassistant-frontend/src/common/util/compute_rtl";
+import { HomeAssistant } from "@ha/types";
+import { computeRTLDirection } from "@ha/common/util/compute_rtl";
 
 export interface RecordRowData extends ALDBRecord {
   record?: ALDBRecord;

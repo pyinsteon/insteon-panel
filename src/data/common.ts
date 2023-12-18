@@ -1,4 +1,4 @@
-import { PageNavigation } from "../../homeassistant-frontend/src/layouts/hass-tabs-subpage";
+import { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 
 export interface insteonPageNavigation extends PageNavigation {
   class?: string;

@@ -1,15 +1,15 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import "../../../homeassistant-frontend/src/components/ha-code-editor";
-import { createCloseHeading } from "../../../homeassistant-frontend/src/components/ha-dialog";
-import { haStyleDialog } from "../../../homeassistant-frontend/src/resources/styles";
-import { HomeAssistant } from "../../../homeassistant-frontend/src/types";
+import "@ha/components/ha-code-editor";
+import { createCloseHeading } from "@ha/components/ha-dialog";
+import { haStyleDialog } from "@ha/resources/styles";
+import { HomeAssistant } from "@ha/types";
 import { Insteon } from "../../data/insteon";
 import { ALDBRecord } from "../../data/device";
 import "./insteon-aldb-data-table";
 import { checkAddress } from "../../tools/address-utils";
-import "../../../homeassistant-frontend/src/components/ha-form/ha-form";
-import type { HaFormSchema, HaFormData } from "../../../homeassistant-frontend/src/components/ha-form/types";
+import "@ha/components/ha-form/ha-form";
+import type { HaFormSchema, HaFormData } from "@ha/components/ha-form/types";
 import { InsteonALDBRecordDialogParams } from "./show-dialog-insteon-aldb-record";
 
 @customElement("dialog-insteon-aldb-record")
