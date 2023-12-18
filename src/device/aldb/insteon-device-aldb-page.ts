@@ -14,10 +14,10 @@ import {
   PropertyValues,
 } from "lit";
 import { customElement, property, state } from "lit/decorators";
+import { classMap } from "lit/directives/class-map";
 import "../../../homeassistant-frontend/src/components/ha-fab";
+import { Insteon, InsteonDevice } from "../../data/insteon";
 import {
-  Insteon,
-  InsteonDevice,
   fetchInsteonDevice,
   ALDBRecord,
   fetchInsteonALDB,
@@ -29,7 +29,8 @@ import {
   addDefaultLinks,
   aldbChangeRecordSchema,
   aldbNewRecordSchema,
-} from "../../data/insteon";
+  removeInsteonDevice,
+} from "../../data/device";
 import "../../../homeassistant-frontend/src/layouts/hass-tabs-subpage";
 import {
   HomeAssistant,
@@ -79,11 +80,14 @@ class InsteonDeviceALDBPage extends LitElement {
 
   private _refreshDevicesTimeoutHandle?: number;
 
+  private _showUnusedAvailable = false;
+
   protected firstUpdated(changedProps: PropertyValues) {
     // eslint-disable-next-line no-console
     console.info("Device GUID: " + this.deviceId + " in aldb");
     super.firstUpdated(changedProps);
     if (this.deviceId && this.hass) {
+      this._showUnusedAvailable = Boolean(this.hass.userData?.showAdvanced)
       fetchInsteonDevice(this.hass, this.deviceId).then(
         (device) => {
           this._device = device;
@@ -106,10 +110,9 @@ class InsteonDeviceALDBPage extends LitElement {
   }
 
   private _filterRecords(
-    records: ALDBRecord[],
-    showUnused: boolean,
+    records: ALDBRecord[]
   ): ALDBRecord[] {
-    return records.filter((record) => record.in_use || showUnused);
+    return records.filter((record) => record.in_use || (this._showUnused && this._showUnusedAvailable) || record.dirty);
   }
 
   protected render(): TemplateResult {
@@ -124,56 +127,42 @@ class InsteonDeviceALDBPage extends LitElement {
         hasFab
       >
         ${this.narrow
-          ? html`
-              <!-- <span slot="header"> -->
-              <div slot="header" class="header fullwidth">
-                <div slot="header" class="narrow-header-left">
-                  ${this._device?.name}
-                </div>
-                <div slot="header" class="narrow-header-right">
-                  <ha-button-menu
-                    corner="BOTTOM_START"
-                    @action=${this._handleMenuAction}
-                    activatable
-                  >
-                    <ha-icon-button
-                      slot="trigger"
-                      .label=${this.hass.localize("ui.common.menu")}
-                      .path=${mdiDotsVertical}
-                    ></ha-icon-button>
-
-                    <mwc-list-item>
-                      ${this.insteon!.localize(
-                        "aldb.actions." + this._showHideUnused,
-                      )}
-                    </mwc-list-item>
-                    <mwc-list-item>
-                      ${this.insteon!.localize(
-                        "aldb.actions.add_default_links",
-                      )}
-                    </mwc-list-item>
-                    <mwc-list-item>
-                      ${this.insteon!.localize("common.actions.load")}
-                    </mwc-list-item>
-                    <mwc-list-item .disabled=${!this._dirty()}>
-                      ${this.insteon!.localize("common.actions.write")}
-                    </mwc-list-item>
-                    <mwc-list-item .disabled=${!this._dirty()}>
-                      ${this.insteon!.localize("common.actions.reset")}
-                    </mwc-list-item>
-                  </ha-button-menu>
-                </div>
+        ? html`
+            <div slot="header" class="header fullwidth">
+              <div slot="header" class="narrow-header-left">
+                ${this._device?.name}
               </div>
-              <!-- </span> -->
+              <div slot="header" class="narrow-header-right">
+                  ${this._generateActionMenu()}
+              </div>
+            </div>
             `
           : ""}
         <div class="container">
           ${!this.narrow
             ? html`
                 <div class="page-header fullwidth">
-                  <div class="device-name">
-                    <h1>${this._device?.name}</h1>
-                  </div>
+                  <table>
+                    <tr>
+                      <td>
+                        <div class="device-name">
+                          <h1>${this._device?.name}</h1>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <div class="aldb-status">
+                          ALDB Status:
+                          ${this._device
+                            ? this.insteon!.localize(
+                                "aldb.status." + this._device?.aldb_status,
+                              )
+                            : ""}
+                        </div>
+                        </td>
+                    </tr>
+                  </table>
                   <div class="logo header-right">
                     <img
                       src="https://brands.home-assistant.io/insteon/logo.png"
@@ -181,55 +170,7 @@ class InsteonDeviceALDBPage extends LitElement {
                       @load=${this._onImageLoad}
                       @error=${this._onImageError}
                     />
-                  </div>
-                </div>
-                <div class="page-header fullwidth">
-                  <div class="aldb-status">
-                    ALDB Status:
-                    ${this._device
-                      ? this.insteon!.localize(
-                          "aldb.status." + this._device?.aldb_status,
-                        )
-                      : ""}
-                  </div>
-                  <div class="actions header-right">
-                    <mwc-button @click=${this._onLoadALDBClick}>
-                      ${this.insteon!.localize("common.actions.load")}
-                    </mwc-button>
-                    <mwc-button @click=${this._onAddDefaultLinksClicked}>
-                      ${this.insteon!.localize(
-                        "aldb.actions.add_default_links",
-                      )}
-                    </mwc-button>
-                    <mwc-button
-                      .disabled=${!this._dirty()}
-                      @click=${this._onWriteALDBClick}
-                    >
-                      ${this.insteon!.localize("common.actions.write")}
-                    </mwc-button>
-                    <mwc-button
-                      .disabled=${!this._dirty()}
-                      @click=${this._onResetALDBClick}
-                    >
-                      ${this.insteon!.localize("common.actions.reset")}
-                    </mwc-button>
-                    <ha-button-menu
-                      corner="BOTTOM_START"
-                      @action=${this._handleMenuAction}
-                      activatable
-                    >
-                      <ha-icon-button
-                        slot="trigger"
-                        .label=${this.hass.localize("ui.common.menu")}
-                        .path=${mdiDotsVertical}
-                      ></ha-icon-button>
-
-                      <mwc-list-item>
-                        ${this.insteon!.localize(
-                          "aldb.actions." + this._showHideUnused,
-                        )}
-                      </mwc-list-item>
-                    </ha-button-menu>
+                        ${this._generateActionMenu()}
                   </div>
                 </div>
               `
@@ -256,6 +197,49 @@ class InsteonDeviceALDBPage extends LitElement {
     `;
   }
 
+  private _generateActionMenu() {
+    return html`
+      <ha-button-menu
+        corner="BOTTOM_START"
+        @action=${this._handleMenuAction}
+        activatable
+        >
+        <ha-icon-button
+          slot="trigger"
+          .label=${this.hass.localize("ui.common.menu")}
+          .path=${mdiDotsVertical}
+        ></ha-icon-button>
+        <mwc-list-item>
+          ${this.insteon!.localize("common.actions.load")}
+        </mwc-list-item>
+        <mwc-list-item>
+          ${this.insteon!.localize("aldb.actions.add_default_links")}
+        </mwc-list-item>
+        <mwc-list-item .disabled=${!this._dirty()}>
+          ${this.insteon!.localize("common.actions.write")}
+        </mwc-list-item>
+        <mwc-list-item .disabled=${!this._dirty()}>
+          ${this.insteon!.localize("common.actions.reset")}
+        </mwc-list-item>
+
+        <mwc-list-item
+          aria-label=${this.insteon.localize("device.actions.delete")}
+          class=${classMap({ warning: true })}
+        >
+          ${this.insteon.localize("device.actions.delete")}
+        </mwc-list-item>
+
+        ${this._showUnusedAvailable
+          ? html`
+            <mwc-list-item>
+              ${this.insteon!.localize("aldb.actions." + this._showHideUnused)}
+            </mwc-list-item>`
+          : ""
+        }
+      </ha-button-menu>
+    `
+  }
+
   private _getRecords(): void {
     if (!this._device) {
       this._records = [];
@@ -263,7 +247,7 @@ class InsteonDeviceALDBPage extends LitElement {
     }
     fetchInsteonALDB(this.hass, this._device?.address).then((records) => {
       this._allRecords = records;
-      this._records = this._filterRecords(this._allRecords, this._showUnused);
+      this._records = this._filterRecords(this._allRecords);
     });
   }
 
@@ -327,7 +311,7 @@ class InsteonDeviceALDBPage extends LitElement {
     } else {
       this._showHideUnused = "show";
     }
-    this._records = this._filterRecords(this._allRecords!, this._showUnused);
+    this._records = this._filterRecords(this._allRecords!);
   }
 
   private async _onWriteALDBClick() {
@@ -349,6 +333,40 @@ class InsteonDeviceALDBPage extends LitElement {
     writeALDB(this.hass, this._device!.address);
     this._isLoading = true;
     this._records = [];
+  }
+
+  private async _onDeleteDevice() {
+    await showConfirmationDialog(this, {
+      text: this.insteon.localize("common.warn.delete"),
+      confirmText: this.hass!.localize("ui.common.yes"),
+      dismissText: this.hass!.localize("ui.common.no"),
+      confirm: async () => this._checkScope(),
+      warning: true,
+    });
+  }
+
+  private async _delete(remove_all_refs: boolean) {
+    await removeInsteonDevice(this.hass, this._device!.address, remove_all_refs);
+    navigate("/insteon")
+  }
+
+  private async _checkScope() {
+    if (this._device!.address.includes("X10")) {
+      this._delete(false)
+      return
+    }
+    const remove_all_refs = await showConfirmationDialog(this, {
+      title: this.insteon.localize("device.remove_all_refs.title"),
+      text: html`
+        ${this.insteon.localize("device.remove_all_refs.description")}<br><br>
+        ${this.insteon.localize("device.remove_all_refs.confirm_description")}<br>
+        ${this.insteon.localize("device.remove_all_refs.dismiss_description")}`,
+      confirmText: this.hass!.localize("ui.common.yes"),
+      dismissText: this.hass!.localize("ui.common.no"),
+      warning: true,
+      destructive: true,
+    });
+    this._delete(remove_all_refs);
   }
 
   private async _onResetALDBClick() {
@@ -376,9 +394,6 @@ class InsteonDeviceALDBPage extends LitElement {
 
   private async _handleRecordChange(record: ALDBRecord) {
     changeALDBRecord(this.hass, this._device!.address, record);
-    if (!record.in_use) {
-      this._showUnused = true;
-    }
     this._getRecords();
   }
 
@@ -404,9 +419,7 @@ class InsteonDeviceALDBPage extends LitElement {
   private async _handleBackTapped(): Promise<void> {
     if (this._dirty()) {
       await showConfirmationDialog(this, {
-        text: this.hass!.localize(
-          "ui.panel.config.common.editor.confirm_unsaved",
-        ),
+        text: this.insteon.localize("common.warn.unsaved"),
         confirmText: this.hass!.localize("ui.common.yes"),
         dismissText: this.hass!.localize("ui.common.no"),
         confirm: () => this._goBack(),
@@ -419,19 +432,22 @@ class InsteonDeviceALDBPage extends LitElement {
   private async _handleMenuAction(ev: CustomEvent<ActionDetail>) {
     switch (ev.detail.index) {
       case 0:
-        await this._onShowHideUnusedClicked();
-        break;
-      case 1:
-        await this._addDefaultLinks();
-        break;
-      case 2:
         await this._onLoadALDBClick();
         break;
-      case 3:
+      case 1:
+        await this._onAddDefaultLinksClicked();
+        break;
+      case 2:
         await this._onWriteALDBClick();
         break;
-      case 4:
+      case 3:
         await this._onResetALDBClick();
+        break;
+      case 4:
+        await this._onDeleteDevice();
+        break;
+      case 5:
+        await this._onShowHideUnusedClicked();
         break;
     }
   }
@@ -506,7 +522,7 @@ class InsteonDeviceALDBPage extends LitElement {
         }
 
         :host(:not([narrow])) {
-          --aldb-table-height: 76vh;
+          --aldb-table-height: 90vh;
         }
 
         .header {
@@ -527,12 +543,19 @@ class InsteonDeviceALDBPage extends LitElement {
           --data-table-border-width: 0;
         }
         .device-name {
-          display: flex;
+          display: block;
           align-items: left;
           padding-left: 0px;
           padding-inline-start: 0px;
           direction: var(--direction);
           font-size: 24px;
+          position: relative;
+          width: 100%;
+          height: 50%;
+        }
+        .aldb-status {
+          position: relative;
+          display: block;
         }
         h1 {
           margin: 0;
@@ -563,7 +586,7 @@ class InsteonDeviceALDBPage extends LitElement {
         }
 
         .header-right {
-          align-self: center;
+          align-self: right;
           display: flex;
         }
 

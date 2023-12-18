@@ -5,7 +5,7 @@ import fs from "fs";
 import gulp from "gulp";
 import webpack from "webpack";
 import paths from "../paths.cjs";
-import { createpanelConfig } from "../webpack.cjs";
+import { createPanelConfig } from "../webpack.cjs";
 
 const bothBuilds = (createConfigFunc, params) => [
   createConfigFunc({ ...params, latestBuild: true }),
@@ -62,7 +62,7 @@ const prodBuild = (conf) =>
 gulp.task("webpack-watch-panel", () => {
   // This command will run forever because we don't close compiler
   webpack(
-    createpanelConfig({
+    createPanelConfig({
       isProdBuild: false,
       latestBuild: true,
     })
@@ -71,7 +71,7 @@ gulp.task("webpack-watch-panel", () => {
 
 gulp.task("webpack-prod-panel", () =>
   prodBuild(
-    bothBuilds(createpanelConfig, {
+    bothBuilds(createPanelConfig, {
       isProdBuild: true,
     })
   )

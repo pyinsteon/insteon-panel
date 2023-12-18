@@ -1,17 +1,17 @@
 [build-system]
-requires = ["setuptools~=68.0", "wheel~=0.40.0"]
+requires = ["setuptools>=69.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name         = "insteon-frontend-home-assistant"
-version      = "0.4.0"
+version      = "0.5.0"
 license      = {text = "MIT License"}
 description  = "The Insteon frontend for Home Assistant"
 readme       = "README.md"
 authors      = [
     {name = "Tom Harris", email = "pyinsteon@harrisnj.net"}
 ]
-requires-python = ">=3.8.0"
+requires-python = ">=3.10.0"
 
 [project.urls]
 "Homepage" = "https://github.com/pyinsteon/insteon-panel"
@@ -23,7 +23,3 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["insteon_frontend*"]
-
-[tool.setuptools.package-data]
-insteon_frontend = ["*"]
-frontend_es5 = ["*"]

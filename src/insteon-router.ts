@@ -1,5 +1,5 @@
 import { customElement, property, state } from "lit/decorators";
-import { mdiNetwork, mdiFolderMultipleOutline } from "@mdi/js";
+import { mdiNetwork, mdiFolderMultipleOutline, mdiWrench } from "@mdi/js";
 import {
   HassRouterPage,
   RouterOptions,
@@ -18,6 +18,11 @@ export const insteonMainTabs: PageNavigation[] = [
     translationKey: "scenes.caption",
     path: `/insteon/scenes`,
     iconPath: mdiNetwork,
+  },
+  {
+    translationKey: "utils.caption",
+    path: `/insteon/utils`,
+    iconPath: mdiWrench,
   },
 ];
 
@@ -54,6 +59,14 @@ class InsteonRouter extends HassRouterPage {
         tag: "insteon-scenes-panel",
         load: () => import("./insteon-scenes-panel"),
       },
+      utils: {
+        tag: "insteon-utils-panel",
+        load: () => import("./insteon-utils-panel"),
+      },
+      device_overrides: {
+        tag: "device-overrides-panel",
+        load: () => import("./config/device-overrides-panel")
+      }
     },
   };
 
@@ -67,27 +80,16 @@ class InsteonRouter extends HassRouterPage {
     el.isWide = isWide;
     el.section = section;
 
-    // eslint-disable-next-line no-console
-    console.info("Current Page: " + this._currentPage + " in insteon-router");
-
-    // eslint-disable-next-line no-console
-    console.info("Route " + this.route.path + " in insteon-router");
-
     if (this._currentPage == "device") {
       const routeSplit = this.routeTail.path.split("/");
       el.deviceId = routeSplit[routeSplit.length - 1];
-
-      // eslint-disable-next-line no-console
-      console.info("Device ID: " + el.deviceId + " in insteon-router");
     }
 
     if (this._currentPage == "scene") {
       const routeSplit = this.routeTail.path.split("/");
       el.sceneId = routeSplit[routeSplit.length - 1];
-
-      // eslint-disable-next-line no-console
-      console.info("Scene ID: " + el.sceneId + " in insteon-router");
     }
+
     el.insteon = this.insteon;
   }
 }

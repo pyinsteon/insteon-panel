@@ -3,32 +3,34 @@ import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
-import "../homeassistant-frontend/src/components/data-table/ha-data-table";
-import "../homeassistant-frontend/src/components/ha-fab";
+import "@ha/components/data-table/ha-data-table";
+import "@ha/components/ha-fab";
 import {
   DataTableRowData,
   RowClickedEvent,
-} from "../homeassistant-frontend/src/components/data-table/ha-data-table";
-import "../homeassistant-frontend/src/components/ha-card";
-import "../homeassistant-frontend/src/components/ha-button-menu";
-import "../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
-import { haStyle } from "../homeassistant-frontend/src/resources/styles";
-import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
+} from "@ha/components/data-table/ha-data-table";
+import "@ha/components/ha-card";
+import "@ha/components/ha-button-menu";
+import "@ha/layouts/hass-tabs-subpage-data-table";
+import { haStyle } from "@ha/resources/styles";
+import { HomeAssistant, Route } from "@ha/types";
 import {
   subscribeDeviceRegistry,
   DeviceRegistryEntry,
-} from "../homeassistant-frontend/src/data/device_registry";
+} from "@ha/data/device_registry";
 import { Insteon } from "./data/insteon";
-import { navigate } from "../homeassistant-frontend/src/common/navigate";
-import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
+import { navigate } from "@ha/common/navigate";
+import { HASSDomEvent } from "@ha/common/dom/fire_event";
 import {
   AreaRegistryEntry,
   subscribeAreaRegistry,
-} from "../homeassistant-frontend/src/data/area_registry";
+} from "@ha/data/area_registry";
 import { showInsteonAddDeviceDialog } from "./device/show-dialog-insteon-add-device";
 import { showInsteonAddingDeviceDialog } from "./device/show-dialog-adding-device";
+import { showDeviceAddX10Dialog } from "./device/show-dialog-device-add-x10";
 import { insteonMainTabs } from "./insteon-router";
-import "../homeassistant-frontend/src/components/ha-fab";
+import "@ha/components/ha-fab";
+import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 
 interface DeviceRowData extends DataTableRowData {
   id: string;
@@ -110,14 +112,14 @@ export class InsteonDevicesPanel extends LitElement {
     narrow
       ? {
           name: {
-            title: "Device",
+            title: this.insteon.localize("devices.fields.name"),
             sortable: true,
             filterable: true,
             direction: "asc",
             grows: true,
           },
           address: {
-            title: "Address",
+            title: this.insteon.localize("devices.fields.address"),
             sortable: true,
             filterable: true,
             direction: "asc",
@@ -126,35 +128,35 @@ export class InsteonDevicesPanel extends LitElement {
         }
       : {
           name: {
-            title: "Device",
+            title: this.insteon.localize("devices.fields.name"),
             sortable: true,
             filterable: true,
             direction: "asc",
             grows: true,
           },
           address: {
-            title: "Address",
+            title: this.insteon.localize("devices.fields.address"),
             sortable: true,
             filterable: true,
             direction: "asc",
             width: "20%",
           },
           description: {
-            title: "Description",
+            title: this.insteon.localize("devices.fields.description"),
             sortable: true,
             filterable: true,
             direction: "asc",
             width: "15%",
           },
           model: {
-            title: "Model",
+            title: this.insteon.localize("devices.fields.model"),
             sortable: true,
             filterable: true,
             direction: "asc",
             width: "15%",
           },
           area: {
-            title: "Area",
+            title: this.insteon.localize("devices.fields.area"),
             sortable: true,
             filterable: true,
             direction: "asc",
@@ -215,18 +217,38 @@ export class InsteonDevicesPanel extends LitElement {
       hass: this.hass,
       insteon: this.insteon,
       title: this.insteon.localize("device.actions.add"),
-      callback: async (address, multiple) =>
-        this._handleDeviceAdd(address!, multiple),
+      callback: async (address, multiple, add_x10) =>
+        this._handleDeviceAdd(address!, multiple, add_x10),
     });
   }
 
-  private async _handleDeviceAdd(address: string, multiple: boolean) {
+  private async _handleDeviceAdd(
+    address: string,
+    multiple: boolean,
+    add_x10: boolean,
+  ) {
+    if (add_x10) {
+      showDeviceAddX10Dialog(this, {
+        hass: this.hass,
+        insteon: this.insteon,
+        title: this.insteon.localize("device.add_x10.caption"),
+        callback: async () => this._handleX10DeviceAdd(),
+      });
+      return;
+    }
     showInsteonAddingDeviceDialog(this, {
       hass: this.hass,
       insteon: this.insteon,
       multiple: multiple,
       address: address,
-      title: "Adding Insteon Device",
+      title: this.insteon.localize("devices.adding_device"),
+    });
+  }
+
+  private async _handleX10DeviceAdd() {
+    showAlertDialog(this, {
+      title: this.insteon.localize("device.add_x10.caption"),
+      text: this.insteon.localize("device.add_x10.success"),
     });
   }
 

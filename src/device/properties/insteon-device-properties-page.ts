@@ -10,15 +10,15 @@ import {
   PropertyValues,
 } from "lit";
 import { customElement, property, state } from "lit/decorators";
+import { classMap } from "lit/directives/class-map";
 import {
   HomeAssistant,
   Route,
 } from "../../../homeassistant-frontend/src/types";
 import "../../../homeassistant-frontend/src/components/ha-icon-button";
 import "./insteon-properties-data-table";
+import { Insteon, InsteonDevice } from "../../data/insteon";
 import {
-  Insteon,
-  InsteonDevice,
   InsteonProperty,
   fetchInsteonDevice,
   fetchInsteonProperties,
@@ -26,7 +26,8 @@ import {
   writeProperties,
   loadProperties,
   resetProperties,
-} from "../../data/insteon";
+  removeInsteonDevice,
+} from "../../data/device";
 import { HASSDomEvent } from "../../../homeassistant-frontend/src/common/dom/fire_event";
 import { showInsteonPropertyDialog } from "./show-dialog-insteon-property";
 import {
@@ -67,9 +68,12 @@ class InsteonDevicePropertiesPage extends LitElement {
 
   private _showHideAdvanced = "show";
 
+  private _advancedAvailable = false;
+
   protected firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
     if (this.deviceId && this.hass) {
+      this._advancedAvailable = Boolean(this.hass.userData?.showAdvanced)
       fetchInsteonDevice(this.hass, this.deviceId).then(
         (device) => {
           this._device = device;
@@ -99,105 +103,49 @@ class InsteonDevicePropertiesPage extends LitElement {
         .localizeFunc=${this.insteon.localize}
         .backCallback=${async () => this._handleBackTapped()}
       >
-        ${
-          this.narrow
-            ? html`
-                <!-- <span slot="header"> -->
-                <div slot="header" class="header fullwidth">
-                  <div slot="header" class="narrow-header-left">
-                    ${this._device?.name}
-                  </div>
-                  <div slot="header" class="narrow-header-right">
-                    <ha-button-menu
-                      corner="BOTTOM_START"
-                      @action=${this._handleMenuAction}
-                      activatable
-                    >
-                      <ha-icon-button
-                        slot="trigger"
-                        .label=${this.hass.localize("ui.common.menu")}
-                        .path=${mdiDotsVertical}
-                      ></ha-icon-button>
-
-                      <mwc-list-item>
-                        ${this.insteon!.localize(
-                          "properties.actions." + this._showHideAdvanced,
-                        )}
-                      </mwc-list-item>
-                      <mwc-list-item>
-                        ${this.insteon!.localize("common.actions.load")}
-                      </mwc-list-item>
-                      <mwc-list-item .disabled=${!this._dirty()}>
-                        ${this.insteon!.localize("common.actions.write")}
-                      </mwc-list-item>
-                      <mwc-list-item .disabled=${!this._dirty()}>
-                        ${this.insteon!.localize("common.actions.reset")}
-                      </mwc-list-item>
-                    </ha-button-menu>
-                  </div>
-                </div>
-                <!-- </span> -->
-              `
-            : ""
-        }
+      ${this.narrow
+        ? html`
+            <div slot="header" class="header fullwidth">
+              <div slot="header" class="narrow-header-left">
+                ${this._device?.name}
+              </div>
+              <div slot="header" class="narrow-header-right">
+                  ${this._generateActionMenu()}
+              </div>
+            </div>
+            `
+          : ""}
         <div class="container">
-          ${
-            !this.narrow
-              ? html`
-                  <div class="page-header fullwidth">
+          ${!this.narrow
+            ? html`
+            <div class="page-header fullwidth">
+              <table>
+                <tr>
+                  <td>
                     <div class="device-name">
                       <h1>${this._device?.name}</h1>
                     </div>
-                    <div class="logo header-right">
-                      <img
-                        src="https://brands.home-assistant.io/insteon/logo.png"
-                        referrerpolicy="no-referrer"
-                        @load=${this._onImageLoad}
-                        @error=${this._onImageError}
-                      />
-                    </div>
-                  </div>
-                  <div class="page-header fullwidth">
-                    <div class="header-right">
-                      <div slot="header" class="actions header-right">
-                        <mwc-button @click=${this._onLoadPropertiesClick}>
-                          ${this.insteon!.localize("common.actions.load")}
-                        </mwc-button>
-                        <mwc-button
-                          .disabled=${!this._dirty()}
-                          @click=${this._onWritePropertiesClick}
-                        >
-                          ${this.insteon!.localize("common.actions.write")}
-                        </mwc-button>
-                        <mwc-button
-                          .disabled=${!this._dirty()}
-                          @click=${this._onResetPropertiesClick}
-                        >
-                          ${this.insteon!.localize("common.actions.reset")}
-                        </mwc-button>
-                        <ha-button-menu
-                          corner="BOTTOM_START"
-                          @action=${this._handleMenuAction}
-                          activatable
-                        >
-                          <ha-icon-button
-                            slot="trigger"
-                            .label=${this.hass.localize("ui.common.menu")}
-                            .path=${mdiDotsVertical}
-                          ></ha-icon-button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div></div>
+                  </td>
+                </tr>
+              </table>
+              <div class="logo header-right">
+                <img
+                  src="https://brands.home-assistant.io/insteon/logo.png"
+                  referrerpolicy="no-referrer"
+                  @load=${this._onImageLoad}
+                  @error=${this._onImageError}
+                />
+                ${this._generateActionMenu()}
+              </div>
+            </div>
+          `
+        : ""}
 
-                          <mwc-list-item>
-                            ${this.insteon!.localize(
-                              "properties.actions." + this._showHideAdvanced,
-                            )}
-                          </mwc-list-item>
-                        </ha-button-menu>
-                      </div>
-                    </div>
-                  </div>
-                `
-              : ""
-          }
           </div>
           <insteon-properties-data-table
             .hass=${this.hass}
@@ -212,6 +160,55 @@ class InsteonDevicePropertiesPage extends LitElement {
         </div>
       </hass-tabs-subpage>
     `;
+  }
+
+  private _generateActionMenu() {
+    return html`
+      <ha-button-menu
+        corner="BOTTOM_START"
+        @action=${this._handleMenuAction}
+        activatable
+      >
+        <ha-icon-button
+          slot="trigger"
+          .label=${this.hass.localize("ui.common.menu")}
+          .path=${mdiDotsVertical}
+        ></ha-icon-button>
+
+        <!-- 0 -->
+        <mwc-list-item>
+          ${this.insteon!.localize("common.actions.load")}
+        </mwc-list-item>
+
+        <!-- 1 -->
+        <mwc-list-item .disabled=${!this._dirty()}>
+          ${this.insteon!.localize("common.actions.write")}
+        </mwc-list-item>
+
+        <!-- 2 -->
+        <mwc-list-item .disabled=${!this._dirty()}>
+          ${this.insteon!.localize("common.actions.reset")}
+        </mwc-list-item>
+
+        <!-- 3 -->
+        <mwc-list-item
+          aria-label=${this.insteon.localize("device.actions.delete")}
+          class=${classMap({ warning: true })}
+        >
+        ${this.insteon.localize("device.actions.delete")}
+      </mwc-list-item>
+
+        <!-- 4 -->
+        ${this._advancedAvailable
+          ? html`<mwc-list-item>
+            ${this.insteon!.localize(
+              "properties.actions." + this._showHideAdvanced,
+            )}
+          </mwc-list-item>`
+          : ""
+        }
+      </ha-button-menu>
+    `
   }
 
   private _onImageLoad(ev) {
@@ -247,6 +244,40 @@ class InsteonDevicePropertiesPage extends LitElement {
       });
     }
     this._showWait = false;
+  }
+
+  private async _onDeleteDevice() {
+    await showConfirmationDialog(this, {
+      text: this.insteon.localize("common.warn.delete"),
+      confirmText: this.hass!.localize("ui.common.yes"),
+      dismissText: this.hass!.localize("ui.common.no"),
+      confirm: async () => this._checkScope(),
+      warning: true,
+    });
+  }
+
+  private async _delete(remove_all_refs: boolean) {
+    await removeInsteonDevice(this.hass, this._device!.address, remove_all_refs);
+    navigate("/insteon")
+  }
+
+  private async _checkScope() {
+    if (this._device!.address.includes("X10")) {
+      this._delete(false)
+      return
+    }
+    const remove_all_refs = await showConfirmationDialog(this, {
+      title: this.insteon.localize("device.remove_all_refs.title"),
+      text: html`
+        ${this.insteon.localize("device.remove_all_refs.description")}<br><br>
+        ${this.insteon.localize("device.remove_all_refs.confirm_description")}<br>
+        ${this.insteon.localize("device.remove_all_refs.dismiss_description")}`,
+      confirmText: this.hass!.localize("ui.common.yes"),
+      dismissText: this.hass!.localize("ui.common.no"),
+      warning: true,
+      destructive: true,
+    });
+    this._delete(remove_all_refs);
   }
 
   private async _onWritePropertiesClick() {
@@ -333,16 +364,19 @@ class InsteonDevicePropertiesPage extends LitElement {
   private async _handleMenuAction(ev: CustomEvent<ActionDetail>) {
     switch (ev.detail.index) {
       case 0:
-        await this._onShowHideAdvancedClicked();
-        break;
-      case 1:
         await this._onLoadPropertiesClick();
         break;
-      case 2:
+      case 1:
         await this._onWritePropertiesClick();
         break;
-      case 3:
+      case 2:
         await this._onResetPropertiesClick();
+        break;
+      case 3:
+        await this._onDeleteDevice();
+        break;
+      case 4:
+        await this._onShowHideAdvancedClicked();
         break;
     }
   }

@@ -1,11 +1,13 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
+import "@material/mwc-button";
 import { customElement, property, state } from "lit/decorators";
 import "../../homeassistant-frontend/src/components/ha-code-editor";
 import { createCloseHeading } from "../../homeassistant-frontend/src/components/ha-dialog";
 import { haStyleDialog } from "../../homeassistant-frontend/src/resources/styles";
 import { HomeAssistant } from "../../homeassistant-frontend/src/types";
-import { Insteon, addDeviceSchema } from "../data/insteon";
-import { check_address } from "../tools/check_address";
+import { Insteon } from "../data/insteon";
+import { addDeviceSchema } from "../data/device";
+import { checkAddress } from "../tools/address-utils";
 import "../../homeassistant-frontend/src/components/ha-form/ha-form";
 import type { HaFormSchema } from "../../homeassistant-frontend/src/components/ha-form/types";
 import { InsteonAddDeviceDialogParams } from "./show-dialog-insteon-add-device";
@@ -24,12 +26,13 @@ class DialogInsteonAddDevice extends LitElement {
 
   @state() private _callback?: (
     device_address: string | undefined,
-    multiple: boolean
+    multiple: boolean,
+    add_x10: boolean
   ) => Promise<void>;
 
   @state() private _errors?: { [key: string]: string };
 
-  @state() private _formData = { multiple: false, device_address: "" };
+  @state() private _formData = { multiple: false, add_x10: false, device_address: "" };
 
   @state() private _opened = false;
 
@@ -40,11 +43,11 @@ class DialogInsteonAddDevice extends LitElement {
     this._title = params.title;
     this._errors = {};
     this._opened = true;
-    this._formData = { multiple: false, device_address: "" };
+    this._formData = { multiple: false, add_x10: false, device_address: "" };
   }
 
-  private _schema(multiple: boolean): HaFormSchema[] {
-    return addDeviceSchema(multiple);
+  private _schema(multiple: boolean, add_x10: boolean): HaFormSchema[] {
+    return addDeviceSchema(multiple, add_x10);
   }
 
   protected render(): TemplateResult {
@@ -60,7 +63,7 @@ class DialogInsteonAddDevice extends LitElement {
         <div class="form">
           <ha-form
             .data=${this._formData}
-            .schema=${this._schema(this._formData.multiple)}
+            .schema=${this._schema(this._formData.multiple, this._formData.add_x10)}
             .error=${this._errors}
             @value-changed=${this._valueChanged}
             .computeLabel=${this._computeLabel(this.insteon?.localize)}
@@ -96,7 +99,7 @@ class DialogInsteonAddDevice extends LitElement {
         this._formData.device_address == ""
           ? undefined
           : this._formData.device_address;
-      await this._callback!(device_address, this._formData.multiple);
+      await this._callback!(device_address, this._formData.multiple, this._formData.add_x10);
     } else {
       this._errors!.base = this.insteon!.localize("common.error.base");
     }
@@ -113,7 +116,7 @@ class DialogInsteonAddDevice extends LitElement {
   private _checkData(): boolean {
     if (
       this._formData.device_address == "" ||
-      check_address(this._formData.device_address)
+      checkAddress(this._formData.device_address)
     )
       return true;
 

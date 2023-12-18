@@ -32,7 +32,7 @@ gulp.task(
     "gen-dummy-icons-json",
     "webpack-prod-panel",
     "gen-index-panel-prod",
-    ...// Don't compress running tests
-    (env.isTest() ? [] : ["compress-panel"]),
+    // Don't compress running tests
+    ...(env.isTestBuild() ? [] : ["compress-panel"]),
   ),
 );

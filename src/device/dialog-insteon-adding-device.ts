@@ -6,9 +6,11 @@ import { haStyleDialog } from "../../homeassistant-frontend/src/resources/styles
 import { HomeAssistant } from "../../homeassistant-frontend/src/types";
 import {
   Insteon,
+} from "../data/insteon";
+import {
   cancelAddInsteonDevice,
   deviceAddedMessage,
-} from "../data/insteon";
+} from "../data/device";
 import "../../homeassistant-frontend/src/components/ha-form/ha-form";
 import { InsteonAddingDeviceDialogParams } from "./show-dialog-adding-device";
 

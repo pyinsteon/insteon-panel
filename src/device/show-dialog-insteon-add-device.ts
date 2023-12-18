@@ -6,7 +6,7 @@ export interface InsteonAddDeviceDialogParams {
   hass: HomeAssistant;
   insteon: Insteon;
   title: string;
-  callback: (address: string | undefined, multiple: boolean) => Promise<void>;
+  callback: (address: string | undefined, multiple: boolean, add_x10: boolean) => Promise<void>;
 }
 
 export const loadInsteonAddDeviceDialog = () =>
