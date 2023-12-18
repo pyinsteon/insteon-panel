@@ -1,17 +1,17 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators";
-import "../../homeassistant-frontend/src/components/ha-code-editor";
-import { createCloseHeading } from "../../homeassistant-frontend/src/components/ha-dialog";
-import { haStyleDialog } from "../../homeassistant-frontend/src/resources/styles";
-import { HomeAssistant } from "../../homeassistant-frontend/src/types";
+import "@ha/components/ha-code-editor";
+import { createCloseHeading } from "@ha/components/ha-dialog";
+import { haStyleDialog } from "@ha/resources/styles";
+import { HomeAssistant } from "@ha/types";
 import { Insteon } from "../data/insteon";
 import { rampRateSchema } from "../data/device";
-import "../../homeassistant-frontend/src/components/ha-slider";
-import "../../homeassistant-frontend/src/components/ha-selector/ha-selector-select";
+import "@ha/components/ha-slider";
+import "@ha/components/ha-selector/ha-selector-select";
 import { InsteonSetOnLevelDialogParams } from "./show-dialog-insteon-scene-set-on-level";
 import memoizeOne from "memoize-one";
 
-import type { SelectSelector } from "../../homeassistant-frontend/src/data/selector";
+import type { SelectSelector } from "@ha/data/selector";
 
 @customElement("dialog-insteon-scene-set-on-level")
 class DialogInsteonSetOnLevel extends LitElement {

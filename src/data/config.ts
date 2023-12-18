@@ -1,6 +1,6 @@
 
-import { HomeAssistant } from "../../homeassistant-frontend/src/types";
-import type { HaFormSchema, HaFormDataContainer } from "../../homeassistant-frontend/src/components/ha-form/types";
+import { HomeAssistant } from "@ha/types";
+import type { HaFormSchema, HaFormDataContainer } from "@ha/components/ha-form/types";
 import { InsteonX10Device, X10HouseCode, X10UnitCode } from "./insteon"
 
 export interface InsteonPLMConfig {

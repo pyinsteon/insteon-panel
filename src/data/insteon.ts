@@ -1,5 +1,5 @@
 import { Repository, Status, Message } from "./common";
-import { ConfigEntry } from "../..//homeassistant-frontend/src/data/config_entries";
+import { ConfigEntry } from "@ha/data/config_entries";
 
 export interface Insteon {
   language: string;

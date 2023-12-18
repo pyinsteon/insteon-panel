@@ -3,9 +3,9 @@ import { mdiNetwork, mdiFolderMultipleOutline, mdiWrench } from "@mdi/js";
 import {
   HassRouterPage,
   RouterOptions,
-} from "../homeassistant-frontend/src/layouts/hass-router-page";
-import { PageNavigation } from "../homeassistant-frontend/src/layouts/hass-tabs-subpage";
-import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
+} from "@ha/layouts/hass-router-page";
+import { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
+import { HomeAssistant, Route } from "@ha/types";
 import { Insteon } from "./data/insteon";
 
 export const insteonMainTabs: PageNavigation[] = [

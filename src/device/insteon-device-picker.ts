@@ -4,29 +4,29 @@ import { html, LitElement, PropertyValues, TemplateResult } from "lit";
 import { ComboBoxLitRenderer } from "@vaadin/combo-box/lit";
 import { customElement, property, query, state } from "lit/decorators";
 import memoizeOne from "memoize-one";
-import { fireEvent } from "../../homeassistant-frontend/src/common/dom/fire_event";
-import { stringCompare } from "../../homeassistant-frontend/src/common/string/compare";
+import { fireEvent } from "@ha/common/dom/fire_event";
+import { stringCompare } from "@ha/common/string/compare";
 import {
   AreaRegistryEntry,
   subscribeAreaRegistry,
-} from "../../homeassistant-frontend/src/data/area_registry";
+} from "@ha/data/area_registry";
 import {
   computeDeviceName,
   DeviceEntityLookup,
   DeviceRegistryEntry,
   subscribeDeviceRegistry,
-} from "../../homeassistant-frontend/src/data/device_registry";
+} from "@ha/data/device_registry";
 import {
   EntityRegistryEntry,
   subscribeEntityRegistry,
-} from "../../homeassistant-frontend/src/data/entity_registry";
-import { SubscribeMixin } from "../../homeassistant-frontend/src/mixins/subscribe-mixin";
-import { PolymerChangedEvent } from "../../homeassistant-frontend/src/polymer-types";
-import { HomeAssistant } from "../../homeassistant-frontend/src/types";
-import "../../homeassistant-frontend/src/components/ha-combo-box";
-import type { HaComboBox } from "../../homeassistant-frontend/src/components/ha-combo-box";
+} from "@ha/data/entity_registry";
+import { SubscribeMixin } from "@ha/mixins/subscribe-mixin";
+import { PolymerChangedEvent } from "@ha/polymer-types";
+import { HomeAssistant } from "@ha/types";
+import "@ha/components/ha-combo-box";
+import type { HaComboBox } from "@ha/components/ha-combo-box";
 import { Insteon } from "../data/insteon";
-import { computeDomain } from "../../homeassistant-frontend/src/common/entity/compute_domain";
+import { computeDomain } from "@ha/common/entity/compute_domain";
 
 interface Device {
   name: string;

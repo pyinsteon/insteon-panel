@@ -1,7 +1,7 @@
-import { fireEvent } from "../../../homeassistant-frontend/src/common/dom/fire_event";
+import { fireEvent } from "@ha/common/dom/fire_event";
 import { Insteon } from "../../data/insteon";
-import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
-import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
+import type { HomeAssistant } from "@ha/types";
+import type { HaFormSchema } from "@ha/components/ha-form/types";
 import type { Property } from "../../data/insteon";
 
 export interface InsteonPropertyDialogParams {

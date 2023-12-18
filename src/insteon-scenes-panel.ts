@@ -2,22 +2,22 @@ import { mdiPlus, mdiLightbulbGroup, mdiLightbulbGroupOff } from "@mdi/js";
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
-import "../homeassistant-frontend/src/components/data-table/ha-data-table";
+import "@ha/components/data-table/ha-data-table";
 import {
   DataTableRowData,
   RowClickedEvent,
   SelectionChangedEvent,
   SortingChangedEvent,
-} from "../homeassistant-frontend/src/components/data-table/ha-data-table";
-import "../homeassistant-frontend/src/layouts/hass-tabs-subpage-data-table";
-import { haStyle } from "../homeassistant-frontend/src/resources/styles";
-import { HomeAssistant, Route } from "../homeassistant-frontend/src/types";
+} from "@ha/components/data-table/ha-data-table";
+import "@ha/layouts/hass-tabs-subpage-data-table";
+import { haStyle } from "@ha/resources/styles";
+import { HomeAssistant, Route } from "@ha/types";
 import { Insteon } from "./data/insteon";
 import { InsteonScene, InsteonScenes, fetchInsteonScenes } from "./data/scene";
-import { navigate } from "../homeassistant-frontend/src/common/navigate";
-import { HASSDomEvent } from "../homeassistant-frontend/src/common/dom/fire_event";
+import { navigate } from "@ha/common/navigate";
+import { HASSDomEvent } from "@ha/common/dom/fire_event";
 import { insteonMainTabs } from "./insteon-router";
-import "../homeassistant-frontend/src/components/ha-fab";
+import "@ha/components/ha-fab";
 
 declare global {
   // for fire event

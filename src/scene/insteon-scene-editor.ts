@@ -14,37 +14,37 @@ import {
 } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import { classMap } from "lit/directives/class-map";
-import { afterNextRender } from "../../homeassistant-frontend/src/common/util/render-status";
-import { computeDomain } from "../../homeassistant-frontend/src/common/entity/compute_domain";
-import { computeStateName } from "../../homeassistant-frontend/src/common/entity/compute_state_name";
-import { computeRTL } from "../../homeassistant-frontend/src/common/util/compute_rtl";
+import { afterNextRender } from "@ha/common/util/render-status";
+import { computeDomain } from "@ha/common/entity/compute_domain";
+import { computeStateName } from "@ha/common/entity/compute_state_name";
+import { computeRTL } from "@ha/common/util/compute_rtl";
 import "../device/insteon-device-picker";
-import "../../homeassistant-frontend/src/layouts/hass-subpage";
-import "../../homeassistant-frontend/src/components/ha-card";
-import "../../homeassistant-frontend/src/components/ha-fab";
-import "../../homeassistant-frontend/src/components/ha-icon-button";
-import "../../homeassistant-frontend/src/components/ha-icon-picker";
-import "../../homeassistant-frontend/src/components/ha-svg-icon";
-import "../../homeassistant-frontend/src/components/ha-textfield";
-import "../../homeassistant-frontend/src/components/ha-checkbox";
-import "../../homeassistant-frontend/src/components/ha-switch";
+import "@ha/layouts/hass-subpage";
+import "@ha/components/ha-card";
+import "@ha/components/ha-fab";
+import "@ha/components/ha-icon-button";
+import "@ha/components/ha-icon-picker";
+import "@ha/components/ha-svg-icon";
+import "@ha/components/ha-textfield";
+import "@ha/components/ha-checkbox";
+import "@ha/components/ha-switch";
 import {
   computeDeviceName,
   DeviceRegistryEntry,
   fetchDeviceRegistry,
-} from "../../homeassistant-frontend/src/data/device_registry";
+} from "@ha/data/device_registry";
 import {
   EntityRegistryEntry,
   fetchEntityRegistry,
-} from "../../homeassistant-frontend/src/data/entity_registry";
+} from "@ha/data/entity_registry";
 import {
   showConfirmationDialog,
   showAlertDialog,
-} from "../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
-import { KeyboardShortcutMixin } from "../../homeassistant-frontend/src/mixins/keyboard-shortcut-mixin";
-import { haStyle } from "../../homeassistant-frontend/src/resources/styles";
-import { HomeAssistant, Route } from "../../homeassistant-frontend/src/types";
-import "../../homeassistant-frontend/src/panels/config/ha-config-section";
+} from "@ha/dialogs/generic/show-dialog-box";
+import { KeyboardShortcutMixin } from "@ha/mixins/keyboard-shortcut-mixin";
+import { haStyle } from "@ha/resources/styles";
+import { HomeAssistant, Route } from "@ha/types";
+import "@ha/panels/config/ha-config-section";
 import { Insteon } from "../data/insteon";
 import {
   InsteonScene,
@@ -55,9 +55,9 @@ import {
   deleteInsteonScene,
   InsteonSceneLinkData,
 } from "../data/scene";
-import "../../homeassistant-frontend/src/components/ha-form/ha-form";
+import "@ha/components/ha-form/ha-form";
 import { showInsteonSetOnLevelDialog } from "./show-dialog-insteon-scene-set-on-level";
-import { navigate } from "../../homeassistant-frontend/src/common/navigate";
+import { navigate } from "@ha/common/navigate";
 
 interface DeviceEntitiesLookup {
   [deviceId: string]: string[];

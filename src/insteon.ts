@@ -4,9 +4,9 @@ import { Insteon } from "./data/insteon";
 import { addedToLovelace } from "./tools/added-to-lovelace";
 import { InsteonLogger } from "./tools/insteon-logger";
 import { localize } from "./localize/localize";
-import { ProvideHassLitMixin } from "../homeassistant-frontend/src/mixins/provide-hass-lit-mixin";
-import { getConfigEntries } from "../homeassistant-frontend/src/data/config_entries";
-import { HomeAssistant } from "../homeassistant-frontend/src/types";
+import { ProvideHassLitMixin } from "@ha/mixins/provide-hass-lit-mixin";
+import { getConfigEntries } from "@ha/data/config_entries";
+import { HomeAssistant } from "@ha/types";
 
 export class insteonElement extends ProvideHassLitMixin(LitElement) {
   @property({ attribute: false }) public hass!: HomeAssistant;

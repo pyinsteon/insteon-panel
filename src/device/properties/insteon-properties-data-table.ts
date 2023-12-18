@@ -1,18 +1,18 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
 import { customElement, property, query } from "lit/decorators";
 import memoizeOne from "memoize-one";
-import "../../../homeassistant-frontend/src/components/ha-circular-progress";
+import "@ha/components/ha-circular-progress";
 
-import "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
+import "@ha/components/data-table/ha-data-table";
 import type {
   HaDataTable,
   DataTableColumnContainer,
   DataTableRowData,
-} from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
+} from "@ha/components/data-table/ha-data-table";
 import type { InsteonProperty } from "../../data/insteon";
-import type { HomeAssistant } from "../../../homeassistant-frontend/src/types";
-import { computeRTLDirection } from "../../../homeassistant-frontend/src/common/util/compute_rtl";
-import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
+import type { HomeAssistant } from "@ha/types";
+import { computeRTLDirection } from "@ha/common/util/compute_rtl";
+import type { HaFormSchema } from "@ha/components/ha-form/types";
 import { Insteon } from "../../data/insteon";
 
 export interface RecordRowData {

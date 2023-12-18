@@ -1,8 +1,8 @@
 // Compat needs to be first import
-import "../homeassistant-frontend/src/resources/compatibility";
+import "@ha/resources/compatibility";
 import { setCancelSyntheticClickEvents } from "@polymer/polymer/lib/utils/settings";
-import "../homeassistant-frontend/src/resources/roboto";
-import "../homeassistant-frontend/src/resources/safari-14-attachshadow-patch";
+import "@ha/resources/roboto";
+import "@ha/resources/safari-14-attachshadow-patch";
 import "./main";
 
 setCancelSyntheticClickEvents(false);

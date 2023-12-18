@@ -14,8 +14,8 @@ import { classMap } from "lit/directives/class-map";
 import {
   HomeAssistant,
   Route,
-} from "../../../homeassistant-frontend/src/types";
-import "../../../homeassistant-frontend/src/components/ha-icon-button";
+} from "@ha/types";
+import "@ha/components/ha-icon-button";
 import "./insteon-properties-data-table";
 import { Insteon, InsteonDevice } from "../../data/insteon";
 import {
@@ -28,18 +28,18 @@ import {
   resetProperties,
   removeInsteonDevice,
 } from "../../data/device";
-import { HASSDomEvent } from "../../../homeassistant-frontend/src/common/dom/fire_event";
+import { HASSDomEvent } from "@ha/common/dom/fire_event";
 import { showInsteonPropertyDialog } from "./show-dialog-insteon-property";
 import {
   showConfirmationDialog,
   showAlertDialog,
-} from "../../../homeassistant-frontend/src/dialogs/generic/show-dialog-box";
-import type { HaFormSchema } from "../../../homeassistant-frontend/src/components/ha-form/types";
-import { RowClickedEvent } from "../../../homeassistant-frontend/src/components/data-table/ha-data-table";
-import "../../../homeassistant-frontend/src/layouts/hass-tabs-subpage";
+} from "@ha/dialogs/generic/show-dialog-box";
+import type { HaFormSchema } from "@ha/components/ha-form/types";
+import { RowClickedEvent } from "@ha/components/data-table/ha-data-table";
+import "@ha/layouts/hass-tabs-subpage";
 import { insteonDeviceTabs } from "../insteon-device-router";
-import { navigate } from "../../../homeassistant-frontend/src/common/navigate";
-import "../../../homeassistant-frontend/src/components/ha-button-menu";
+import { navigate } from "@ha/common/navigate";
+import "@ha/components/ha-button-menu";
 import { haStyle } from "@ha/resources/styles";
 
 @customElement("insteon-device-properties-page")
