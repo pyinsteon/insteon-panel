@@ -4,10 +4,7 @@ const env = require("./env.cjs");
 const paths = require("./paths.cjs");
 
 // Files from NPM Packages that should not be imported
-module.exports.ignorePackages = ({ latestBuild }) => [
-  // Part of yaml.js and only used for !!js functions that we don't use
-  require.resolve("esprima"),
-];
+module.exports.ignorePackages = () => [];
 
 // Files from NPM packages that we should replace with empty file
 module.exports.emptyPackages = ({ latestBuild, isHassioBuild }) =>
@@ -29,8 +26,6 @@ module.exports.emptyPackages = ({ latestBuild, isHassioBuild }) =>
           "homeassistant-frontend/src/resources/compatibility.ts"
         )
       ),
-    // This polyfill is loaded in workers to support ES5, filter it out.
-    latestBuild && require.resolve("proxy-polyfill/src/index.js"),
     // Icons in supervisor conflict with icons in HA so we don't load.
     isHassioBuild &&
       require.resolve(
@@ -70,6 +65,18 @@ module.exports.definedVars = ({ isProdBuild, latestBuild, defineOverlay }) => ({
   ...defineOverlay,
 });
 
+module.exports.htmlMinifierOptions = {
+  caseSensitive: true,
+  collapseWhitespace: true,
+  conservativeCollapse: true,
+  decodeEntities: true,
+  removeComments: true,
+  removeRedundantAttributes: true,
+  minifyCSS: {
+    compatibility: "*,-properties.zeroUnits",
+  },
+};
+
 module.exports.terserOptions = ({ latestBuild, isTestBuild }) => ({
   safari10: !latestBuild,
   ecma: latestBuild ? 2015 : 5,
@@ -77,7 +84,7 @@ module.exports.terserOptions = ({ latestBuild, isTestBuild }) => ({
   sourceMap: !isTestBuild,
 });
 
-module.exports.babelOptions = ({ latestBuild }) => ({
+module.exports.babelOptions = ({isProdBuild, latestBuild }) => ({
   babelrc: false,
   compact: false,
   assumptions: {
@@ -86,15 +93,14 @@ module.exports.babelOptions = ({ latestBuild }) => ({
     setSpreadProperties: true,
   },
   browserslistEnv: latestBuild ? "modern" : "legacy",
-  // Must be unambiguous because some dependencies are CommonJS only
-  sourceType: "unambiguous",
   presets: [
     [
       "@babel/preset-env",
       {
-        useBuiltIns: latestBuild ? false : "entry",
-        corejs: latestBuild ? false : { version: "3.30", proposals: true },
+        useBuiltIns: latestBuild ? false : "usage",
+        corejs: latestBuild ? false : "3.33",
         bugfixes: true,
+        shippedProposals: true,
       },
     ],
     "@babel/preset-typescript",
@@ -110,6 +116,35 @@ module.exports.babelOptions = ({ latestBuild }) => ({
         ignoreModuleNotFound: true,
       },
     ],
+    [
+      path.resolve(
+        paths.polymer_dir,
+        "build-scripts/babel-plugins/custom-polyfill-plugin.js"
+      ),
+      { method: "usage-global" },
+    ],
+    // Minify template literals for production
+    isProdBuild && [
+      "template-html-minifier",
+      {
+        modules: {
+          ...Object.fromEntries(
+            ["lit", "lit-element", "lit-html"].map((m) => [
+              m,
+              [
+                "html",
+                { name: "svg", encapsulation: "svg" },
+                { name: "css", encapsulation: "style" },
+              ],
+            ])
+          ),
+          "@polymer/polymer/lib/utils/html-tag.js": ["html"],
+        },
+        strictCSS: true,
+        htmlMinifier: module.exports.htmlMinifierOptions,
+        failOnError: false, // we can turn this off in case of false positives
+      },
+    ],
     // Import helpers and regenerator from runtime package
     [
       "@babel/plugin-transform-runtime",
@@ -123,7 +158,22 @@ module.exports.babelOptions = ({ latestBuild }) => ({
     /node_modules[\\/]core-js/,
     /node_modules[\\/]webpack[\\/]buildin/,
   ],
+  sourceMaps: false,
+  overrides: [
+    {
+      // Use unambiguous for dependencies so that require() is correctly injected into CommonJS files
+      // Exclusions are needed in some cases where ES modules have no static imports or exports, such as polyfills
+      sourceType: "unambiguous",
+      include: /\/node_modules\//,
+      exclude: [
+        "element-internals-polyfill",
+        "@?lit(?:-labs|-element|-html)?",
+      ].map((p) => new RegExp(`/node_modules/${p}/`)),
+    },
+  ],
 });
+
+const nameSuffix = (latestBuild) => (latestBuild ? "-modern" : "-legacy");
 
 const outputPath = (outputRoot, latestBuild) =>
   path.resolve(outputRoot, latestBuild ? "frontend_latest" : "frontend_es5");
@@ -134,13 +184,14 @@ const publicPath = (latestBuild, root = "") =>
 module.exports.config = {
   panel({ isProdBuild, latestBuild }) {
     return {
+      name: "insteon" + nameSuffix(latestBuild),
       entry: {
         entrypoint: path.resolve(paths.panel_dir, "src/entrypoint.ts"),
       },
       outputPath: outputPath(paths.panel_output_root, latestBuild),
       publicPath: publicPath(latestBuild, paths.panel_publicPath),
-      isProdBuild,
-      latestBuild,
+      isProdBuild: isProdBuild,
+      latestBuild: latestBuild,
       isHassioBuild: true,
     };
   },

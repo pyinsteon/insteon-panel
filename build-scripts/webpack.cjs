@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const webpack = require("webpack");
 const path = require("path");
+const { StatsWriterPlugin } = require("webpack-stats-plugin");
+const filterStats = require("@bundle-stats/plugin-webpack-filter").default;
 const TerserPlugin = require("terser-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const { WebpackManifestPlugin } = require("webpack-manifest-plugin");
@@ -40,10 +42,13 @@ const createWebpackConfig = ({
   const ignorePackages = bundle.ignorePackages({ latestBuild });
   return {
     mode: isProdBuild ? "production" : "development",
-    target: ["web", latestBuild ? "es2017" : "es5"],
-    devtool: isProdBuild
-      ? "cheap-module-source-map"
-      : "eval-cheap-module-source-map",
+    target: `browserslist:${latestBuild ? "modern" : "legacy"}`,
+    // For tests/CI, source maps are skipped to gain build speed
+    devtool: false
+      ? false
+      : isProdBuild
+        ? "nosources-source-map"
+        : "eval-cheap-module-source-map",
     entry,
     node: false,
     module: {
@@ -191,9 +196,9 @@ const createWebpackConfig = ({
   };
 };
 
-const createpanelConfig = ({ isProdBuild, latestBuild }) =>
+const createPanelConfig = ({ isProdBuild, latestBuild }) =>
   createWebpackConfig(bundle.config.panel({ isProdBuild, latestBuild }));
 
 module.exports = {
-  createpanelConfig: createpanelConfig,
+  createPanelConfig: createPanelConfig,
 };
