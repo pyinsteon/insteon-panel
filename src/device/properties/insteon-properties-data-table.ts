@@ -81,8 +81,8 @@ export class InsteonPropertiesDataTable extends LitElement {
             },
             modified: {
               title: this.insteon.localize("properties.fields.modified"),
-              template: (modified: boolean) => {
-                if (modified) {
+              template: (record) => {
+                if (record.modified) {
                   return html`${this.hass.localize("ui.common.yes")}`;
                 }
                 return html`${this.hass.localize("ui.common.no")}`;
@@ -109,8 +109,8 @@ export class InsteonPropertiesDataTable extends LitElement {
             },
             modified: {
               title: this.insteon.localize("properties.fields.modified"),
-              template: (modified: boolean) => {
-                if (modified) {
+              template: (record) => {
+                if (record.modified) {
                   return html`${this.hass.localize("ui.common.yes")}`;
                 }
                 return html`${this.hass.localize("ui.common.no")}`;

@@ -132,7 +132,7 @@ export class DeviceOverridesPanel extends LitElement {
           actions: {
             title: this.insteon.localize("devices.fields.actions"),
             type: "icon-button",
-            template: (_toggle, override) => html`
+            template: (override) => html`
               <ha-icon-button
                 .override=${override}
                 .hass=${this.hass}
@@ -159,7 +159,7 @@ export class DeviceOverridesPanel extends LitElement {
       const overrideDevices: DeviceRowData[] = overrides.map((override) => {
         const address = toAddressId(override.address);
         const device = devices.find(
-          (d) => (d.name ? toAddressId(device.name?.substring(device.name.length - 8)) : "") == address,
+          (d) => (d.name ? toAddressId(d.name?.substring(d.name.length - 8)) : "") == address,
         );
         const deviceRowdata: DeviceRowData = {
           id: device.id,

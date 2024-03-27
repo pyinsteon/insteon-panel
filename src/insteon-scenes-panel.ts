@@ -116,7 +116,7 @@ export class InsteonScenesPanel extends LitElement {
           actions: {
             title: this.insteon.localize("scenes.fields.actions"),
             type: "icon-button",
-            template: (_toggle, scene) => html`
+            template: (scene) => html`
               <ha-icon-button
                 .scene=${scene}
                 .hass=${this.hass}

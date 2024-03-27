@@ -1,5 +1,4 @@
 import { css, CSSResultGroup, html, LitElement, TemplateResult } from "lit";
-import memoizeOne from "memoize-one";
 import "@material/mwc-button";
 import { customElement, property, state } from "lit/decorators";
 import "@ha/components/ha-code-editor";
@@ -9,7 +8,7 @@ import { HomeAssistant } from "@ha/types";
 import { Insteon, InsteonX10Device} from "../data/insteon";
 import { X10DeviceSchema } from "data/config";
 import { addX10Device } from "data/device"
-import { HaFormData } from "@ha/components/ha-form"
+import { HaFormData } from "@ha/components/ha-form/types"
 import "@ha/components/ha-form/ha-form";
 import "@ha/components/ha-alert"
 import { insteonDeviceAddX10DialogParams } from "./show-dialog-device-add-x10";

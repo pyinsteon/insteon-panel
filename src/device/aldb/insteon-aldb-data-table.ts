@@ -44,8 +44,8 @@ export class InsteonALDBDataTable extends LitElement {
         ? {
             in_use: {
               title: this.insteon.localize("aldb.fields.in_use"),
-              template: (in_use: boolean) => {
-                if (in_use) {
+              template: (record) => {
+                if (record.in_use) {
                   return html`${this.hass.localize("ui.common.yes")}`;
                 }
                 return html`${this.hass.localize("ui.common.no")}`;
@@ -55,8 +55,8 @@ export class InsteonALDBDataTable extends LitElement {
             },
             dirty: {
               title: this.insteon.localize("aldb.fields.modified"),
-              template: (dirty: boolean) => {
-                if (dirty) {
+              template: (record) => {
+                if (record.dirty) {
                   return html`${this.hass.localize("ui.common.yes")}`;
                 }
                 return html`${this.hass.localize("ui.common.no")}`;
@@ -76,8 +76,8 @@ export class InsteonALDBDataTable extends LitElement {
             },
             is_controller: {
               title: this.insteon.localize("aldb.fields.mode"),
-              template: (is_controller: boolean) => {
-                if (is_controller) {
+              template: (record) => {
+                if (record.is_controller) {
                   return html`${this.insteon.localize("aldb.mode.controller")}`;
                 }
                 return html`${this.insteon.localize("aldb.mode.responder")}`;
@@ -89,11 +89,11 @@ export class InsteonALDBDataTable extends LitElement {
         : {
             mem_addr: {
               title: this.insteon.localize("aldb.fields.id"),
-              template: (mem_addr: number) => {
-                if (mem_addr < 0) {
+              template: (record) => {
+                if (record.mem_addr < 0) {
                   return html`New`;
                 }
-                return html`${mem_addr}`;
+                return html`${record.mem_addr}`;
               },
               sortable: true,
               direction: "desc",
@@ -101,8 +101,8 @@ export class InsteonALDBDataTable extends LitElement {
             },
             in_use: {
               title: this.insteon.localize("aldb.fields.in_use"),
-              template: (in_use: boolean) => {
-                if (in_use) {
+              template: (record) => {
+                if (record.in_use) {
                   return html`${this.hass.localize("ui.common.yes")}`;
                 }
                 return html`${this.hass.localize("ui.common.no")}`;
@@ -112,8 +112,8 @@ export class InsteonALDBDataTable extends LitElement {
             },
             dirty: {
               title: this.insteon.localize("aldb.fields.modified"),
-              template: (dirty: boolean) => {
-                if (dirty) {
+              template: (record) => {
+                if (record.dirty) {
                   return html`${this.hass.localize("ui.common.yes")}`;
                 }
                 return html`${this.hass.localize("ui.common.no")}`;
@@ -138,8 +138,8 @@ export class InsteonALDBDataTable extends LitElement {
             },
             is_controller: {
               title: this.insteon.localize("aldb.fields.mode"),
-              template: (is_controller: boolean) => {
-                if (is_controller) {
+              template: (record) => {
+                if (record.is_controller) {
                   return html`${this.insteon.localize("aldb.mode.controller")}`;
                 }
                 return html`${this.insteon.localize("aldb.mode.responder")}`;
