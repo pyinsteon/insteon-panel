@@ -136,7 +136,7 @@ export class DeviceOverridesPanel extends LitElement {
         const address = toAddressId(override.address);
         const device = devices.find(
           (d) =>
-            (d.name ? toAddressId(device.name?.substring(device.name.length - 8)) : "") === address,
+            (d.name ? toAddressId(d.name?.substring(d.name.length - 8)) : "") === address,
         );
         const deviceRowdata: DeviceRowData = {
           id: device.id,
