@@ -14,7 +14,7 @@ import "@ha/components/ha-button-menu";
 import "@ha/layouts/hass-tabs-subpage-data-table";
 import type { HomeAssistant } from "@ha/types";
 import type { DeviceRegistryEntry } from "@ha/data/device_registry";
-import { subscribeDeviceRegistry } from "@ha/data/device_registry";
+import { fetchDeviceRegistry, subscribeDeviceRegistry } from "@ha/data/device_registry";
 import type { Insteon } from "../data/insteon";
 import type { InsteonDeviceOverride } from "../data/config";
 import { fetchInsteonConfig, removeDeviceOverride } from "../data/config";
@@ -78,6 +78,18 @@ export class DeviceOverridesPanel extends LitElement {
     ];
   }
 
+  private async _refreshDevices(): Promise<void> {
+    if (!this.hass?.connection || !this.insteon) {
+      return;
+    }
+    const entries = await fetchDeviceRegistry(this.hass.connection);
+    this._devices = entries.filter(
+      (device) =>
+        device.config_entries &&
+        device.config_entries.includes(this.insteon.config_entry.entry_id),
+    );
+  }
+
   private _columns = memoizeOne(
     (): DataTableColumnContainer => ({
       name: {
@@ -138,6 +150,15 @@ export class DeviceOverridesPanel extends LitElement {
           (d) =>
             (d.name ? toAddressId(d.name?.substring(d.name.length - 8)) : "") === address,
         );
+        if (!device) {
+          return {
+            id: address,
+            name: override.address,
+            address: override.address,
+            description: `cat: 0x${override.cat}, subcat: 0x${override.subcat}`,
+            model: "Not yet discovered",
+          };
+        }
         const deviceRowdata: DeviceRowData = {
           id: device.id,
           name: device.name_by_user || device.name || "No device name",
@@ -198,12 +219,17 @@ export class DeviceOverridesPanel extends LitElement {
   }
 
   private async _addOverride() {
-    await showAddDeviceOverrideDialog(this, {
+    showAddDeviceOverrideDialog(this, {
       hass: this.hass,
       insteon: this.insteon,
       title: this.insteon.localize("utils.config_device_overrides.add_override"),
+      callback: async (success: boolean) => {
+        if (success) {
+          await this._getOverrides();
+          await this._refreshDevices();
+        }
+      },
     });
-    await this._getOverrides();
   }
 }
 

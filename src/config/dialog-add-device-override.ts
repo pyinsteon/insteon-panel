@@ -104,7 +104,7 @@ class DialogAddDeviceOverride extends LitElement {
       if (this._checkData(override)) {
         await addDeviceOverride(this.hass!, override);
         if (this._callback) {
-          this._callback(true);
+          await this._callback(true);
         }
         this._opened = false;
       }
