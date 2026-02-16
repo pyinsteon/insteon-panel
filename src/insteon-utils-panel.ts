@@ -25,7 +25,7 @@ import {
   modemIsPlm,
 } from "./data/config";
 import { showConfigModemDialog } from "./config/show-dialog-config-modem";
-import { showDeleteDeviceDialog } from "./config/show-dialog-delete-device";
+
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 import type { HaFormDataContainer } from "@ha/components/ha-form/types";
 
@@ -187,14 +187,6 @@ export class InsteonUtilsPanel extends LitElement {
     history.back();
   }
 
-  private async _showDeleteDeviceDialog() {
-    await showDeleteDeviceDialog(this, {
-      hass: this.hass,
-      insteon: this.insteon,
-      title: this.insteon.localize("device.actions.delete"),
-    });
-  }
-
   static get styles(): CSSResultGroup {
     return [
       haStyle,
@@ -335,7 +327,7 @@ export class InsteonUtilsPanel extends LitElement {
           this._broken_links = broken_links || [];
         });
         fetchUnknownDevices(this.hass).then((unknown_devices) => {
-          this._unknown_devices = unknown_devices || [];
+          this._unknown_devices = (unknown_devices || []).map((addr) => ({ address: addr }));
         });
       }
     }

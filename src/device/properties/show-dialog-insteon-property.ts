@@ -1,12 +1,13 @@
 import { fireEvent } from "@ha/common/dom/fire_event";
-import type { Insteon, Property } from "../../data/insteon";
+import type { InsteonProperty } from "../../data/device";
+import type { Insteon } from "../../data/insteon";
 import type { HomeAssistant } from "@ha/types";
 import type { HaFormSchema } from "@ha/components/ha-form/types";
 
 export interface InsteonPropertyDialogParams {
   hass: HomeAssistant;
   insteon: Insteon;
-  record: Property;
+  record: InsteonProperty;
   schema: HaFormSchema[];
   title: string;
   callback: (name: string, value: any) => Promise<void>;

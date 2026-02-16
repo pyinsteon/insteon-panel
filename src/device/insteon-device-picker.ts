@@ -15,15 +15,16 @@ import { subscribeDeviceRegistry } from "@ha/data/device_registry";
 import type { EntityRegistryEntry } from "@ha/data/entity_registry";
 import { subscribeEntityRegistry } from "@ha/data/entity_registry";
 import { SubscribeMixin } from "@ha/mixins/subscribe-mixin";
-import type { PolymerChangedEvent } from "@ha/polymer-types";
 import type { HomeAssistant } from "@ha/types";
 import "@ha/components/ha-combo-box";
 import type { HaComboBox } from "@ha/components/ha-combo-box";
 import type { Insteon } from "../data/insteon";
 import { computeDomain } from "@ha/common/entity/compute_domain";
 
+type PolymerChangedEvent<T> = CustomEvent<{ value: T }>;
+
 interface Device {
-  name: string;
+  name: string | undefined;
   area: string;
   id: string;
 }
@@ -128,7 +129,7 @@ export class InsteonDevicePicker extends SubscribeMixin(LitElement) {
         .filter((device) => deviceEntityLookup.hasOwnProperty(device.id))
         .map((device) => ({
           id: device.id,
-          name: computeDeviceName(device, this.hass, deviceEntityLookup[device.id]),
+          name: computeDeviceName(device),
           area:
             device.area_id && areaLookup[device.area_id]
               ? areaLookup[device.area_id].name

@@ -91,7 +91,7 @@ class DialogInsteonAddingDevice extends LitElement {
     this._devicesAdded.forEach((addr) => {
       let device_text = this.insteon?.localize("device.add.added");
       device_text = device_text?.replace("--address--", addr);
-      content = html`${content}<br />${device_text}`;
+      content = content + "<br />" + (device_text ?? "");
     });
     return content;
   }
@@ -133,7 +133,7 @@ class DialogInsteonAddingDevice extends LitElement {
       return;
     }
     this._subscribed = this.hass.connection.subscribeMessage(
-      (message) => this._handleMessage(message),
+      (message: deviceAddedMessage) => this._handleMessage(message),
       {
         type: "insteon/device/add",
         multiple: this._multiple,

@@ -40,5 +40,6 @@
       }
     ]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/tools/markdown"]
 }

@@ -341,11 +341,7 @@ export class InsteonSceneEditor extends KeyboardShortcutMixin(LitElement) {
         thisDevice = {
           address: address,
           device_id: haDevice.device.id,
-          name: computeDeviceName(
-            haDevice.device,
-            this.hass,
-            this._deviceEntityLookup[haDevice.device.id],
-          ),
+          name: computeDeviceName(haDevice.device),
           entities: theseEntities,
         };
       }

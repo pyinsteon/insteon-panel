@@ -1,4 +1,5 @@
 import { mdiPlus, mdiDotsVertical } from "@mdi/js";
+import type { ActionDetail } from "@material/mwc-list";
 import memoizeOne from "memoize-one";
 import "@ha/components/ha-icon-button";
 import "@ha/components/ha-spinner";

@@ -1,5 +1,5 @@
 import type { HomeAssistant } from "@ha/types";
-import type { HaFormSchema } from "@ha/components/ha-form/types";
+import type { HaFormSchema, HaFormSelectSchema } from "@ha/components/ha-form/types";
 import type { Insteon, InsteonDevice, InsteonX10Device } from "./insteon";
 import type { ConfigUpdateStatus } from "./config";
 
@@ -297,7 +297,7 @@ export const RAMP_RATE_SECONDS: { [seconds: string]: number } = {
   "0.1": 31,
 };
 
-export const rampRateSchema: HaFormSchema = {
+export const rampRateSchema: HaFormSelectSchema = {
   name: "ramp_rate",
   options: [
     ["31", "0.1"],

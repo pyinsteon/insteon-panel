@@ -9,7 +9,7 @@ import type { HomeAssistant } from "@ha/types";
 import type { Insteon, InsteonX10Device } from "../data/insteon";
 import { X10DeviceSchema } from "data/config";
 import { addX10Device } from "data/device";
-import type { HaFormData } from "@ha/components/ha-form/types";
+import type { HaFormDataContainer } from "@ha/components/ha-form/types";
 import "@ha/components/ha-form/ha-form";
 import "@ha/components/ha-alert";
 import type { insteonDeviceAddX10DialogParams } from "./show-dialog-device-add-x10";
@@ -74,8 +74,8 @@ class DialogInsteonDeviceAddX10 extends LitElement {
     `;
   }
 
-  private _haFormData(): HaFormData {
-    return { ...this._formData };
+  private _haFormData(): HaFormDataContainer {
+    return { ...this._formData } as HaFormDataContainer;
   }
 
   private _dismiss(): void {
