@@ -76,7 +76,7 @@ export class InsteonPropertiesDataTable extends LitElement {
             name: {
               title: this.insteon.localize("properties.fields.name"),
               sortable: true,
-              grows: true,
+              flex: 2,
             },
             modified: {
               title: this.insteon.localize("properties.fields.modified"),
@@ -87,24 +87,24 @@ export class InsteonPropertiesDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
             display_value: {
               title: this.insteon.localize("properties.fields.value"),
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
           }
         : {
             name: {
               title: this.insteon.localize("properties.fields.name"),
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
             description: {
               title: this.insteon.localize("properties.fields.description"),
               sortable: true,
-              grows: true,
+              flex: 2,
             },
             modified: {
               title: this.insteon.localize("properties.fields.modified"),
@@ -115,12 +115,12 @@ export class InsteonPropertiesDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
             display_value: {
               title: this.insteon.localize("properties.fields.value"),
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
           },
   );
