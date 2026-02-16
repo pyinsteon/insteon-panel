@@ -54,6 +54,7 @@ export default tseslint.config(
         ecmaFeatures: {
           modules: true,
         },
+        tsconfigRootDir: _dirname,
       },
     },
 
