@@ -7,7 +7,9 @@ gulp.task("lint-types", (done) => {
   try {
     output = execSync("tsc --pretty false --project tsconfig.json", { encoding: "utf-8" });
   } catch (err) {
-    output = err.stdout || "";
+    const stdout = err && err.stdout != null ? String(err.stdout) : "";
+    const stderr = err && err.stderr != null ? String(err.stderr) : "";
+    output = `${stdout}\n${stderr}`.trim();
   }
   const srcErrors = output.split("\n").filter((line) => line.startsWith("src/"));
   if (srcErrors.length > 0) {
