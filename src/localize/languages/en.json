@@ -104,7 +104,7 @@
       },
       "actions": {
         "target_db_not_loaded": "Load All-Link Database",
-        "missing_responder": "Delete exiting record",
+        "missing_responder": "Delete existing record",
         "missing_controller": "Create missing record"
       },
       "status": {
@@ -149,7 +149,7 @@
       "scene_write": "The scene did not save to one or more devices correctly.",
       "scene_device_no_entities": "There are one or more devices without any entities selected. Please select an entity or remove the device from the scene.",
       "device_not_found": "An Insteon device was not found.",
-      "connect_error": "Could not connect to the modem. Pleaes check the configuration.",
+      "connect_error": "Could not connect to the modem. Please check the configuration.",
       "save_config_error": "An unknown error occured saving the configuration. Please retry, and if this issue occures again restart Home Assistant."
     },
     "warn": {
@@ -270,7 +270,7 @@
     },
     "form_options": {
       "on_off_switch_main": "Main switch",
-      "dimmable_light_main": "Main dimmery switch",
+      "dimmable_light_main": "Main dimmer switch",
       "on_off_switch_a": "Button A",
       "on_off_switch_b": "Button B",
       "on_off_switch_c": "Button C",
