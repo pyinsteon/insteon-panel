@@ -85,8 +85,7 @@ export class DeviceOverridesPanel extends LitElement {
     const entries = await fetchDeviceRegistry(this.hass.connection);
     this._devices = entries.filter(
       (device) =>
-        device.config_entries &&
-        device.config_entries.includes(this.insteon.config_entry.entry_id),
+        device.config_entries && device.config_entries.includes(this.insteon.config_entry.entry_id),
     );
   }
 
@@ -147,8 +146,7 @@ export class DeviceOverridesPanel extends LitElement {
       const overrideDevices: DeviceRowData[] = overrides.map((override) => {
         const address = toAddressId(override.address);
         const device = devices.find(
-          (d) =>
-            (d.name ? toAddressId(d.name?.substring(d.name.length - 8)) : "") === address,
+          (d) => (d.name ? toAddressId(d.name?.substring(d.name.length - 8)) : "") === address,
         );
         if (!device) {
           return {
