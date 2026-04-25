@@ -1,0 +1,2 @@
+# Default: auto-detect text files and normalize to LF in repo
+* text=auto
