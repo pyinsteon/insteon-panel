@@ -1,2 +1,2 @@
-# Default: auto-detect text files and normalize to LF in repo
-* text=auto
+# Force LF for all text files. Needed for Docker for Windows to work correctly.
+* text eol=lf
