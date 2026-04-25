@@ -4,7 +4,7 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
-  "postCreateCommand": "./homeassistant-frontend/.devcontainer/post_create.sh",
+  "postCreateCommand": "git submodule update --init && ./homeassistant-frontend/.devcontainer/post_create.sh",
   "postStartCommand": "script/bootstrap",
   "containerEnv": {
     "DEV_CONTAINER": "1",
