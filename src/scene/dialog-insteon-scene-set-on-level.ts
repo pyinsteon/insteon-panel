@@ -50,7 +50,7 @@ class DialogInsteonSetOnLevel extends LitElement {
     this._callback = params.callback;
     this._title = params.title;
     this._opened = true;
-    this._value = params.value;
+    this._value = this._convertToSliderValue(params.value);
     this._ramp_rate = params.ramp_rate;
     this._address = params.address;
     this._group = params.group;
@@ -71,6 +71,8 @@ class DialogInsteonSetOnLevel extends LitElement {
     if (!this._opened) {
       return html``;
     }
+
+    const formatter = new Intl.NumberFormat("en-US", { style: "percent" });
     return html`
       <ha-dialog
         open
@@ -83,11 +85,14 @@ class DialogInsteonSetOnLevel extends LitElement {
             ignore-bar-touch
             .value=${this._value}
             .min=${0}
-            .max=${255}
+            .max=${1}
+            .step=${0.01}
             .disabled=${false}
+            .label=${this.insteon?.localize("scenes.scene.devices.on_level")}
+            .valueFormatter=${formatter.format}
             @change=${this._valueChanged}
           ></ha-slider>
-
+          <br />
           <ha-selector-select
             .hass=${this.hass}
             .value=${"" + this._ramp_rate}
@@ -97,14 +102,12 @@ class DialogInsteonSetOnLevel extends LitElement {
             @value-changed=${this._rampRateChanged}
           ></ha-selector-select>
         </div>
-        <div class="buttons">
-          <ha-button @click=${this._dismiss} slot="secondaryAction">
-            ${this.insteon!.localize("common.cancel")}
-          </ha-button>
-          <ha-button @click=${this._submit} slot="primaryAction">
-            ${this.insteon!.localize("common.ok")}
-          </ha-button>
-        </div>
+        <ha-button @click=${this._dismiss} slot="primaryAction" appearance="plain">
+          ${this.insteon!.localize("common.cancel")}
+        </ha-button>
+        <ha-button @click=${this._submit} slot="primaryAction">
+          ${this.insteon!.localize("common.ok")}
+        </ha-button>
       </ha-dialog>
     `;
   }
@@ -117,7 +120,12 @@ class DialogInsteonSetOnLevel extends LitElement {
     // eslint-disable-next-line no-console
     console.info("Should be calling callback");
     this._close();
-    await this._callback!(this._address, this._group, this._value, this._ramp_rate);
+    await this._callback!(
+      this._address,
+      this._group,
+      this._convertFromSliderValue(this._value),
+      this._ramp_rate,
+    );
   }
 
   private _close(): void {
@@ -130,6 +138,15 @@ class DialogInsteonSetOnLevel extends LitElement {
 
   private _rampRateChanged(ev: CustomEvent) {
     this._ramp_rate = +ev.detail?.value;
+  }
+
+  private _convertToSliderValue(value: number): number {
+    const converted = value / 255;
+    return Number.parseFloat(converted.toFixed(2));
+  }
+
+  private _convertFromSliderValue(value: number): number {
+    return Math.round(value * 255);
   }
 
   static get styles(): CSSResultGroup[] {

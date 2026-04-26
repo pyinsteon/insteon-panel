@@ -96,11 +96,9 @@ class DialogInsteonConfigModem extends LitElement {
               </div>
             `
           : html`
-        <div class="buttons">
           <ha-button @click=${this._submit} .disabled=${!this._hasChanged} slot="primaryAction">
             ${this.insteon!.localize("common.ok")}
           </ha-button>
-        </div>
       </ha-dialog>`}
       </ha-dialog>
     `;

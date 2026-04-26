@@ -74,11 +74,9 @@ class DialogAddDeviceOverride extends LitElement {
               </div>
             `
           : html`
-        <div class="buttons">
           <ha-button @click=${this._submit} slot="primaryAction">
             ${this.insteon!.localize("common.ok")}
           </ha-button>
-        </div>
       </ha-dialog>`}
       </ha-dialog>
     `;

@@ -62,14 +62,12 @@ class DialogInsteonDeviceAddX10 extends LitElement {
             .computeLabel=${this._computeLabel(this.insteon?.localize)}
           ></ha-form>
         </div>
-        <div class="buttons">
-          <ha-button @click=${this._dismiss} slot="secondaryAction">
-            ${this.insteon!.localize("common.cancel")}
-          </ha-button>
-          <ha-button @click=${this._submit} slot="primaryAction">
-            ${this.insteon!.localize("common.ok")}
-          </ha-button>
-        </div>
+        <ha-button @click=${this._dismiss} slot="primaryAction" appearance="plain">
+          ${this.insteon!.localize("common.cancel")}
+        </ha-button>
+        <ha-button @click=${this._submit} slot="primaryAction">
+          ${this.insteon!.localize("common.ok")}
+        </ha-button>
       </ha-dialog>
     `;
   }

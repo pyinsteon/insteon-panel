@@ -75,14 +75,12 @@ class DialogInsteonProperty extends LitElement {
             .error=${this._errors}
           ></ha-form>
         </div>
-        <div class="buttons">
-          <ha-button appearance="plain" @click=${this._dismiss} slot="secondaryAction">
-            ${this.hass.localize("ui.common.cancel")}
-          </ha-button>
-          <ha-button appearance="plain" @click=${this._submit} slot="primaryAction">
-            ${this.hass.localize("ui.common.ok")}
-          </ha-button>
-        </div>
+        <ha-button @click=${this._dismiss} slot="primaryAction" appearance="plain">
+          ${this.hass.localize("ui.common.cancel")}
+        </ha-button>
+        <ha-button @click=${this._submit} slot="primaryAction">
+          ${this.hass.localize("ui.common.ok")}
+        </ha-button>
       </ha-dialog>
     `;
   }

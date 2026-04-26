@@ -1,5 +1,5 @@
 import type { CSSResultGroup, TemplateResult } from "lit";
-import { css, html, LitElement } from "lit";
+import { html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators";
 import "@ha/components/ha-code-editor";
 import { createCloseHeading } from "@ha/components/ha-dialog";
@@ -70,14 +70,12 @@ class DialogInsteonAddDevice extends LitElement {
             .computeLabel=${this._computeLabel(this.insteon?.localize)}
           ></ha-form>
         </div>
-        <div class="buttons">
-          <ha-button @click=${this._dismiss} slot="secondaryAction">
-            ${this.insteon!.localize("common.cancel")}
-          </ha-button>
-          <ha-button @click=${this._submit} slot="primaryAction">
-            ${this.insteon!.localize("common.ok")}
-          </ha-button>
-        </div>
+        <ha-button @click=${this._dismiss} slot="primaryAction" appearance="plain">
+          ${this.insteon!.localize("common.cancel")}
+        </ha-button>
+        <ha-button @click=${this._submit} slot="primaryAction">
+          ${this.insteon!.localize("common.ok")}
+        </ha-button>
       </ha-dialog>
     `;
   }
@@ -122,20 +120,7 @@ class DialogInsteonAddDevice extends LitElement {
   }
 
   static get styles(): CSSResultGroup[] {
-    return [
-      haStyleDialog,
-      css`
-        table {
-          width: 100%;
-        }
-        ha-combo-box {
-          width: 20px;
-        }
-        .title {
-          width: 200px;
-        }
-      `,
-    ];
+    return [haStyleDialog];
   }
 }
 
