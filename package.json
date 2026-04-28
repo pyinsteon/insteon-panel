@@ -1,6 +1,6 @@
 {
   "name": "insteon-frontend",
-  "version": "0.0.1",
+  "version": "0.6.2",
   "description": "Home Assistant custom panel for the Insteon integration",
   "source": "src/entrypoint.ts",
   "main": "build/entrypoint.js",
