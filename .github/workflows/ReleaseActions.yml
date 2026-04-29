@@ -11,6 +11,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     name: Deploy to PyPi
+    permissions:
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -34,16 +36,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install build twine
+          python -m pip install build
           ./script/bootstrap
 
-      - name: Build
+      - name: Build frontend
         run: yarn build
 
+      - name: Build Python distribution
+        run: python -m build
+
       - name: Publish to PyPi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          python -m build
-          twine upload dist/*
+        uses: pypa/gh-action-pypi-publish@release/v1
