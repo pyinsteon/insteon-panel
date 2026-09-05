@@ -25,9 +25,10 @@ import {
   loadALDB,
   subscribeAldbLoading,
 } from "../data/device";
-import { buttonTitle, plateGroups, plateLayout } from "../device/plate-layout";
+import { buttonTitle, plateLayout } from "../device/plate-layout";
 import { insteonAddress, modemAddress, normalizeAddress } from "../device/registry-lookup";
 import { paneState } from "../device/pane-state";
+import { modemLinkNeeds } from "../device/reporting-groups";
 import { hasModemLinkGaps, modemLinkGaps } from "./modem-links";
 
 interface ModemLinkRow extends DataTableRowData {
@@ -107,8 +108,8 @@ export class ModemLinksPanel extends LitElement {
         battery: false,
       };
     }
-    const groups = this._groups(device);
-    if (groups.length === 0 || this._modem === undefined) {
+    const needs = modemLinkNeeds(device);
+    if (needs.controllers.length === 0 || this._modem === undefined) {
       return undefined;
     }
     const name = entry.name_by_user || entry.name || device.name;
@@ -123,7 +124,7 @@ export class ModemLinksPanel extends LitElement {
         battery: device.is_battery,
       };
     }
-    const gaps = modemLinkGaps(records, groups, this._modem);
+    const gaps = modemLinkGaps(records, needs, this._modem);
     if (!hasModemLinkGaps(gaps)) {
       return undefined;
     }
@@ -149,16 +150,6 @@ export class ModemLinksPanel extends LitElement {
       problem: problems.join(". "),
       battery: device.is_battery,
     };
-  }
-
-  private _groups(device: InsteonDevice): number[] {
-    const layout = plateLayout(device.cat, device.subcat);
-    if (layout !== "none") {
-      return plateGroups(layout);
-    }
-    return Object.keys(device.buttons || {})
-      .map(Number)
-      .sort((a, b) => a - b);
   }
 
   private async _refreshRow(id: string) {

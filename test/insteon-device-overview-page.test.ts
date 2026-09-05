@@ -504,6 +504,24 @@ describe("insteon-device-overview-page", () => {
     expect(t).toContain("Outlet");
     expect(t).toContain("Not written yet");
   });
+
+  it("does not ask an I/O Linc sensor for a modem link it never sends", async () => {
+    const ioLinc = {
+      ...kp014,
+      cat: 0x07,
+      subcat: 0x00,
+      buttons: { 1: "relay", 2: "open_close_sensor" },
+    };
+    const el = await mount(
+      makeHass(defaults({}, ioLinc, [rec({ is_controller: true, group: 1 })])),
+    );
+    const tiles = [...el.shadowRoot!.querySelectorAll(".tile")];
+    (tiles[1] as HTMLElement).click();
+    await settle(el);
+    const t = text(el);
+    expect(t).not.toContain("is not notified");
+    expect(t).not.toContain("no control link");
+  });
 });
 
 describe("load caption", () => {

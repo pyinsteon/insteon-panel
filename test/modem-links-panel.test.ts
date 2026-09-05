@@ -260,6 +260,34 @@ describe("modem-links-panel", () => {
     expect(row.problem).toBe("Not reported to Home Assistant: Paddle");
   });
 
+  it("leaves a correctly linked I/O Linc off the list", async () => {
+    entries.push({
+      id: "dev-6",
+      identifiers: [["insteon", "1A.2B.3C"]],
+      model: "2450 (0x07, 0x00)",
+      via_device_id: "modem-1",
+      name: "Garage Door",
+      name_by_user: null,
+      config_entries: ["entry-1"],
+    });
+    devicesById["dev-6"] = {
+      name: "Garage Door",
+      address: "1A.2B.3C",
+      is_battery: false,
+      aldb_status: "loaded",
+      cat: 7,
+      subcat: 0,
+      buttons: { 1: "relay", 2: "open_close_sensor" },
+    };
+    recordsByAddress["1A.2B.3C"] = [rec({ is_controller: true, group: 1 })];
+    try {
+      const el = await mount();
+      expect(el._rows.some((row: any) => row.address === "1A.2B.3C")).toBe(false);
+    } finally {
+      entries.pop();
+    }
+  });
+
   it("skips the modem, extenders and devices from other config entries", async () => {
     const el = await mount();
     const types = el.hass.callWS.mock.calls.map((call: any[]) => call[0]);

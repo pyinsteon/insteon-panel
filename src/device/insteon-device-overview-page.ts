@@ -52,6 +52,7 @@ import {
   MODEM_CAT,
   modemAddress,
 } from "./registry-lookup";
+import { modemLinkNeeds, stateGroups } from "./reporting-groups";
 import { nextGroup } from "./roving";
 import { confirmDeleteDevice } from "./delete-device";
 
@@ -140,7 +141,7 @@ class InsteonDeviceOverviewPage extends LitElement {
       this._aldbLoading = true;
       this._watch();
     }
-    this._selectedGroup = this._groups(device)[0];
+    this._selectedGroup = stateGroups(device)[0];
     this._resolveLoadGroup(device, token);
     this._fetchScenes(token);
     await this._fetchRecords(token);
@@ -211,18 +212,8 @@ class InsteonDeviceOverviewPage extends LitElement {
     }
   }
 
-  private _groups(device: InsteonDevice): number[] {
-    const layout = plateLayout(device.cat, device.subcat);
-    if (layout !== "none") {
-      return plateGroups(layout);
-    }
-    return Object.keys(device.buttons || {})
-      .map(Number)
-      .sort((a, b) => a - b);
-  }
-
   private _cardKind(device: InsteonDevice): CardKind {
-    const groups = this._groups(device);
+    const groups = stateGroups(device);
     if (groups.length === 0) {
       return "none";
     }
@@ -508,7 +499,7 @@ class InsteonDeviceOverviewPage extends LitElement {
   }
 
   private _renderTiles(device: InsteonDevice): TemplateResult {
-    const groups = this._groups(device);
+    const groups = stateGroups(device);
     const buttons = device.buttons || {};
     const focus =
       this._selectedGroup !== undefined && groups.includes(this._selectedGroup)
@@ -650,13 +641,18 @@ class InsteonDeviceOverviewPage extends LitElement {
     }
     const records = this._aldb!;
     const modem = this._modem();
-    const links = this._attributed(records, this._groups(device), modem, this._loadGroup);
+    const links = this._attributed(records, stateGroups(device), modem, this._loadGroup);
     const own = links.byButton.get(group) ?? { controls: [], controlledBy: [] };
     const { localize } = this.insteon;
     const loaded = this._paneState(device) === "loaded";
+    const needs = modemLinkNeeds(device);
     return html`
       ${pending ?? nothing} ${this._renderPending(records)}
-      ${loaded && modem && device.cat !== MODEM_CAT && !hasModemResponderLink(records, modem)
+      ${loaded &&
+      modem &&
+      device.cat !== MODEM_CAT &&
+      needs.responder &&
+      !hasModemResponderLink(records, modem)
         ? html`
             <ha-alert alert-type="warning">
               ${localize("device.overview.pane.ha_no_control_link")}
@@ -666,7 +662,11 @@ class InsteonDeviceOverviewPage extends LitElement {
             </ha-alert>
           `
         : nothing}
-      ${loaded && modem && device.cat !== MODEM_CAT && !buttonNotifiesModem(records, modem, group)
+      ${loaded &&
+      modem &&
+      device.cat !== MODEM_CAT &&
+      needs.controllers.includes(group) &&
+      !buttonNotifiesModem(records, modem, group)
         ? html`
             <ha-alert alert-type="warning">
               ${localize("device.overview.pane.button_not_notified")}

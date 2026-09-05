@@ -1,5 +1,6 @@
 import type { ALDBRecord } from "../data/device";
 import { buttonNotifiesModem, hasModemResponderLink } from "../device/link-rows";
+import type { ModemLinkNeeds } from "../device/reporting-groups";
 
 export interface ModemLinkGaps {
   control: boolean;
@@ -8,11 +9,11 @@ export interface ModemLinkGaps {
 
 export const modemLinkGaps = (
   records: ALDBRecord[],
-  buttons: number[],
+  needs: ModemLinkNeeds,
   modem: string,
 ): ModemLinkGaps => ({
-  control: !hasModemResponderLink(records, modem),
-  unreported: buttons.filter((button) => !buttonNotifiesModem(records, modem, button)),
+  control: needs.responder && !hasModemResponderLink(records, modem),
+  unreported: needs.controllers.filter((button) => !buttonNotifiesModem(records, modem, button)),
 });
 
 export const hasModemLinkGaps = (gaps: ModemLinkGaps): boolean =>
