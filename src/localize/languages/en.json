@@ -331,6 +331,11 @@
   "properties": {
     "caption": "Properties",
     "no_data": "No properties are available for this device.",
+    "errors": {
+      "required": "Enter a value",
+      "integer": "Enter a whole number",
+      "range": "Enter a number from {min} to {max}"
+    },
     "actions": {
       "manage": "Insteon Properties",
       "change": "Change Property Value",

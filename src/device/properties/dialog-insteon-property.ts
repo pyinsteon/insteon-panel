@@ -106,10 +106,33 @@ class DialogInsteonProperty extends LitElement {
       value = this._radio_button_groups_to_value(this._formData);
     } else {
       value = this._formData[this._record!.name];
+      const problem = this._valueProblem(this._schema[0], value);
+      if (problem) {
+        this._errors = { base: "", [this._record.name]: problem };
+        return;
+      }
     }
 
     this._close();
     await this._callback!(this._record.name, value);
+  }
+
+  private _valueProblem(schema: HaFormSchema, value: unknown): string | undefined {
+    const range = propertyRange(schema);
+    if (!range) {
+      return undefined;
+    }
+    const { localize } = this.insteon;
+    if (value === undefined || value === null || value === "") {
+      return localize("properties.errors.required");
+    }
+    if (typeof value !== "number" || !Number.isInteger(value)) {
+      return localize("properties.errors.integer");
+    }
+    if (value < range.min || value > range.max) {
+      return localize("properties.errors.range", range);
+    }
+    return undefined;
   }
 
   private _changeMade(): boolean {
@@ -126,6 +149,7 @@ class DialogInsteonProperty extends LitElement {
 
   private _valueChanged(ev: CustomEvent) {
     this._formData = ev.detail.value;
+    this._errors = { base: "" };
   }
 
   private _computeLabel = (schema: HaFormSchema): string =>
