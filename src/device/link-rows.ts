@@ -7,7 +7,6 @@ export interface LinkRow {
   target: string;
   name: string;
   group: number;
-  data3: number;
   isModem: boolean;
   isController: boolean;
   pending: boolean;
@@ -43,7 +42,6 @@ const toRow = (rec: ALDBRecord, modem?: string): LinkRow => ({
   target: rec.target,
   name: rec.target_name || rec.target,
   group: rec.group,
-  data3: rec.data3,
   isModem: isModemTarget(rec, modem),
   isController: rec.is_controller,
   pending: rec.dirty,

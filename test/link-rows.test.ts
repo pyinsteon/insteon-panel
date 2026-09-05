@@ -172,16 +172,14 @@ describe("rowDetail", () => {
     target: MODEM,
     name: "modem",
     group: 0,
-    data3: 0,
     isModem: true,
     isController: false,
     pending: false,
   };
-  const deviceRow = (group: number, data3: number): LinkRow => ({
+  const deviceRow = (group: number): LinkRow => ({
     target: "39.43.A8",
     name: "Keypad",
     group,
-    data3,
     isModem: false,
     isController: false,
     pending: false,
@@ -197,27 +195,27 @@ describe("rowDetail", () => {
   });
 
   it("names the controller's button under controlled by and stays quiet under controls", () => {
-    expect(rowDetail(deviceRow(1, 2), "controlled_by", "keypad_6")).toEqual({
+    expect(rowDetail(deviceRow(1), "controlled_by", "keypad_6")).toEqual({
       kind: "button",
       layout: "keypad_6",
       group: 1,
     });
-    expect(rowDetail(deviceRow(1, 2), "controls", "keypad_i3_4")).toEqual({ kind: "none" });
-    expect(rowDetail(deviceRow(1, 158), "controls", "keypad_8")).toEqual({ kind: "none" });
-    expect(rowDetail(deviceRow(1, 0), "controls", "paddle_bar")).toEqual({ kind: "none" });
+    expect(rowDetail(deviceRow(1), "controls", "keypad_i3_4")).toEqual({ kind: "none" });
+    expect(rowDetail(deviceRow(1), "controls", "keypad_8")).toEqual({ kind: "none" });
+    expect(rowDetail(deviceRow(1), "controls", "paddle_bar")).toEqual({ kind: "none" });
   });
 
   it("flags a controller group that is not a button on the controller", () => {
-    expect(rowDetail(deviceRow(0, 0), "controlled_by", "paddle_bar")).toEqual({
+    expect(rowDetail(deviceRow(0), "controlled_by", "paddle_bar")).toEqual({
       kind: "not_a_button",
       group: 0,
     });
   });
 
   it("says nothing for single button devices and unknown layouts", () => {
-    expect(rowDetail(deviceRow(1, 1), "controlled_by", "paddle_bar")).toEqual({ kind: "none" });
-    expect(rowDetail(deviceRow(1, 1), "controlled_by", undefined)).toEqual({ kind: "none" });
-    expect(rowDetail(deviceRow(1, 1), "controlled_by", "none")).toEqual({ kind: "none" });
+    expect(rowDetail(deviceRow(1), "controlled_by", "paddle_bar")).toEqual({ kind: "none" });
+    expect(rowDetail(deviceRow(1), "controlled_by", undefined)).toEqual({ kind: "none" });
+    expect(rowDetail(deviceRow(1), "controlled_by", "none")).toEqual({ kind: "none" });
   });
 });
 
