@@ -4,6 +4,7 @@ import {
   attributeRecords,
   buttonNotifiesModem,
   hasModemResponderLink,
+  hasPendingRecords,
   rowDetail,
 } from "../src/device/link-rows";
 import type { LinkRow } from "../src/device/link-rows";
@@ -147,6 +148,23 @@ describe("attributeRecords", () => {
     const links = attributeRecords([rec({ group: 0, data3: 158 })], kp014, MODEM, 3);
     expect(links.byButton.get(3)!.controlledBy.length).toBe(1);
   });
+
+  it("marks rows that have not been written yet", () => {
+    const links = attributeRecords(
+      [
+        rec({
+          is_controller: true,
+          group: 1,
+          target: "60.19.68",
+          target_name: "Outlet",
+          dirty: true,
+        }),
+      ],
+      [1],
+      MODEM,
+    );
+    expect(links.byButton.get(1)!.controls[0].pending).toBe(true);
+  });
 });
 
 describe("rowDetail", () => {
@@ -157,6 +175,7 @@ describe("rowDetail", () => {
     data3: 0,
     isModem: true,
     isController: false,
+    pending: false,
   };
   const deviceRow = (group: number, data3: number): LinkRow => ({
     target: "39.43.A8",
@@ -165,6 +184,7 @@ describe("rowDetail", () => {
     data3,
     isModem: false,
     isController: false,
+    pending: false,
   });
 
   it("explains modem rows", () => {
@@ -229,5 +249,17 @@ describe("modem link diagnostics", () => {
   it("detects a button with no controller link to the modem", () => {
     expect(buttonNotifiesModem([rec({ is_controller: true, group: 3 })], MODEM, 3)).toBe(true);
     expect(buttonNotifiesModem([rec({ is_controller: true, group: 3 })], MODEM, 1)).toBe(false);
+  });
+
+  it("ignores links that have not been written yet", () => {
+    expect(hasModemResponderLink([rec({ group: 0, dirty: true })], MODEM)).toBe(false);
+    expect(
+      buttonNotifiesModem([rec({ is_controller: true, group: 1, dirty: true })], MODEM, 1),
+    ).toBe(false);
+  });
+
+  it("knows when any record is still waiting to be written", () => {
+    expect(hasPendingRecords([rec({ group: 0 }), rec({ group: 1, dirty: true })])).toBe(true);
+    expect(hasPendingRecords([rec({ group: 0 })])).toBe(false);
   });
 });

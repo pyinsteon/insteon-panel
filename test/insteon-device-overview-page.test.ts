@@ -485,6 +485,25 @@ describe("insteon-device-overview-page", () => {
     await mount(hass);
     expect(hass.connection.subscribeMessage).not.toHaveBeenCalled();
   });
+
+  it("flags links that have not been written yet and marks their rows", async () => {
+    const staged = [
+      ...records,
+      rec({
+        is_controller: true,
+        group: 3,
+        target: "60.19.68",
+        target_name: "Outlet",
+        dirty: true,
+      }),
+    ];
+    const el = await mount(makeHass(defaults({}, kp014, staged)));
+    expect(text(el)).toContain("have not been written to the device yet");
+    await select(el, 3);
+    const t = text(el);
+    expect(t).toContain("Outlet");
+    expect(t).toContain("Not written yet");
+  });
 });
 
 describe("load caption", () => {

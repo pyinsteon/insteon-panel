@@ -250,6 +250,16 @@ describe("modem-links-panel", () => {
     expect(byAddress["05.DC.21"].problem).toBe("Link database not loaded");
   });
 
+  it("does not count a link that has not been written yet", async () => {
+    recordsByAddress["38.EC.93"] = [
+      rec({ group: 0 }),
+      rec({ is_controller: true, group: 1, dirty: true }),
+    ];
+    const el = await mount();
+    const row = el._rows.find((candidate: any) => candidate.address === "38.EC.93");
+    expect(row.problem).toBe("Not reported to Home Assistant: Paddle");
+  });
+
   it("skips the modem, extenders and devices from other config entries", async () => {
     const el = await mount();
     const types = el.hass.callWS.mock.calls.map((call: any[]) => call[0]);

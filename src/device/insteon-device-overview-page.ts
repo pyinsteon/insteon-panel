@@ -43,6 +43,7 @@ import {
   attributeRecords,
   buttonNotifiesModem,
   hasModemResponderLink,
+  hasPendingRecords,
   rowDetail,
 } from "./link-rows";
 import {
@@ -631,6 +632,17 @@ class InsteonDeviceOverviewPage extends LitElement {
     return undefined;
   }
 
+  private _renderPending(records: ALDBRecord[]): TemplateResult | typeof nothing {
+    if (!hasPendingRecords(records)) {
+      return nothing;
+    }
+    return html`
+      <ha-alert alert-type="warning">
+        ${this.insteon.localize("device.overview.pane.pending")}
+      </ha-alert>
+    `;
+  }
+
   private _renderLinks(device: InsteonDevice, group: number): TemplateResult {
     const pending = this._renderState(device);
     if (pending && this._paneState(device) !== "partial") {
@@ -643,7 +655,7 @@ class InsteonDeviceOverviewPage extends LitElement {
     const { localize } = this.insteon;
     const loaded = this._paneState(device) === "loaded";
     return html`
-      ${pending ?? nothing}
+      ${pending ?? nothing} ${this._renderPending(records)}
       ${loaded && modem && device.cat !== MODEM_CAT && !hasModemResponderLink(records, modem)
         ? html`
             <ha-alert alert-type="warning">
@@ -707,7 +719,12 @@ class InsteonDeviceOverviewPage extends LitElement {
     const name = row.isModem
       ? this.insteon.localize("device.overview.pane.home_assistant")
       : row.name;
-    const detailText = this._detailText(detail);
+    const detailText = [
+      row.pending ? this.insteon.localize("device.overview.pane.pending_row") : undefined,
+      this._detailText(detail),
+    ]
+      .filter((part) => part)
+      .join(" · ");
     return html`
       <ha-md-list-item
         type=${path ? "button" : "text"}
@@ -805,7 +822,7 @@ class InsteonDeviceOverviewPage extends LitElement {
     if (!records.some((rec) => rec.in_use)) {
       return html`
         <div class="pane">
-          ${pending ?? nothing}
+          ${pending ?? nothing} ${this._renderPending(records)}
           <div class="empty">${localize("device.overview.no_links_stored")}</div>
         </div>
       `;
@@ -813,7 +830,9 @@ class InsteonDeviceOverviewPage extends LitElement {
     const links = this._attributed(records, [1], this._modem(), this._loadGroup);
     const own = links.byButton.get(1)!;
     return html`
-      <div class="pane">${pending ?? nothing} ${this._renderSections(links, own)}</div>
+      <div class="pane">
+        ${pending ?? nothing} ${this._renderPending(records)} ${this._renderSections(links, own)}
+      </div>
     `;
   }
 
@@ -827,7 +846,7 @@ class InsteonDeviceOverviewPage extends LitElement {
     const scenes = [...this._scenes].sort((a, b) => a.group - b.group);
     return html`
       <div class="pane">
-        ${pending ?? nothing}
+        ${pending ?? nothing} ${this._renderPending(records)}
         <div class="section">
           <div class="label">${localize("device.overview.modem_scenes")}</div>
           ${scenes.length === 0

@@ -58,7 +58,6 @@ describe("insteon-device-header", () => {
     expect(
       (await mount({ aldb_status: "empty" })).shadowRoot!.querySelector(".chip")!.className,
     ).toContain("bad");
-    expect(text(await mount({ aldb_status: "dirty" }))).toContain("Link database: Unsaved changes");
   });
 
   it("adds the not identified and battery chips only when they apply", async () => {

@@ -14,7 +14,7 @@ export const paneState = ({ status, records, error, loading }: PaneStateInput): 
   if (loading || status === "loading" || records === undefined) {
     return "loading";
   }
-  if (status === "partial" || status === "dirty") {
+  if (status === "partial") {
     return "partial";
   }
   if (status === "loaded") {

@@ -21,9 +21,9 @@ describe("paneState", () => {
     expect(paneState({ status: undefined, records: [] })).toBe("not_loaded");
   });
 
-  it("is partial for partial and dirty", () => {
+  it("is partial only for partial", () => {
     expect(paneState({ status: "partial", records: [] })).toBe("partial");
-    expect(paneState({ status: "dirty", records: [] })).toBe("partial");
+    expect(paneState({ status: "dirty", records: [] })).toBe("not_loaded");
   });
 
   it("is loaded only for loaded with records present", () => {

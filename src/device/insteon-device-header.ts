@@ -10,7 +10,7 @@ const statusKind = (status: string): "ok" | "warn" | "bad" => {
   if (status === "loaded") {
     return "ok";
   }
-  if (status === "loading" || status === "partial" || status === "dirty") {
+  if (status === "loading" || status === "partial") {
     return "warn";
   }
   return "bad";

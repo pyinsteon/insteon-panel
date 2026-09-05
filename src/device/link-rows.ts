@@ -10,6 +10,7 @@ export interface LinkRow {
   data3: number;
   isModem: boolean;
   isController: boolean;
+  pending: boolean;
 }
 
 export interface ButtonLinks {
@@ -34,6 +35,11 @@ export type RowDetail =
 const isModemTarget = (rec: ALDBRecord, modem?: string): boolean =>
   modem !== undefined && normalizeAddress(rec.target) === normalizeAddress(modem);
 
+const isInstalled = (rec: ALDBRecord): boolean => rec.in_use && !rec.dirty;
+
+export const hasPendingRecords = (records: ALDBRecord[]): boolean =>
+  records.some((rec) => rec.dirty);
+
 const toRow = (rec: ALDBRecord, modem?: string): LinkRow => ({
   target: rec.target,
   name: rec.target_name || rec.target,
@@ -41,6 +47,7 @@ const toRow = (rec: ALDBRecord, modem?: string): LinkRow => ({
   data3: rec.data3,
   isModem: isModemTarget(rec, modem),
   isController: rec.is_controller,
+  pending: rec.dirty,
 });
 
 const responderButton = (
@@ -139,7 +146,7 @@ export const rowDetail = (
 };
 
 export const hasModemResponderLink = (records: ALDBRecord[], modem: string): boolean =>
-  records.some((rec) => rec.in_use && !rec.is_controller && isModemTarget(rec, modem));
+  records.some((rec) => isInstalled(rec) && !rec.is_controller && isModemTarget(rec, modem));
 
 export const buttonNotifiesModem = (
   records: ALDBRecord[],
@@ -147,5 +154,6 @@ export const buttonNotifiesModem = (
   button: number,
 ): boolean =>
   records.some(
-    (rec) => rec.in_use && rec.is_controller && rec.group === button && isModemTarget(rec, modem),
+    (rec) =>
+      isInstalled(rec) && rec.is_controller && rec.group === button && isModemTarget(rec, modem),
   );

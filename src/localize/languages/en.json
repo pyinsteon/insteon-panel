@@ -226,7 +226,9 @@
         "controls_row": "Controls {name}",
         "controlled_by_row": "Controlled by {name}",
         "ha_no_control_link": "Home Assistant has no control link to this device",
-        "button_not_notified": "Home Assistant is not notified when this button is used"
+        "button_not_notified": "Home Assistant is not notified when this button is used",
+        "pending": "Some of these links have not been written to the device yet. Write or undo them from the All-Link Database tab.",
+        "pending_row": "Not written yet"
       },
       "button": {
         "named": "Button {label}",
@@ -299,7 +301,6 @@
       "empty": "Not loaded",
       "failed": "Failed to load",
       "partial": "Partially loaded",
-      "dirty": "Unsaved changes",
       "undefined": "undefined"
     },
     "mode": {
