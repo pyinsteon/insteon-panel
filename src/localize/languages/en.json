@@ -220,7 +220,6 @@
         "scene": "Scene {group}",
         "scene_named": "Scene {group}: {name}",
         "not_a_button": "Group {group}, not a button",
-        "not_a_button_on_target": "Button {group} is not a button on that device",
         "other_links": "Other links ({count})",
         "other_links_hint": "These links are not tied to a button. The All-Link Database tab lists every record.",
         "controls_row": "Controls {name}",

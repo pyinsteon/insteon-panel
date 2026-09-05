@@ -764,8 +764,6 @@ class InsteonDeviceOverviewPage extends LitElement {
         return buttonTitle(detail.layout, detail.group, localize);
       case "not_a_button":
         return localize("device.overview.pane.not_a_button", { group: detail.group });
-      case "not_a_button_on_target":
-        return localize("device.overview.pane.not_a_button_on_target", { group: detail.group });
       default:
         return undefined;
     }

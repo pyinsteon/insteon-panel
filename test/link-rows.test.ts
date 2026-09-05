@@ -196,35 +196,21 @@ describe("rowDetail", () => {
     });
   });
 
-  it("names the other side's button when it has several", () => {
+  it("names the controller's button under controlled by and stays quiet under controls", () => {
     expect(rowDetail(deviceRow(1, 2), "controlled_by", "keypad_6")).toEqual({
       kind: "button",
       layout: "keypad_6",
       group: 1,
     });
-    expect(rowDetail(deviceRow(1, 2), "controls", "keypad_i3_4")).toEqual({
-      kind: "button",
-      layout: "keypad_i3_4",
-      group: 2,
-    });
-    expect(rowDetail(deviceRow(1, 0), "controls", "keypad_i3_4")).toEqual({
-      kind: "button",
-      layout: "keypad_i3_4",
-      group: 1,
-    });
+    expect(rowDetail(deviceRow(1, 2), "controls", "keypad_i3_4")).toEqual({ kind: "none" });
+    expect(rowDetail(deviceRow(1, 158), "controls", "keypad_8")).toEqual({ kind: "none" });
+    expect(rowDetail(deviceRow(1, 0), "controls", "paddle_bar")).toEqual({ kind: "none" });
   });
 
   it("flags a controller group that is not a button on the controller", () => {
     expect(rowDetail(deviceRow(0, 0), "controlled_by", "paddle_bar")).toEqual({
       kind: "not_a_button",
       group: 0,
-    });
-  });
-
-  it("flags a data3 value that is not a button on the target", () => {
-    expect(rowDetail(deviceRow(1, 9), "controls", "keypad_i3_4")).toEqual({
-      kind: "not_a_button_on_target",
-      group: 9,
     });
   });
 

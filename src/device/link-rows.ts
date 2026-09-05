@@ -29,7 +29,6 @@ export type RowDetail =
   | { kind: "scene"; group: number }
   | { kind: "button"; layout: PlateLayout; group: number }
   | { kind: "not_a_button"; group: number }
-  | { kind: "not_a_button_on_target"; group: number }
   | { kind: "none" };
 
 const isModemTarget = (rec: ALDBRecord, modem?: string): boolean =>
@@ -125,24 +124,20 @@ export const rowDetail = (
     }
     return row.group > 0 ? { kind: "scene", group: row.group } : { kind: "ha_controls" };
   }
-  if (!targetLayout) {
+  if (section === "controls" || !targetLayout) {
     return { kind: "none" };
   }
   const groups = plateGroups(targetLayout);
   if (groups.length === 0) {
     return { kind: "none" };
   }
-  const raw = section === "controls" ? row.data3 : row.group;
-  const group = section === "controls" && raw === 0 && groups.includes(1) ? 1 : raw;
-  if (!groups.includes(group)) {
-    return section === "controls"
-      ? { kind: "not_a_button_on_target", group }
-      : { kind: "not_a_button", group };
+  if (!groups.includes(row.group)) {
+    return { kind: "not_a_button", group: row.group };
   }
   if (groups.length < 2) {
     return { kind: "none" };
   }
-  return { kind: "button", layout: targetLayout, group };
+  return { kind: "button", layout: targetLayout, group: row.group };
 };
 
 export const hasModemResponderLink = (records: ALDBRecord[], modem: string): boolean =>
