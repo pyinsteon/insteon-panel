@@ -57,6 +57,8 @@ import { confirmDeleteDevice } from "./delete-device";
 type CardKind = "buttons" | "single" | "fallback" | "none";
 type Section = "controls" | "controlled_by";
 
+const WATCH_TIMEOUT = 1200000;
+
 @customElement("insteon-device-overview-page")
 class InsteonDeviceOverviewPage extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
@@ -86,6 +88,8 @@ class InsteonDeviceOverviewPage extends LitElement {
   @state() private _scenes: InsteonScene[] = [];
 
   private _unsubscribe?: Promise<() => Promise<void>>;
+
+  private _watchTimeout?: number;
 
   private _attributed = memoizeOne(
     (
@@ -131,6 +135,10 @@ class InsteonDeviceOverviewPage extends LitElement {
       return;
     }
     this._device = device;
+    if (device.aldb_status === "loading") {
+      this._aldbLoading = true;
+      this._watch();
+    }
     this._selectedGroup = this._groups(device)[0];
     this._resolveLoadGroup(device, token);
     this._fetchScenes(token);
@@ -241,13 +249,25 @@ class InsteonDeviceOverviewPage extends LitElement {
     this._unsubscribe = subscribeAldbLoading(this.hass, this._device.address, (message) =>
       this._onNotify(message),
     );
+    this._watchTimeout = window.setTimeout(() => this._giveUpWatching(), WATCH_TIMEOUT);
   }
 
   private _stopWatching() {
+    if (this._watchTimeout !== undefined) {
+      clearTimeout(this._watchTimeout);
+      this._watchTimeout = undefined;
+    }
     if (this._unsubscribe) {
       this._unsubscribe.then((unsub) => unsub()).catch(() => undefined);
       this._unsubscribe = undefined;
     }
+  }
+
+  private async _giveUpWatching() {
+    this._stopWatching();
+    this._aldbLoading = false;
+    await this._refreshDevice();
+    await this._fetchRecords();
   }
 
   private async _onNotify(message: AldbNotification) {

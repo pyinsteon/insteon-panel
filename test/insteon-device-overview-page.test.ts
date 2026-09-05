@@ -458,6 +458,33 @@ describe("insteon-device-overview-page", () => {
     expect(header.shadowRoot!.textContent).toContain("Second Device");
     expect(text(el)).not.toContain("is loading");
   });
+
+  it("watches a read that was already running and refreshes when it finishes", async () => {
+    let listener: ((message: { type: string; is_loading?: boolean }) => void) | undefined;
+    const unsub = vi.fn(async () => {});
+    let current: object = { ...kp014, aldb_status: "loading" };
+    const hass = makeHass(defaults({ "insteon/device/get": async () => current }));
+    hass.connection.subscribeMessage = vi.fn(async (callback: any) => {
+      listener = callback;
+      return unsub;
+    }) as any;
+    const el = await mount(hass);
+    expect(text(el)).toContain("is loading");
+    expect(hass.connection.subscribeMessage).toHaveBeenCalledTimes(1);
+    current = kp014;
+    listener!({ type: "status_changed", is_loading: false });
+    await settle(el);
+    expect(text(el)).not.toContain("is loading");
+    expect(text(el)).toContain("Controls");
+    expect(unsub).toHaveBeenCalled();
+    expect(el._watchTimeout).toBeUndefined();
+  });
+
+  it("does not subscribe when the database is already loaded", async () => {
+    const hass = makeHass(defaults());
+    await mount(hass);
+    expect(hass.connection.subscribeMessage).not.toHaveBeenCalled();
+  });
 });
 
 describe("load caption", () => {
