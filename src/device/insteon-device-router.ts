@@ -1,30 +1,10 @@
 import { customElement, property, state } from "lit/decorators";
-import { mdiNetwork, mdiFolderMultipleOutline, mdiInformationOutline } from "@mdi/js";
 import type { RouterOptions } from "@ha/layouts/hass-router-page";
 import { HassRouterPage } from "@ha/layouts/hass-router-page";
 import type { HomeAssistant, Route } from "@ha/types";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import type { Insteon } from "../data/insteon";
-
-export function get_insteon_devices_tabs(localize: (string: string) => string): PageNavigation[] {
-  return [
-    {
-      name: localize("device.overview.caption"),
-      path: `/insteon/device/overview/`,
-      iconPath: mdiInformationOutline,
-    },
-    {
-      name: localize("properties.caption"),
-      path: `/insteon/device/properties/`,
-      iconPath: mdiFolderMultipleOutline,
-    },
-    {
-      name: localize("aldb.caption"),
-      path: `/insteon/device/aldb/`,
-      iconPath: mdiNetwork,
-    },
-  ];
-}
+import { deviceTabs } from "./device-tabs";
 
 export var insteonDeviceTabs: PageNavigation[] | undefined = undefined;
 
@@ -65,22 +45,18 @@ class InsteonDeviceRouter extends HassRouterPage {
   };
 
   protected updatePageEl(el) {
-    // eslint-disable-next-line no-console
-    console.info("In device router updatePageEl");
     el.route = this.route;
     el.hass = this.hass;
     el.insteon = this.insteon;
     el.isWide = this.isWide;
     el.narrow = this.narrow;
     const tail = this.routeTail.path.split("/");
-    this.deviceId = tail[tail.length - 1];
-    if (!insteonDeviceTabs) {
-      insteonDeviceTabs = get_insteon_devices_tabs(this.insteon.localize);
+    const deviceId = tail[tail.length - 1];
+    if (!insteonDeviceTabs || deviceId !== this.deviceId) {
+      insteonDeviceTabs = deviceTabs(this.insteon.localize, deviceId);
     }
-    insteonDeviceTabs[0].path = "/insteon/device/overview/" + this.deviceId;
-    insteonDeviceTabs[1].path = "/insteon/device/properties/" + this.deviceId;
-    insteonDeviceTabs[2].path = "/insteon/device/aldb/" + this.deviceId;
-    el.deviceId = this.deviceId;
+    this.deviceId = deviceId;
+    el.deviceId = deviceId;
   }
 }
 

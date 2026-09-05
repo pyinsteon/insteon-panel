@@ -31,7 +31,6 @@ import {
   loadProperties,
   resetProperties,
 } from "../../data/device";
-// import { get_insteon_devices_tabs } from "../insteon-device-router";
 
 @customElement("insteon-device-properties-page")
 class InsteonDevicePropertiesPage extends LitElement {
