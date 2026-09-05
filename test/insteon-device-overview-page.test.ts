@@ -486,6 +486,42 @@ describe("insteon-device-overview-page", () => {
     expect(hass.connection.subscribeMessage).not.toHaveBeenCalled();
   });
 
+  it("catches a read that finished before the subscription was live", async () => {
+    const unsub = vi.fn(async () => {});
+    let calls = 0;
+    const hass = makeHass(
+      defaults({
+        "insteon/device/get": async () =>
+          calls++ === 0 ? { ...kp014, aldb_status: "loading" } : kp014,
+      }),
+    );
+    hass.connection.subscribeMessage = vi.fn(async () => unsub) as any;
+    const el = await mount(hass);
+    expect(hass.connection.subscribeMessage).toHaveBeenCalledTimes(1);
+    expect(unsub).toHaveBeenCalled();
+    expect(text(el)).not.toContain("is loading");
+    expect(text(el)).toContain("Controls");
+  });
+
+  it("re-arms the watch when the device still says loading and stops once it does not", async () => {
+    const unsub = vi.fn(async () => {});
+    let current: object = { ...kp014, aldb_status: "loading" };
+    const hass = makeHass(defaults({ "insteon/device/get": async () => current }));
+    hass.connection.subscribeMessage = vi.fn(async () => unsub) as any;
+    const el = await mount(hass);
+    expect(hass.connection.subscribeMessage).toHaveBeenCalledTimes(1);
+    await el._giveUpWatching();
+    await settle(el);
+    expect(hass.connection.subscribeMessage).toHaveBeenCalledTimes(2);
+    expect(text(el)).toContain("is loading");
+    current = kp014;
+    await el._giveUpWatching();
+    await settle(el);
+    expect(hass.connection.subscribeMessage).toHaveBeenCalledTimes(2);
+    expect(text(el)).not.toContain("is loading");
+    expect(el._watchTimeout).toBeUndefined();
+  });
+
   it("flags links that have not been written yet and marks their rows", async () => {
     const staged = [
       ...records,

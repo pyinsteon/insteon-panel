@@ -59,7 +59,7 @@ import { confirmDeleteDevice } from "./delete-device";
 type CardKind = "buttons" | "single" | "fallback" | "none";
 type Section = "controls" | "controlled_by";
 
-const WATCH_TIMEOUT = 1200000;
+const WATCH_TIMEOUT = 20 * 60 * 1000;
 
 @customElement("insteon-device-overview-page")
 class InsteonDeviceOverviewPage extends LitElement {
@@ -140,6 +140,7 @@ class InsteonDeviceOverviewPage extends LitElement {
     if (device.aldb_status === "loading") {
       this._aldbLoading = true;
       this._watch();
+      this._confirmStillLoading(token);
     }
     this._selectedGroup = stateGroups(device)[0];
     this._resolveLoadGroup(device, token);
@@ -257,9 +258,37 @@ class InsteonDeviceOverviewPage extends LitElement {
 
   private async _giveUpWatching() {
     this._stopWatching();
-    this._aldbLoading = false;
     await this._refreshDevice();
+    if (this._device?.aldb_status === "loading") {
+      this._watch();
+      return;
+    }
+    this._aldbLoading = false;
     await this._fetchRecords();
+  }
+
+  private async _confirmStillLoading(token?: string) {
+    const subscription = this._unsubscribe;
+    if (!subscription) {
+      return;
+    }
+    try {
+      await subscription;
+    } catch (_err) {
+      return;
+    }
+    if (this.deviceId !== token || this._unsubscribe !== subscription) {
+      return;
+    }
+    await this._refreshDevice();
+    if (this.deviceId !== token || this._unsubscribe !== subscription) {
+      return;
+    }
+    if (this._device?.aldb_status !== "loading") {
+      this._stopWatching();
+      this._aldbLoading = false;
+      await this._fetchRecords(token);
+    }
   }
 
   private async _onNotify(message: AldbNotification) {
@@ -635,9 +664,9 @@ class InsteonDeviceOverviewPage extends LitElement {
   }
 
   private _renderLinks(device: InsteonDevice, group: number): TemplateResult {
-    const pending = this._renderState(device);
-    if (pending && this._paneState(device) !== "partial") {
-      return pending;
+    const state = this._renderState(device);
+    if (state && this._paneState(device) !== "partial") {
+      return state;
     }
     const records = this._aldb!;
     const modem = this._modem();
@@ -647,7 +676,7 @@ class InsteonDeviceOverviewPage extends LitElement {
     const loaded = this._paneState(device) === "loaded";
     const needs = modemLinkNeeds(device);
     return html`
-      ${pending ?? nothing} ${this._renderPending(records)}
+      ${state ?? nothing} ${this._renderPending(records)}
       ${loaded &&
       modem &&
       device.cat !== MODEM_CAT &&
@@ -808,19 +837,19 @@ class InsteonDeviceOverviewPage extends LitElement {
   }
 
   private _renderNoButtons(device: InsteonDevice): TemplateResult {
-    const pending = this._renderState(device);
-    if (pending && this._paneState(device) !== "partial") {
-      return html`<div class="pane">${pending}</div>`;
+    const state = this._renderState(device);
+    if (state && this._paneState(device) !== "partial") {
+      return html`<div class="pane">${state}</div>`;
     }
     const records = this._aldb!;
     if (device.cat === MODEM_CAT) {
-      return this._renderModem(records, pending);
+      return this._renderModem(records, state);
     }
     const { localize } = this.insteon;
     if (!records.some((rec) => rec.in_use)) {
       return html`
         <div class="pane">
-          ${pending ?? nothing} ${this._renderPending(records)}
+          ${state ?? nothing} ${this._renderPending(records)}
           <div class="empty">${localize("device.overview.no_links_stored")}</div>
         </div>
       `;
@@ -829,12 +858,12 @@ class InsteonDeviceOverviewPage extends LitElement {
     const own = links.byButton.get(1)!;
     return html`
       <div class="pane">
-        ${pending ?? nothing} ${this._renderPending(records)} ${this._renderSections(links, own)}
+        ${state ?? nothing} ${this._renderPending(records)} ${this._renderSections(links, own)}
       </div>
     `;
   }
 
-  private _renderModem(records: ALDBRecord[], pending: TemplateResult | undefined): TemplateResult {
+  private _renderModem(records: ALDBRecord[], state: TemplateResult | undefined): TemplateResult {
     const { localize } = this.insteon;
     const controlled = new Set(
       records
@@ -844,7 +873,7 @@ class InsteonDeviceOverviewPage extends LitElement {
     const scenes = [...this._scenes].sort((a, b) => a.group - b.group);
     return html`
       <div class="pane">
-        ${pending ?? nothing} ${this._renderPending(records)}
+        ${state ?? nothing} ${this._renderPending(records)}
         <div class="section">
           <div class="label">${localize("device.overview.modem_scenes")}</div>
           ${scenes.length === 0
