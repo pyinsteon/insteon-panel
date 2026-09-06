@@ -1017,7 +1017,7 @@ class InsteonDeviceOverviewPage extends LitElement {
         ha-md-list {
           --md-list-container-color: transparent;
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
           gap: 6px;
           padding: 0;
         }
