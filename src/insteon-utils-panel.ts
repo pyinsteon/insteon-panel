@@ -9,7 +9,7 @@ import type { Insteon } from "./data/insteon";
 import { insteonMainTabs } from "./insteon-router";
 import "@ha/components/ha-fab";
 import "./insteon-utils-card";
-import { mdiWrench, mdiCog, mdiDevices } from "@mdi/js";
+import { mdiWrench, mdiCog, mdiDevices, mdiLinkOff } from "@mdi/js";
 import "@ha/components/ha-svg-icon";
 import type {
   InsteonModemConfig,
@@ -156,6 +156,13 @@ export class InsteonUtilsPanel extends LitElement {
             .action_url=${"/insteon/broken_links"}
           >
             <ha-svg-icon slot="icon" .path=${mdiDevices}></ha-svg-icon>
+          </insteon-utils-card>
+          <insteon-utils-card
+            .hass=${this.hass}
+            .title=${this.insteon.localize("utils.modem_links.caption")}
+            .action_url=${"/insteon/modem_links"}
+          >
+            <ha-svg-icon slot="icon" .path=${mdiLinkOff}></ha-svg-icon>
           </insteon-utils-card>
         </div>
       </hass-tabs-subpage>

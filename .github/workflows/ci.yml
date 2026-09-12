@@ -34,20 +34,20 @@ jobs:
       - name: Check for duplicate dependencies
         run: yarn dedupe --check
 
-  # test:
-  #   name: Test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Check out files from GitHub
-  #       uses: actions/checkout@v5
-  #       with:
-  #         submodules: recursive
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out files from GitHub
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
 
-  #     - name: Setup Node and Dependencies
-  #       uses: ./.github/actions/setup
+      - name: Setup Node and Dependencies
+        uses: ./.github/actions/setup
 
-  #     - name: Run tests
-  #       run: yarn test
+      - name: Run tests
+        run: yarn test
 
   # coverage:
   #   name: Coverage

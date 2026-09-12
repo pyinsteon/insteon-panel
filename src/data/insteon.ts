@@ -21,6 +21,13 @@ export interface InsteonDevice {
   address: string;
   is_battery: boolean;
   aldb_status: string;
+  cat?: number | null;
+  subcat?: number | null;
+  model?: string | null;
+  description?: string | null;
+  engine_version?: string;
+  firmware?: number | null;
+  buttons?: { [group: number]: string };
 }
 
 export enum X10HouseCode {

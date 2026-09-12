@@ -118,6 +118,22 @@
       "load_aldb_1": " will load in the background. If this is a battery operated device, you will need to trigger the device to wake up before the ALDB will load.",
       "remove_record": "The record will be removed from device "
     },
+    "modem_links": {
+      "caption": "Missing modem links",
+      "fields": {
+        "device": "Device",
+        "address": "Address",
+        "problem": "Problem"
+      },
+      "status": {
+        "control": "Home Assistant cannot control this device",
+        "unreported": "Not reported to Home Assistant: {buttons}",
+        "not_loaded": "Link database not loaded",
+        "unreachable": "Could not read this device"
+      },
+      "scanning": "Reading every device's link database",
+      "none": "Every device is linked to the modem"
+    },
     "unknown_devices": {
       "caption": "Unknown Devices",
       "fields": {
@@ -139,7 +155,7 @@
       "delete_scene": "Delete scene",
       "add_device": "Add device",
       "save_scene": "Save scene",
-      "add_default_links": "Add Default Links",
+      "add_default_links": "Add default links",
       "add_override": "Add override",
       "delete_override": "Delete override"
     },
@@ -177,6 +193,62 @@
   },
   "device": {
     "caption": "Insteon Device",
+    "overview": {
+      "caption": "Overview",
+      "battery_device": "Battery powered",
+      "not_identified": "Not identified",
+      "connections": "Connections",
+      "select_hint": "Select a button to see what it controls",
+      "records_error": "Could not read the link database from Home Assistant.",
+      "retry": "Retry",
+      "no_links_stored": "No links stored on this device",
+      "modem_scenes": "Scenes",
+      "scene_devices": "Scene {group} · {count, plural, one {# device} other {# devices}}",
+      "modem_devices": "{count, plural, one {# device} other {# devices}} Home Assistant can control",
+      "see_aldb": "The full record list is on the All-Link Database tab.",
+      "pane": {
+        "controls": "Controls",
+        "controlled_by": "Controlled by",
+        "no_links": "No connections",
+        "group": "Group {group}",
+        "load_button": "Load button",
+        "scene_button": "Scene button",
+        "load_caption": "Load button: {label}",
+        "home_assistant": "Home Assistant",
+        "ha_notified": "Notified when this button is used",
+        "ha_controls": "Can control this button",
+        "scene": "Scene {group}",
+        "scene_named": "Scene {group}: {name}",
+        "not_a_button": "Group {group}, not a button",
+        "other_links": "Other links ({count})",
+        "other_links_hint": "These links are not tied to a button. The All-Link Database tab lists every record.",
+        "controls_row": "Controls {name}",
+        "controlled_by_row": "Controlled by {name}",
+        "ha_no_control_link": "Home Assistant has no control link to this device",
+        "button_not_notified": "Home Assistant is not notified when this button is used",
+        "pending": "Some of these links have not been written to the device yet. Write or undo them from the All-Link Database tab.",
+        "pending_row": "Not written yet"
+      },
+      "button": {
+        "named": "Button {label}",
+        "group": "Group {group}",
+        "paddle": "Paddle",
+        "dial": "Dial",
+        "toggle": "Toggle",
+        "outlet_top": "Top outlet",
+        "outlet_bottom": "Bottom outlet",
+        "light": "Light",
+        "fan": "Fan",
+        "load": "Load"
+      },
+      "fields": {
+        "category": "Category / subcategory",
+        "engine_version": "Engine version",
+        "firmware": "Firmware",
+        "aldb_status": "Link database",
+        "buttons": "Buttons"
+      }
+    },
     "remove_all_refs": {
       "title": "Delete All References",
       "description": "Do you want to delete all references to this device in all Insteon devices?",
@@ -186,7 +258,8 @@
     "actions": {
       "add": "Add Insteon Device",
       "stop": "Stop",
-      "delete": "Delete device"
+      "delete": "Delete device",
+      "open_in_ha": "Open in Home Assistant"
     },
     "fields": {
       "device_address": "Insteon device address (optional)",
@@ -242,7 +315,7 @@
       "create": "Create ALDB Record",
       "show": "Show Unused",
       "hide": "Hide Unused",
-      "add_default_links": "Add Default Links",
+      "add_default_links": "Add default links",
       "download": "Download"
     },
     "fields": {
@@ -258,6 +331,11 @@
   "properties": {
     "caption": "Properties",
     "no_data": "No properties are available for this device.",
+    "errors": {
+      "required": "Enter a value",
+      "integer": "Enter a whole number",
+      "range": "Enter a number from {min} to {max}"
+    },
     "actions": {
       "manage": "Insteon Properties",
       "change": "Change Property Value",
@@ -269,6 +347,9 @@
       "description": "Description",
       "modified": "Modified",
       "value": "Value"
+    },
+    "form": {
+      "range": "{min} to {max}"
     },
     "form_options": {
       "on_off_switch_main": "Main switch",

@@ -1,5 +1,6 @@
 import { customElement, property, state } from "lit/decorators";
 import { mdiNetwork, mdiFolderMultipleOutline, mdiWrench } from "@mdi/js";
+import "@ha/components/ha-icon-overflow-menu";
 import type { RouterOptions } from "@ha/layouts/hass-router-page";
 import { HassRouterPage } from "@ha/layouts/hass-router-page";
 import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
@@ -72,6 +73,10 @@ class InsteonRouter extends HassRouterPage {
       broken_links: {
         tag: "broken-links-panel",
         load: () => import("./config/broken-links-panel"),
+      },
+      modem_links: {
+        tag: "modem-links-panel",
+        load: () => import("./config/modem-links-panel"),
       },
       unknown_devices: {
         tag: "unknown-devices-panel",

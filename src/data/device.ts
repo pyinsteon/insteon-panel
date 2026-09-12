@@ -161,6 +161,21 @@ export const aldbRecordLoaded = (hass: HomeAssistant, id: string): Promise<void>
     device_address: id,
   });
 
+export interface AldbNotification {
+  type: "record_loaded" | "status_changed" | "unsubscribed";
+  is_loading?: boolean;
+}
+
+export const subscribeAldbLoading = (
+  hass: HomeAssistant,
+  address: string,
+  callback: (message: AldbNotification) => void,
+): Promise<() => Promise<void>> =>
+  hass.connection.subscribeMessage<AldbNotification>(callback, {
+    type: "insteon/aldb/notify",
+    device_address: address,
+  });
+
 export const aldbNewRecordSchema = (insteon: Insteon): HaFormSchema[] => [
   {
     name: "mode",

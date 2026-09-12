@@ -3,6 +3,7 @@ import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "@ha/components/ha-spinner";
+import "@ha/components/data-table/ha-data-table";
 import type {
   DataTableColumnContainer,
   DataTableRowData,
@@ -166,6 +167,7 @@ export class InsteonALDBDataTable extends LitElement {
     }
     return html`
       <ha-data-table
+        has-fab
         .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._records(this.records)}
