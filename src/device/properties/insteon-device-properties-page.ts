@@ -63,20 +63,36 @@ class InsteonDevicePropertiesPage extends LitElement {
 
   private _tabs = memoizeOne((deviceId: string) => deviceTabs(this.insteon.localize, deviceId));
 
-  protected firstUpdated(changedProps: PropertyValues) {
-    super.firstUpdated(changedProps);
-    if (this.deviceId && this.hass) {
-      this._advancedAvailable = Boolean(this.hass.userData?.showAdvanced);
-      fetchInsteonDevice(this.hass, this.deviceId).then(
-        (device) => {
-          this._device = device;
-          this._getProperties();
-        },
-        () => {
-          this._noDeviceError();
-        },
-      );
+  protected willUpdate(changedProps: PropertyValues) {
+    super.willUpdate(changedProps);
+    // The device router reuses this element when switching devices, so reload
+    // whenever deviceId changes rather than only on first render.
+    if (changedProps.has("deviceId") && this.deviceId && this.hass) {
+      this._loadDevice();
     }
+  }
+
+  private _loadDevice() {
+    const token = this.deviceId!;
+    this._advancedAvailable = Boolean(this.hass.userData?.showAdvanced);
+    this._device = undefined;
+    this._properties = [];
+    this._schema = undefined;
+    fetchInsteonDevice(this.hass, token).then(
+      (device) => {
+        if (this.deviceId !== token) {
+          return;
+        }
+        this._device = device;
+        this._getProperties();
+      },
+      () => {
+        if (this.deviceId !== token) {
+          return;
+        }
+        this._noDeviceError();
+      },
+    );
   }
 
   protected _dirty() {
@@ -219,11 +235,11 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   private async _getProperties() {
-    const propertiesInfo = await fetchInsteonProperties(
-      this.hass,
-      this._device!.address,
-      this._showAdvanced,
-    );
+    const address = this._device!.address;
+    const propertiesInfo = await fetchInsteonProperties(this.hass, address, this._showAdvanced);
+    if (this._device?.address !== address) {
+      return;
+    }
     // eslint-disable-next-line no-console
     console.info("Properties: " + propertiesInfo.properties.length);
     this._properties = propertiesInfo.properties;

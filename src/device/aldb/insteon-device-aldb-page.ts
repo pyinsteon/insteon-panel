@@ -87,22 +87,38 @@ class InsteonDeviceALDBPage extends LitElement {
 
   private _tabs = memoizeOne((deviceId: string) => deviceTabs(this.insteon.localize, deviceId));
 
-  protected firstUpdated(changedProps: PropertyValues) {
-    // eslint-disable-next-line no-console
-    console.info("Device GUID: " + this.deviceId + " in aldb");
-    super.firstUpdated(changedProps);
-    if (this.deviceId && this.hass) {
-      this._showUnusedAvailable = Boolean(this.hass.userData?.showAdvanced);
-      fetchInsteonDevice(this.hass, this.deviceId).then(
-        (device) => {
-          this._device = device;
-          this._getRecords();
-        },
-        () => {
-          this._noDeviceError();
-        },
-      );
+  protected willUpdate(changedProps: PropertyValues) {
+    super.willUpdate(changedProps);
+    // The device router reuses this element when switching devices, so reload
+    // whenever deviceId changes rather than only on first render.
+    if (changedProps.has("deviceId") && this.deviceId && this.hass) {
+      this._loadDevice();
     }
+  }
+
+  private _loadDevice() {
+    const token = this.deviceId!;
+    this._showUnusedAvailable = Boolean(this.hass.userData?.showAdvanced);
+    this._unsubscribe();
+    this._isLoading = false;
+    this._device = undefined;
+    this._allRecords = [];
+    this._records = undefined;
+    fetchInsteonDevice(this.hass, token).then(
+      (device) => {
+        if (this.deviceId !== token) {
+          return;
+        }
+        this._device = device;
+        this._getRecords();
+      },
+      () => {
+        if (this.deviceId !== token) {
+          return;
+        }
+        this._noDeviceError();
+      },
+    );
   }
 
   public disconnectedCallback(): void {
@@ -211,7 +227,11 @@ class InsteonDeviceALDBPage extends LitElement {
       this._records = [];
       return;
     }
-    fetchInsteonALDB(this.hass, this._device?.address).then((records) => {
+    const address = this._device.address;
+    fetchInsteonALDB(this.hass, address).then((records) => {
+      if (this._device?.address !== address) {
+        return;
+      }
       this._allRecords = records;
       this._records = this._filterRecords(this._allRecords);
     });
