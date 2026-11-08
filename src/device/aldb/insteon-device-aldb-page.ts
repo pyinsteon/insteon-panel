@@ -27,7 +27,7 @@ import {
 } from "../../data/device";
 import "@ha/layouts/hass-tabs-subpage";
 import type { HomeAssistant, Route } from "@ha/types";
-import { insteonDeviceTabs } from "../insteon-device-router";
+import { deviceTabs } from "../device-tabs";
 import "../insteon-device-header";
 import { confirmDeleteDevice } from "../delete-device";
 import "./insteon-aldb-data-table";
@@ -85,6 +85,8 @@ class InsteonDeviceALDBPage extends LitElement {
 
   private _showUnusedAvailable = false;
 
+  private _tabs = memoizeOne((deviceId: string) => deviceTabs(this.insteon.localize, deviceId));
+
   protected firstUpdated(changedProps: PropertyValues) {
     // eslint-disable-next-line no-console
     console.info("Device GUID: " + this.deviceId + " in aldb");
@@ -124,7 +126,7 @@ class InsteonDeviceALDBPage extends LitElement {
         .hass=${this.hass}
         .narrow=${this.narrow!}
         .route=${this.route!}
-        .tabs=${insteonDeviceTabs}
+        .tabs=${this._tabs(this.deviceId ?? "")}
         .localizeFunc=${this.insteon.localize}
         .backCallback=${() => this._handleBackTapped()}
       >

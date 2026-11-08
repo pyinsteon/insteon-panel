@@ -23,7 +23,9 @@
     "fields": {
       "group": "Scene",
       "name": "Name",
+      "area": "Area",
       "num_devices": "Devices",
+      "controllers": "Controllers",
       "actions": "Actions"
     },
     "unsaved": {
@@ -37,15 +39,48 @@
       "area": "Area",
       "delete": "Delete scene",
       "save": "Save scene",
+      "saving": "Saving scene data. Writing links to each device can take a minute or two.",
+      "deleting": "Deleting scene. Removing links from each device can take a minute or two.",
+      "area_failed": "The scene was saved, but its area could not be set because Home Assistant has no switch for the scene. Save again to retry.",
       "activate": "Turn on",
       "deactivate": "Turn off",
+      "controllers": {
+        "header": "Scene controllers",
+        "type": "Scene type",
+        "app_only": "Home Assistant Only",
+        "device_controlled": "Device + Home Assistant",
+        "introduction": "Home Assistant can always control this scene. Add hardware buttons to control it directly without Home Assistant.",
+        "device": "Controller device",
+        "button": "Controller button",
+        "add": "Add controller",
+        "remove": "Remove controller",
+        "required": "Add at least one controller, or select Home Assistant Only.",
+        "invalid": "Select a valid controller device and button.",
+        "duplicate": "This controller button is already in the scene.",
+        "wake": "Wake battery-operated controllers before saving or deleting the scene. Read their complete All-Link Database before saving.",
+        "local_load": "Controller buttons also respond when Home Assistant or another controller turns this scene on. A controller's load uses its local on-level and ramp rate unless you set its level in the scene, and keypad button lights turn on. Pressing a controller button always uses its local settings.",
+        "pending": "The scene was not fully written. Some devices may already have changed. Wake battery devices, read missing All-Link Databases, and save again or retry deletion to finish.",
+        "upgrade": "Device + Home Assistant scenes require an updated Insteon integration and pyinsteon library."
+      },
       "devices": {
-        "header": "Add device",
-        "introduction": "Add or remove devices from the scene. Select the entities associated with each device that you want the scene to control.",
+        "header": "Devices",
+        "introduction": "Add devices to the scene and set what each one does when the scene turns on. For devices with several outputs, such as keypads, select the outputs that the scene controls.",
         "remove": "Remove device",
         "add": "Add device",
         "on_level": "On level",
-        "ramp_rate": "Ramp rate in seconds",
+        "ramp_rate": "Ramp rate",
+        "seconds": "{seconds} s",
+        "state": "State",
+        "speed": "Speed",
+        "states": {
+          "off": "Off",
+          "on": "On",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "unlocked": "Unlocked",
+          "locked": "Locked"
+        },
         "button": "Button"
       }
     }
@@ -133,6 +168,24 @@
       },
       "scanning": "Reading every device's link database",
       "none": "Every device is linked to the modem"
+    },
+    "device_scenes": {
+      "caption": "Import device scenes",
+      "no_data": "No device-controlled scenes to import. Read the All-Link Databases of all devices to find scenes created outside Home Assistant.",
+      "fields": {
+        "controllers": "Controllers",
+        "area": "Area",
+        "responders": "Responders",
+        "status": "Status"
+      },
+      "ready": "Ready to import",
+      "import": "Import",
+      "name": "Scene name",
+      "import_title": "Import device scene",
+      "import_text": "Home Assistant will control this scene too. Existing device links are kept and a modem scene is added.",
+      "importing_title": "Importing scene",
+      "importing_text": "Adding a modem scene and writing links to each device. This can take a minute or two.",
+      "failed": "The scene could not be imported."
     },
     "unknown_devices": {
       "caption": "Unknown Devices",

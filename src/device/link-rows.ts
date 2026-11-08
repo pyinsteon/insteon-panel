@@ -27,6 +27,7 @@ export type RowDetail =
   | { kind: "ha_controls" }
   | { kind: "scene"; group: number }
   | { kind: "button"; layout: PlateLayout; group: number }
+  | { kind: "remote_button"; label: string }
   | { kind: "not_a_button"; group: number }
   | { kind: "none" };
 

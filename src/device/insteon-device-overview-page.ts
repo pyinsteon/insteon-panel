@@ -21,10 +21,17 @@ import "@ha/layouts/hass-tabs-subpage";
 import { navigate } from "@ha/common/navigate";
 import { showAlertDialog, showConfirmationDialog } from "@ha/dialogs/generic/show-dialog-box";
 import { haStyle } from "@ha/resources/styles";
-import { insteonDeviceTabs } from "./insteon-device-router";
+import { deviceTabs } from "./device-tabs";
 import "./insteon-device-header";
 import "./insteon-device-plate";
-import { buttonLabel, buttonTitle, plateGroups, plateLayout } from "./plate-layout";
+import {
+  buttonLabel,
+  buttonTitle,
+  deviceButtonTitle,
+  plateGroups,
+  plateLayout,
+  remoteButtonLabel,
+} from "./plate-layout";
 import type { Insteon, InsteonDevice } from "../data/insteon";
 import type { ALDBRecord, AldbNotification } from "../data/device";
 import {
@@ -92,6 +99,8 @@ class InsteonDeviceOverviewPage extends LitElement {
   private _unsubscribe?: Promise<() => Promise<void>>;
 
   private _watchTimeout?: number;
+
+  private _tabs = memoizeOne((deviceId: string) => deviceTabs(this.insteon.localize, deviceId));
 
   private _attributed = memoizeOne(
     (
@@ -410,7 +419,7 @@ class InsteonDeviceOverviewPage extends LitElement {
         .hass=${this.hass}
         .narrow=${this.narrow!}
         .route=${this.route!}
-        .tabs=${insteonDeviceTabs}
+        .tabs=${this._tabs(this.deviceId ?? "")}
         .localizeFunc=${this.insteon.localize}
         .backCallback=${this._handleBackTapped}
       >
@@ -587,8 +596,10 @@ class InsteonDeviceOverviewPage extends LitElement {
   // aria-controls cannot reach across the plate's shadow root, so the pane announces itself.
   private _renderPane(device: InsteonDevice, kind: CardKind): TemplateResult {
     const group = this._selectedGroup;
-    const layout = plateLayout(device.cat, device.subcat);
-    const title = group === undefined ? "" : buttonTitle(layout, group, this.insteon.localize);
+    const title =
+      group === undefined
+        ? ""
+        : deviceButtonTitle(device.cat, device.subcat, group, this.insteon.localize);
     return html`
       <div
         class="pane"
@@ -738,6 +749,13 @@ class InsteonDeviceOverviewPage extends LitElement {
     const devices = this.hass.devices ?? {};
     const entry = row.isModem ? undefined : insteonDeviceByAddress(devices, row.target);
     const pair = entry ? catSubcatFromModel(entry.model) : undefined;
+    const remote =
+      pair && section === "controlled_by"
+        ? remoteButtonLabel(pair[0], pair[1], row.group)
+        : undefined;
+    if (remote) {
+      return { entry, detail: { kind: "remote_button", label: remote } };
+    }
     const layout = pair ? plateLayout(pair[0], pair[1]) : undefined;
     return { entry, detail: rowDetail(row, section, layout) };
   }
@@ -791,6 +809,8 @@ class InsteonDeviceOverviewPage extends LitElement {
       }
       case "button":
         return buttonTitle(detail.layout, detail.group, localize);
+      case "remote_button":
+        return localize("device.overview.button.named", { label: detail.label });
       case "not_a_button":
         return localize("device.overview.pane.not_a_button", { group: detail.group });
       default:

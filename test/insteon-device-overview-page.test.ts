@@ -18,7 +18,6 @@ vi.mock("@ha/dialogs/generic/show-dialog-box", () => ({
   showAlertDialog: vi.fn(),
   showConfirmationDialog: vi.fn(async () => true),
 }));
-vi.mock("../src/device/insteon-device-router", () => ({ insteonDeviceTabs: [] }));
 
 import { localize } from "../src/localize/localize";
 import type { ALDBRecord } from "../src/data/device";
@@ -425,11 +424,75 @@ describe("insteon-device-overview-page", () => {
     expect(tiles[1].getAttribute("aria-selected")).toBe("true");
   });
 
+  it("titles mini remote buttons by letter", async () => {
+    const remote = {
+      ...kp014,
+      name: "Bed remote",
+      cat: 0x00,
+      subcat: 0x10,
+      is_battery: true,
+      buttons: { 1: "a", 2: "b", 3: "c", 4: "d" },
+    };
+    const el = await mount(makeHass(defaults({}, remote, [])));
+    const tiles = [...el.shadowRoot!.querySelectorAll(".tile")] as HTMLElement[];
+    tiles[2].click();
+    await settle(el);
+    expect(el.shadowRoot!.querySelector(".pane-title")!.textContent).toBe("Button C");
+  });
+
+  it("names the remote button that controls a keypad button", async () => {
+    const hass = makeHass(
+      defaults({}, kp014, [
+        rec({ group: 7, target: "35.65.B6", target_name: "Bed remote", data3: 2 }),
+      ]),
+    );
+    hass.devices = {
+      ...devices,
+      "dev-4": {
+        id: "dev-4",
+        identifiers: [["insteon", "35.65.B6"]],
+        model: "2342-222 (0x00, 0x1A)",
+        via_device_id: "modem-1",
+      },
+    };
+    const el = await mount(hass);
+    await select(el, 2);
+    // Group 7 on an 8-scene remote is button H.
+    expect(text(el)).toContain("Bed remote Button H");
+  });
+
   it("puts the header in the toolbar slot when narrow", async () => {
     const el = await mount(makeHass(defaults()), true);
     const headers = [...el.shadowRoot!.querySelectorAll("insteon-device-header")];
     expect(headers.length).toBe(1);
     expect(headers[0].getAttribute("slot")).toBe("header");
+  });
+
+  it("points its tabs at its own device across page instances", async () => {
+    const hass = makeHass(defaults({}, kp014));
+    const first = await mount(hass);
+    const tabs = (el: any) =>
+      el
+        .shadowRoot!.querySelector("hass-tabs-subpage")!
+        .tabs.map((tab: { path: string }) => tab.path);
+    expect(tabs(first)).toContain("/insteon/device/aldb/dev-1");
+    first.remove();
+
+    const second = document.createElement("insteon-device-overview-page") as any;
+    Object.assign(second, {
+      hass,
+      insteon: first.insteon,
+      narrow: false,
+      route: { prefix: "/insteon/device/overview", path: "/dev-2" },
+      deviceId: "dev-2",
+    });
+    document.body.appendChild(second);
+    await settle(second);
+    expect(tabs(second)).toEqual([
+      "/insteon/device/overview/dev-2",
+      "/insteon/device/properties/dev-2",
+      "/insteon/device/aldb/dev-2",
+    ]);
   });
 
   it("clears a pending load and its subscription when the device changes", async () => {

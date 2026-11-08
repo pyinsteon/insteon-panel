@@ -18,7 +18,8 @@ import "@ha/components/ha-button-menu";
 import { haStyle } from "@ha/resources/styles";
 import "./insteon-properties-data-table";
 import { showInsteonPropertyDialog } from "./show-dialog-insteon-property";
-import { insteonDeviceTabs } from "../insteon-device-router";
+import memoizeOne from "memoize-one";
+import { deviceTabs } from "../device-tabs";
 import "../insteon-device-header";
 import { confirmDeleteDevice } from "../delete-device";
 import type { Insteon, InsteonDevice } from "../../data/insteon";
@@ -60,6 +61,8 @@ class InsteonDevicePropertiesPage extends LitElement {
 
   private _advancedAvailable = false;
 
+  private _tabs = memoizeOne((deviceId: string) => deviceTabs(this.insteon.localize, deviceId));
+
   protected firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
     if (this.deviceId && this.hass) {
@@ -86,7 +89,7 @@ class InsteonDevicePropertiesPage extends LitElement {
         .hass=${this.hass}
         .narrow=${this.narrow!}
         .route=${this.route!}
-        .tabs=${insteonDeviceTabs}
+        .tabs=${this._tabs(this.deviceId ?? "")}
         .localizeFunc=${this.insteon.localize}
         .backCallback=${this._handleBackTapped}
       >
