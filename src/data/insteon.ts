@@ -28,6 +28,7 @@ export interface InsteonDevice {
   engine_version?: string;
   firmware?: number | null;
   buttons?: { [group: number]: string };
+  controller_groups?: number[];
 }
 
 export enum X10HouseCode {

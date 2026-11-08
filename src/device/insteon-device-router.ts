@@ -1,12 +1,8 @@
-import { customElement, property, state } from "lit/decorators";
+import { customElement, property } from "lit/decorators";
 import type { RouterOptions } from "@ha/layouts/hass-router-page";
 import { HassRouterPage } from "@ha/layouts/hass-router-page";
 import type { HomeAssistant, Route } from "@ha/types";
-import type { PageNavigation } from "@ha/layouts/hass-tabs-subpage";
 import type { Insteon } from "../data/insteon";
-import { deviceTabs } from "./device-tabs";
-
-export var insteonDeviceTabs: PageNavigation[] | undefined = undefined;
 
 @customElement("insteon-device-router")
 class InsteonDeviceRouter extends HassRouterPage {
@@ -19,8 +15,6 @@ class InsteonDeviceRouter extends HassRouterPage {
   @property({ type: Boolean }) public isWide!: boolean;
 
   @property({ type: Boolean }) public narrow!: boolean;
-
-  @state() private deviceId?: string | undefined = undefined;
 
   protected routerOptions: RouterOptions = {
     defaultPage: "overview",
@@ -51,12 +45,7 @@ class InsteonDeviceRouter extends HassRouterPage {
     el.isWide = this.isWide;
     el.narrow = this.narrow;
     const tail = this.routeTail.path.split("/");
-    const deviceId = tail[tail.length - 1];
-    if (!insteonDeviceTabs || deviceId !== this.deviceId) {
-      insteonDeviceTabs = deviceTabs(this.insteon.localize, deviceId);
-    }
-    this.deviceId = deviceId;
-    el.deviceId = deviceId;
+    el.deviceId = tail[tail.length - 1];
   }
 }
 

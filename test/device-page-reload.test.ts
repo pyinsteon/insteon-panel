@@ -14,7 +14,6 @@ vi.mock("@ha/dialogs/generic/show-dialog-box", () => ({
   showAlertDialog: vi.fn(),
   showConfirmationDialog: vi.fn(async () => true),
 }));
-vi.mock("../src/device/insteon-device-router", () => ({ insteonDeviceTabs: [] }));
 vi.mock("../src/device/insteon-device-header", () => ({}));
 vi.mock("../src/device/delete-device", () => ({ confirmDeleteDevice: vi.fn() }));
 vi.mock("../src/device/aldb/insteon-aldb-data-table", () => ({}));
@@ -90,6 +89,13 @@ const mount = async (tag: string, hass: ReturnType<typeof makeHass>) => {
   return el;
 };
 
+const tabPaths = (el: HTMLElement) => {
+  const subpage = el.shadowRoot!.querySelector("hass-tabs-subpage") as HTMLElement & {
+    tabs: { path: string }[];
+  };
+  return subpage.tabs.map((tab) => tab.path);
+};
+
 describe("device pages reload when the router reuses them", () => {
   beforeEach(() => {
     document.body.innerHTML = "";
@@ -102,6 +108,11 @@ describe("device pages reload when the router reuses them", () => {
     await settle(el);
     expect(el._device.address).toBe("22.22.22");
     expect(el._properties.map((p: any) => p.name)).toEqual(["prop_22.22.22"]);
+    expect(tabPaths(el)).toEqual([
+      "/insteon/device/overview/dev-2",
+      "/insteon/device/properties/dev-2",
+      "/insteon/device/aldb/dev-2",
+    ]);
   });
 
   it("properties page ignores a late response for the previous device", async () => {
@@ -121,6 +132,11 @@ describe("device pages reload when the router reuses them", () => {
     await settle(el);
     expect(el._device.address).toBe("22.22.22");
     expect(el._records.map((r: any) => r.target)).toEqual(["22.22.22"]);
+    expect(tabPaths(el)).toEqual([
+      "/insteon/device/overview/dev-2",
+      "/insteon/device/properties/dev-2",
+      "/insteon/device/aldb/dev-2",
+    ]);
   });
 
   it("ALDB page ignores a late response for the previous device", async () => {

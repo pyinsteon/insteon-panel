@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buttonLabel, buttonTitle, plateGroups, plateLayout } from "../src/device/plate-layout";
+import {
+  buttonLabel,
+  buttonTitle,
+  deviceButtonTitle,
+  plateGroups,
+  plateLayout,
+  remoteButtonLabel,
+} from "../src/device/plate-layout";
 
 const localize = (key: string, replace?: Record<string, unknown>) =>
   replace ? `${key}:${JSON.stringify(replace)}` : key;
@@ -95,5 +102,42 @@ describe("buttonTitle", () => {
     expect(buttonTitle("dial_i3", 1, localize)).toBe("device.overview.button.dial");
     expect(buttonTitle("micro", 1, localize)).toBe("device.overview.button.load");
     expect(buttonTitle("none", 4, localize)).toBe('device.overview.button.group:{"group":4}');
+  });
+});
+
+describe("remoteButtonLabel", () => {
+  const labels = (subcat: number, count: number) =>
+    Array.from({ length: count }, (_, i) => remoteButtonLabel(0x00, subcat, i + 1));
+
+  it("labels 4-scene mini remote buttons A to D", () => {
+    for (const subcat of [0x10, 0x14, 0x17, 0x1b]) {
+      expect(labels(subcat, 5)).toEqual(["A", "B", "C", "D", undefined]);
+    }
+  });
+
+  it("labels 8-scene mini remote buttons in pyinsteon's swapped pairs", () => {
+    for (const subcat of [0x12, 0x16, 0x18, 0x1a]) {
+      expect(labels(subcat, 9)).toEqual(["B", "A", "D", "C", "F", "E", "H", "G", undefined]);
+    }
+  });
+
+  it("does not label other devices", () => {
+    expect(remoteButtonLabel(0x00, 0x11, 1)).toBeUndefined();
+    expect(remoteButtonLabel(0x01, 0x10, 1)).toBeUndefined();
+    expect(remoteButtonLabel(undefined, undefined, 1)).toBeUndefined();
+  });
+});
+
+describe("deviceButtonTitle", () => {
+  it("titles remote buttons by letter and other devices by their plate", () => {
+    expect(deviceButtonTitle(0x00, 0x1b, 3, localize)).toBe(
+      'device.overview.button.named:{"label":"C"}',
+    );
+    expect(deviceButtonTitle(0x01, 0x41, 3, localize)).toBe(
+      'device.overview.button.named:{"label":"C"}',
+    );
+    expect(deviceButtonTitle(0x00, 0x11, 1, localize)).toBe(
+      'device.overview.button.group:{"group":1}',
+    );
   });
 });
