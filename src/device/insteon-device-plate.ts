@@ -29,7 +29,7 @@ const slots = (cx: number, y: number, gap: number, tall: number, short: number, 
   `;
 
 const ground = (cx: number, y: number, w: number, h: number): SVGTemplateResult =>
-  svg`<path class="slot" d="M${cx - w / 2} ${y} h${w} v${h - w / 2} a${w / 2} ${w / 2} 0 0 1 -${w} 0 z"></path>`;
+  svg`<path class="slot" d="M${cx - w / 2} ${y + h} h${w} v-${h - w / 2} a${w / 2} ${w / 2} 0 0 0 -${w} 0 z"></path>`;
 
 const hit = (y: number, h: number): SVGTemplateResult =>
   svg`<rect class="hit" x="0.5" y=${y} width="79" height=${h} rx="2"></rect>`;

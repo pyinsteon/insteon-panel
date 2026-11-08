@@ -197,6 +197,26 @@ describe("i3 dial", () => {
   });
 });
 
+describe("receptacle ground openings", () => {
+  it.each([
+    { name: "on/off outlet", cat: 0x02, subcat: 0x39, grounds: 2 },
+    { name: "i3 outlet", cat: 0x02, subcat: 0x3f, grounds: 2 },
+    { name: "outletlinc dimmer", cat: 0x01, subcat: 0x21, grounds: 1 },
+    { name: "outletlinc relay", cat: 0x02, subcat: 0x08, grounds: 2 },
+    { name: "plug-in module", cat: 0x01, subcat: 0x0e, grounds: 1 },
+  ])("puts the flat side down on the $name", async ({ cat, subcat, grounds }) => {
+    const el = await renderPlate(cat, subcat);
+    const paths = [...root(el).querySelectorAll("path.slot")];
+    expect(paths).toHaveLength(grounds);
+    for (const path of paths) {
+      // Rise from the flat base, then arc counterclockwise over the top.
+      expect(path.getAttribute("d")).toMatch(
+        /^M[\d.]+ [\d.]+ h[\d.]+ v-[\d.]+ a[\d.]+ [\d.]+ 0 0 0 -[\d.]+ 0 z$/,
+      );
+    }
+  });
+});
+
 describe("on/off outlet", () => {
   it("uses invisible hit regions on a flat face with pills and ring leds at x 14.4", async () => {
     const el = await renderPlate(0x02, 0x39);
