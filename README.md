@@ -2,40 +2,6 @@
 
 This repository holds the frontend files of Insteon configuration panel in home assistant.
 
-## Device + Home Assistant scenes
-
-In the scene editor, choose **Home Assistant Only** for the existing modem-controlled
-behavior, or **Device + Home Assistant** to add one or more hardware devices and their
-buttons.
-Home Assistant remains a controller in both cases. Adding responders or changing
-their levels and ramp rates updates every associated hardware group.
-
-Controller buttons already used by another managed scene or unmanaged device links
-cannot be reused. Read complete All-Link Databases before saving, and wake battery
-remotes before saving or deleting. If a write fails, some devices may already have
-changed: keep the scene open and retry. Interrupted scenes remain available after
-restart with their reserved scene number.
-
-Controller buttons on lighting devices also respond when Home Assistant or another
-controller turns the scene on, so their loads and keypad button lights stay in sync.
-Unless you set a level for the controller in the scene, its load uses its local
-on-level and ramp rate. Pressing a controller's own button always uses its local
-settings; the scene editor does not create self-links or change those settings.
-
-To bring scenes created outside Home Assistant (for example by manual linking or
-Insteon Director) under management, open **Utilities > Import device scenes**. Read the
-All-Link Databases of the involved devices first. Buttons that control the same devices
-(including each other) with the same levels are listed as one scene. Importing keeps the
-existing device links, adds a modem scene so Home Assistant can control it, and opens it
-in the scene editor. Scenes with conflicting or unreadable links are listed with the
-reason they cannot be imported.
-
-This feature requires the matching Insteon WebSocket API changes in Home Assistant
-and the device-controlled scene implementation in `pyinsteon`. For local development,
-mount the `pyinsteon` feature worktree in the core devcontainer and install it with
-`uv pip install -e /workspaces/pyinsteon`. Use the panel development path described
-below. Release both libraries before updating the core integration's dependency pins.
-
 ## Development Setup
 
 1. Install vscode, git, and docker desktop
