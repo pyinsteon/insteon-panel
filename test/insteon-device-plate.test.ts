@@ -235,6 +235,78 @@ describe("receptacle ground openings", () => {
     expect(upper.bottom).toBeLessThan(upper.limit);
     expect(upper.gap).toBeCloseTo(lower.gap);
   });
+
+  it("uses the same blade and ground geometry across all receptacles", async () => {
+    const drawings = await Promise.all(
+      [
+        [0x02, 0x39],
+        [0x02, 0x3f],
+        [0x01, 0x21],
+        [0x02, 0x08],
+        [0x01, 0x0e],
+      ].map(async ([cat, subcat]) => root(await renderPlate(cat, subcat))),
+    );
+    const bladeGeometry = (left: Element, right: Element) => [
+      left.getAttribute("width"),
+      left.getAttribute("height"),
+      right.getAttribute("width"),
+      right.getAttribute("height"),
+      (Number(right.getAttribute("x")) - Number(left.getAttribute("x"))).toFixed(4),
+      (Number(right.getAttribute("y")) - Number(left.getAttribute("y"))).toFixed(4),
+    ];
+    const groundGeometry = (path: Element, left: Element) => {
+      const [x, y, ...commands] = path.getAttribute("d")!.split(" ");
+      return [
+        (Number(x.slice(1)) - Number(left.getAttribute("x"))).toFixed(4),
+        (Number(y) - Number(left.getAttribute("y"))).toFixed(4),
+        ...commands,
+      ];
+    };
+    const reference = [...drawings[0].querySelectorAll(".slot")];
+    for (const drawing of drawings) {
+      const blades = [...drawing.querySelectorAll("rect.slot")];
+      for (let i = 0; i < blades.length; i += 2) {
+        expect(bladeGeometry(blades[i], blades[i + 1])).toEqual(
+          bladeGeometry(reference[0], reference[1]),
+        );
+      }
+      const slots = [...drawing.querySelectorAll(".slot")];
+      slots.forEach((slot, i) => {
+        if (slot.localName === "path") {
+          expect(groundGeometry(slot, slots[i - 2])).toEqual(
+            groundGeometry(reference[2], reference[0]),
+          );
+        }
+      });
+    }
+  });
+});
+
+describe("dual outlet controls", () => {
+  it.each([
+    { name: "on/off outlet", cat: 0x02, subcat: 0x39 },
+    { name: "i3 outlet", cat: 0x02, subcat: 0x3f },
+  ])("centers buttons and leds between the dividers on the $name", async ({ cat, subcat }) => {
+    const el = await renderPlate(cat, subcat);
+    const r = root(el);
+    const [upper, lower] = [...r.querySelectorAll(".hit")];
+    const top = Number(upper.getAttribute("y")) + Number(upper.getAttribute("height"));
+    const bottom = Number(lower.getAttribute("y"));
+    const leds = [...r.querySelectorAll(".led")];
+    [...r.querySelectorAll(".btn")].forEach((button, i) => {
+      const circle = button.localName === "circle";
+      const height = circle
+        ? Number(button.getAttribute("r")) * 2
+        : Number(button.getAttribute("height"));
+      const center = circle
+        ? Number(button.getAttribute("cy"))
+        : Number(button.getAttribute("y")) + height / 2;
+      expect(center).toBeCloseTo(top + ((bottom - top) * (i + 0.5)) / 2);
+      expect(center - height / 2).toBeGreaterThan(top);
+      expect(center + height / 2).toBeLessThan(bottom);
+      expect(Number(leds[i].getAttribute("cy"))).toBeCloseTo(center);
+    });
+  });
 });
 
 describe("on/off outlet", () => {
@@ -263,7 +335,6 @@ describe("i3 outlet", () => {
     const leds = [...r.querySelectorAll(".led")];
     expect(leds.map((c) => c.getAttribute("cx"))).toEqual(["24.8", "24.8"]);
     expect(leds[0].getAttribute("r")).toBe("0.8");
-    expect(r.querySelector(".slot")!.getAttribute("width")).toBe("5");
   });
 });
 
