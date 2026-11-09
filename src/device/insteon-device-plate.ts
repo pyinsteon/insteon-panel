@@ -357,7 +357,11 @@ export class InsteonDevicePlate extends LitElement {
     const keyedTop = OUTLET_TOP_CENTER - 19;
     const upper = dimmer
       ? svg`
-          <path class="keyed" d="M14 ${keyedTop} h52 v30 l-26 8 l-26 -8 z"></path>
+          <path
+            class="keyed"
+            transform="translate(0 ${keyedTop})"
+            d="M18 0 H62 Q66 0 66 4 V22 Q66 25 63.5 26.5 L44 36.5 Q42 38 40 38 Q38 38 36 36.5 L16.5 26.5 Q14 25 14 22 V4 Q14 0 18 0 Z"
+          ></path>
           ${slots(40, keyedTop + 4)}
         `
       : receptacle(40, OUTLET_TOP_CENTER);

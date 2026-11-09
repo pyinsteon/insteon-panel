@@ -389,18 +389,21 @@ describe("i3 outlet", () => {
 });
 
 describe("outletlinc dimmer", () => {
-  it("vertically centers the keyed adapter outline within the upper section", async () => {
+  it("rounds and vertically centers the keyed adapter outline within the upper section", async () => {
     const el = await renderPlate(0x01, 0x21);
     const r = root(el);
     const hit = r.querySelector(".hit")!;
     const sectionTop = Number(hit.getAttribute("y"));
     const sectionBottom = sectionTop + Number(hit.getAttribute("height"));
-    const outline = r.querySelector(".keyed")!.getAttribute("d")!;
-    const [, y, side, tip] = outline.match(
-      /^M[\d.]+ ([\d.]+) h[\d.]+ v([\d.]+) l-[\d.]+ ([\d.]+)/,
-    )!;
-    const top = Number(y);
-    const bottom = top + Number(side) + Number(tip);
+    const outline = r.querySelector(".keyed")!;
+    const curves = [
+      ...outline.getAttribute("d")!.matchAll(/Q[-\d.]+ ([-\d.]+) [-\d.]+ ([-\d.]+)/g),
+    ];
+    expect(curves.length).toBeGreaterThanOrEqual(4);
+    const ys = curves.flatMap(([, control, end]) => [Number(control), Number(end)]);
+    const [, y] = outline.getAttribute("transform")!.match(/^translate\(0 ([\d.]+)\)$/)!;
+    const top = Number(y) + Math.min(...ys);
+    const bottom = Number(y) + Math.max(...ys);
     expect(top - sectionTop).toBeCloseTo(sectionBottom - bottom);
     const slot = r.querySelector("rect.slot")!;
     const slotTop = Number(slot.getAttribute("y"));
