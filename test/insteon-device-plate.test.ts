@@ -438,14 +438,33 @@ describe("in-line module", () => {
 });
 
 describe("plug-in module", () => {
-  it("draws a tall body with a led strip and edge rocker but no receptacle", async () => {
+  it("draws a led strip and three side buttons but no receptacle", async () => {
     const el = await renderPlate(0x01, 0x0e);
     const r = root(el);
     expect(r.querySelector("svg")!.getAttribute("viewBox")).toBe("0 0 86 127");
     expect(r.querySelector(".led.strip")).not.toBeNull();
     expect(r.querySelector(".wordmark")).toBeNull();
     expect(r.querySelector(".slot")).toBeNull();
-    expect(r.querySelector("rect.btn")!.getAttribute("x")).toBe("80");
+    const buttons = [...r.querySelectorAll("rect.btn")].map((button) => ({
+      x: Number(button.getAttribute("x")),
+      y: Number(button.getAttribute("y")),
+      width: Number(button.getAttribute("width")),
+      height: Number(button.getAttribute("height")),
+    }));
+    expect(buttons).toHaveLength(3);
+    expect(buttons[0].height).toBe(buttons[1].height);
+    expect(buttons[0].height).toBeGreaterThan(buttons[0].width);
+    expect(buttons[2].height).toBeLessThan(buttons[2].width);
+    const face = r.querySelector(".face")!;
+    const edge = Number(face.getAttribute("x")) + Number(face.getAttribute("width"));
+    buttons.forEach((button, i) => {
+      expect(button.x).toBeGreaterThan(edge);
+      expect(button.x).toBe(buttons[0].x);
+      expect(button.width).toBe(buttons[0].width);
+      if (i > 0) {
+        expect(button.y).toBeGreaterThan(buttons[i - 1].y + buttons[i - 1].height);
+      }
+    });
   });
 });
 

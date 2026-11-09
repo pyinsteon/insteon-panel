@@ -415,7 +415,9 @@ export class InsteonDevicePlate extends LitElement {
     return svg`
       ${this._key(1, svg`<rect class="face" x="0.5" y="0.5" width="79" height="126" rx="4"></rect>`)}
       <rect class="led strip" x="11.3" y="3" width="1.4" height="6.4" rx="0.7"></rect>
-      <rect class="btn" x="80" y="48" width="5" height="30" rx="2"></rect>
+      <rect class="btn" x="80" y="55" width="5" height="12" rx="1"></rect>
+      <rect class="btn" x="80" y="73" width="5" height="12" rx="1"></rect>
+      <rect class="btn" x="80" y="94" width="5" height="2" rx="0.5"></rect>
     `;
   }
 
