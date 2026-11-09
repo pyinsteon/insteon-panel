@@ -123,6 +123,23 @@ describe("i3 paddle", () => {
 });
 
 describe("kp014 keypad", () => {
+  it("keeps the bottom row inset so it cannot cover the frame border", async () => {
+    const el = await renderPlate(0x01, 0x59);
+    const r = root(el);
+    const frame = r.querySelector(".frame")!;
+    const rows = [...r.querySelectorAll(".face.row")];
+    const first = rows[0];
+    const last = rows[rows.length - 1];
+    const topInset = Number(first.getAttribute("y")) - Number(frame.getAttribute("y"));
+    const bottomInset =
+      Number(frame.getAttribute("y")) +
+      Number(frame.getAttribute("height")) -
+      Number(last.getAttribute("y")) -
+      Number(last.getAttribute("height"));
+    expect(bottomInset).toBeCloseTo(topInset);
+    expect(bottomInset).toBeGreaterThan(0);
+  });
+
   it("draws four blank rows with a led each and keeps separators when selected", async () => {
     const el = await renderPlate(0x01, 0x59, { 1: "Button A", 2: "Button B" });
     el.selected = 1;
@@ -181,6 +198,22 @@ describe("keypadlinc 8", () => {
     expect(keys[0].querySelector(".print")!.getAttribute("font-size")).toBe("6");
     expect(keys[7].textContent).toContain("H");
     expect(r.querySelectorAll(".print.bold").length).toBe(1);
+  });
+});
+
+describe("keypadlinc label placement", () => {
+  it.each([
+    { name: "six-button", subcat: 0x42 },
+    { name: "eight-button", subcat: 0x41 },
+  ])("vertically centers every $name label within its button", async ({ subcat }) => {
+    const el = await renderPlate(0x01, subcat);
+    for (const label of root(el).querySelectorAll(".print")) {
+      const face = label.previousElementSibling!;
+      expect(face.matches(".face")).toBe(true);
+      const center = Number(face.getAttribute("y")) + Number(face.getAttribute("height")) / 2;
+      expect(Number(label.getAttribute("y"))).toBeCloseTo(center);
+      expect(label.getAttribute("dominant-baseline")).toBe("central");
+    }
   });
 });
 

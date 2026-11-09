@@ -20,7 +20,7 @@ const tab = (x: number, y: number, w: number, h: number, cls = ""): SVGTemplateR
   svg`<rect class="tab ${cls}" x=${x} y=${y} width=${w} height=${h} rx=${h / 2}></rect>`;
 
 const print = (x: number, y: number, text: string, size: number, cls = ""): SVGTemplateResult =>
-  svg`<text class="print ${cls}" x=${x} y=${y} font-size=${size}>${text}</text>`;
+  svg`<text class="print ${cls}" x=${x} y=${y} font-size=${size} dominant-baseline="central">${text}</text>`;
 
 const slots = (cx: number, y: number): SVGTemplateResult =>
   svg`
@@ -59,7 +59,7 @@ const kplFace = (x: number, y: number, w: number): SVGTemplateResult =>
 
 const sceneKey = (x: number, y: number, letter: string): SVGTemplateResult => svg`
   ${kplFace(x, y, KPL_KEY.w)}
-  ${print(x + KPL_KEY.w / 2, y + 24, letter, 6.5)}
+  ${print(x + KPL_KEY.w / 2, y + KPL_KEY.h / 2, letter, 6.5)}
 `;
 
 @customElement("insteon-device-plate")
@@ -238,7 +238,7 @@ export class InsteonDevicePlate extends LitElement {
       ${rows.map((i) =>
         this._key(
           i + 1,
-          svg`<rect class="face row" x="1.5" y=${i * 40 + 1.5} width="77" height="38"></rect>`,
+          svg`<rect class="face row" x="1.5" y=${i * 40 + 1.5} width="77" height=${i === rows.length - 1 ? 37 : 38}></rect>`,
         ),
       )}
       ${[40, 80, 120].map((y) => svg`<line class="hair" x1="1" y1=${y} x2="79" y2=${y}></line>`)}
@@ -262,9 +262,9 @@ export class InsteonDevicePlate extends LitElement {
         1,
         svg`
           ${kplFace(6, KPL_ROWS[0], 68)}
-          ${print(40, KPL_ROWS[0] + 21, "ON", 6)}
+          ${print(40, KPL_ROWS[0] + KPL_KEY.h / 2, "ON", 6)}
           ${kplFace(6, KPL_ROWS[3], 68)}
-          ${print(40, KPL_ROWS[3] + 21, "OFF", 6)}
+          ${print(40, KPL_ROWS[3] + KPL_KEY.h / 2, "OFF", 6)}
         `,
       )}
       ${letters.map((letter, i) =>
@@ -280,7 +280,7 @@ export class InsteonDevicePlate extends LitElement {
         1,
         svg`
           ${kplFace(6, 6, KPL_KEY.w)}
-          ${print(22.75, 24, "MAIN", 6, "bold")}
+          ${print(22.75, KPL_ROWS[0] + KPL_KEY.h / 2, "MAIN", 6, "bold")}
         `,
       )}
       ${letters.map((letter, i) => {
