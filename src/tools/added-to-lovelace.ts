@@ -1,16 +1,6 @@
 import type { Repository } from "../data/common";
 import type { Insteon } from "../data/insteon";
 
-const generateUniqueTag = (repository: Repository, version?: string): string =>
-  String(
-    `${repository.id}${(
-      version ||
-      repository.installed_version ||
-      repository.selected_tag ||
-      repository.available_version
-    ).replace(/\D+/g, "")}`,
-  );
-
 export const generateLovelaceURL = (options: {
   repository: Repository;
   version?: string;

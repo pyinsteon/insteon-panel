@@ -9,7 +9,7 @@ import type { HomeAssistant } from "@ha/types";
 import type { Insteon, InsteonX10Device } from "../data/insteon";
 import { X10DeviceSchema } from "data/config";
 import { addX10Device } from "data/device";
-import type { HaFormData } from "@ha/components/ha-form/types";
+import type { HaFormDataContainer } from "@ha/components/ha-form/types";
 import "@ha/components/ha-form/ha-form";
 import "@ha/components/ha-alert";
 import type { insteonDeviceAddX10DialogParams } from "./show-dialog-device-add-x10";
@@ -62,20 +62,18 @@ class DialogInsteonDeviceAddX10 extends LitElement {
             .computeLabel=${this._computeLabel(this.insteon?.localize)}
           ></ha-form>
         </div>
-        <div class="buttons">
-          <ha-button @click=${this._dismiss} slot="secondaryAction">
-            ${this.insteon!.localize("common.cancel")}
-          </ha-button>
-          <ha-button @click=${this._submit} slot="primaryAction">
-            ${this.insteon!.localize("common.ok")}
-          </ha-button>
-        </div>
+        <ha-button @click=${this._dismiss} slot="primaryAction" appearance="plain">
+          ${this.insteon!.localize("common.cancel")}
+        </ha-button>
+        <ha-button @click=${this._submit} slot="primaryAction">
+          ${this.insteon!.localize("common.ok")}
+        </ha-button>
       </ha-dialog>
     `;
   }
 
-  private _haFormData(): HaFormData {
-    return { ...this._formData };
+  private _haFormData(): HaFormDataContainer {
+    return { ...this._formData } as HaFormDataContainer;
   }
 
   private _dismiss(): void {

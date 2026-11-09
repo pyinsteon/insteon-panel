@@ -26,11 +26,9 @@ class DialogInsteonAddingDevice extends LitElement {
 
   @state() private _opened = false;
 
-  @state() private _devicesAddedText = "";
+  @state() private _devicesAdded: string[] = [];
 
   @state() private _subscribed?: Promise<() => Promise<void>>;
-
-  private _devicesAdded?: [string];
 
   private _address = "";
 
@@ -46,8 +44,7 @@ class DialogInsteonAddingDevice extends LitElement {
     this._title = params.title;
     this._opened = true;
     this._subscribe();
-    this._devicesAddedText = "";
-    this._devicesAdded = undefined;
+    this._devicesAdded = [];
   }
 
   protected render(): TemplateResult {
@@ -62,12 +59,16 @@ class DialogInsteonAddingDevice extends LitElement {
       >
         <div class="instructions">${this._showInstructions()}</div>
         <br />
-        <div class="devices">${this._devicesAddedText}</div>
-        <div class="buttons">
-          <ha-button @click=${this._checkCancel} slot="primaryAction">
-            ${this._buttonText(this._subscribed)}
-          </ha-button>
+        <div class="devices">
+          ${this._devicesAdded.map((addr) => {
+            let deviceText = this.insteon?.localize("device.add.added") ?? "";
+            deviceText = deviceText.replace("--address--", addr);
+            return html`<p>${deviceText}</p>`;
+          })}
         </div>
+        <ha-button @click=${this._checkCancel} slot="primaryAction">
+          ${this._buttonText(this._subscribed)}
+        </ha-button>
       </ha-dialog>
     `;
   }
@@ -84,18 +85,6 @@ class DialogInsteonAddingDevice extends LitElement {
     return this.insteon!.localize("common.ok");
   }
 
-  private _showAddedDevices(): string {
-    if (!this._devicesAdded) return "";
-
-    let content = "";
-    this._devicesAdded.forEach((addr) => {
-      let device_text = this.insteon?.localize("device.add.added");
-      device_text = device_text?.replace("--address--", addr);
-      content = html`${content}<br />${device_text}`;
-    });
-    return content;
-  }
-
   private _addressText(address: string): string {
     let add_text = this.insteon.localize("device.add.address");
     add_text = add_text.replace("--address--", address.toUpperCase());
@@ -106,12 +95,7 @@ class DialogInsteonAddingDevice extends LitElement {
     if (message.type === "device_added") {
       // eslint-disable-next-line no-console
       console.info("Added device: " + message.address);
-      if (!this._devicesAdded) {
-        this._devicesAdded = [message.address];
-      } else {
-        this._devicesAdded.push(message.address);
-      }
-      this._devicesAddedText = this._showAddedDevices();
+      this._devicesAdded = [...this._devicesAdded, message.address];
     }
     if (message.type === "linking_stopped") {
       this._unsubscribe();
@@ -133,7 +117,7 @@ class DialogInsteonAddingDevice extends LitElement {
       return;
     }
     this._subscribed = this.hass.connection.subscribeMessage(
-      (message) => this._handleMessage(message),
+      (message: deviceAddedMessage) => this._handleMessage(message),
       {
         type: "insteon/device/add",
         multiple: this._multiple,

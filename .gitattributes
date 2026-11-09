@@ -1,0 +1,2 @@
+# Force LF for all text files. Needed for Docker for Windows to work correctly.
+* text eol=lf

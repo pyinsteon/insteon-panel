@@ -151,11 +151,17 @@ export class InsteonDevicesPanel extends LitElement {
     }
 
     const insteonDevices: DeviceRowData[] = devices.map((device) => {
+      const identifier = device.identifiers.find((ident) => ident[0] === "insteon");
+      const address = identifier ? identifier[1] : "";
+      const name = device.name || "";
+      const description = name.endsWith(address)
+        ? name.substring(0, name.length - address.length).trim()
+        : name;
       const deviceRowdata: DeviceRowData = {
         id: device.id,
         name: device.name_by_user || device.name || "No device name",
-        address: device.name?.substring(device.name.length - 8) || "",
-        description: device.name?.substring(0, device.name.length - 8) || "",
+        address,
+        description,
         model: device.model || "",
         area: device.area_id ? areaLookup[device.area_id].name : "",
       };
@@ -230,7 +236,7 @@ export class InsteonDevicesPanel extends LitElement {
   private async _handleRowClicked(ev: HASSDomEvent<RowClickedEvent>): Promise<void> {
     // console.info("Row clicked received");
     const id = ev.detail.id;
-    navigate("/insteon/device/properties/" + id);
+    navigate("/insteon/device/overview/" + id);
   }
 }
 

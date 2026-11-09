@@ -3,6 +3,7 @@ import { html, LitElement } from "lit";
 import { customElement, property } from "lit/decorators";
 import memoizeOne from "memoize-one";
 import "@ha/components/ha-spinner";
+import "@ha/components/data-table/ha-data-table";
 import type {
   DataTableColumnContainer,
   DataTableRowData,
@@ -54,7 +55,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "15%",
+              minWidth: "15%",
             },
             dirty: {
               title: this.insteon.localize("aldb.fields.modified"),
@@ -65,17 +66,17 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "15%",
+              minWidth: "15%",
             },
             target: {
               title: this.insteon.localize("aldb.fields.target"),
               sortable: true,
-              grows: true,
+              flex: 2,
             },
             group: {
               title: this.insteon.localize("aldb.fields.group"),
               sortable: true,
-              width: "15%",
+              minWidth: "15%",
             },
             is_controller: {
               title: this.insteon.localize("aldb.fields.mode"),
@@ -86,7 +87,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.insteon.localize("aldb.mode.responder")}`;
               },
               sortable: true,
-              width: "25%",
+              minWidth: "25%",
             },
           }
         : {
@@ -100,7 +101,7 @@ export class InsteonALDBDataTable extends LitElement {
               },
               sortable: true,
               direction: "desc",
-              width: "10%",
+              minWidth: "10%",
             },
             in_use: {
               title: this.insteon.localize("aldb.fields.in_use"),
@@ -111,7 +112,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "10%",
+              minWidth: "10%",
             },
             dirty: {
               title: this.insteon.localize("aldb.fields.modified"),
@@ -122,22 +123,22 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "10%",
+              minWidth: "10%",
             },
             target: {
               title: this.insteon.localize("aldb.fields.target"),
               sortable: true,
-              width: "15%",
+              minWidth: "15%",
             },
             target_name: {
               title: this.insteon.localize("aldb.fields.target_device"),
               sortable: true,
-              grows: true,
+              flex: 2,
             },
             group: {
               title: this.insteon.localize("aldb.fields.group"),
               sortable: true,
-              width: "10%",
+              minWidth: "10%",
             },
             is_controller: {
               title: this.insteon.localize("aldb.fields.mode"),
@@ -148,7 +149,7 @@ export class InsteonALDBDataTable extends LitElement {
                 return html`${this.insteon.localize("aldb.mode.responder")}`;
               },
               sortable: true,
-              width: "12%",
+              minWidth: "12%",
             },
           },
   );
@@ -166,6 +167,7 @@ export class InsteonALDBDataTable extends LitElement {
     }
     return html`
       <ha-data-table
+        has-fab
         .hass=${this.hass}
         .columns=${this._columns(this.narrow)}
         .data=${this._records(this.records)}

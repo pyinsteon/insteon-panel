@@ -5,6 +5,7 @@ import "./clean.js";
 import "./compress.js";
 import "./entry-html.js";
 import "./gen-icons-json.js";
+import "./lint-types.js";
 import "./rspack.js";
 import "./translations.js";
 import "./locale-data.js";
@@ -35,9 +36,9 @@ gulp.task(
     "gen-icons-json",
     "build-translations",
     "build-locale-data",
+    "lint-types",
     "rspack-prod-insteon",
     "gen-index-insteon-prod",
-    ...// Don't compress running tests
-    (env.isTest() ? [] : ["compress-insteon"]),
+    ...(env.isTest() ? [] : ["compress-insteon"]), // Don't compress running tests
   ),
 );

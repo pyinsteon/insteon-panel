@@ -4,7 +4,7 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
-  "postCreateCommand": "./homeassistant-frontend/.devcontainer/post_create.sh",
+  "postCreateCommand": "script/container-create",
   "postStartCommand": "script/bootstrap",
   "containerEnv": {
     "DEV_CONTAINER": "1",
@@ -25,7 +25,7 @@
         "ms-python.vscode-pylance"
       ],
       "settings": {
-        "terminal.integrated.shell.linux": "/bin/bash",
+        "terminal.integrated.defaultProfile.linux": "bash",
         "files.eol": "\n",
         "editor.tabSize": 2,
         "editor.formatOnPaste": false,

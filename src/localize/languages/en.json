@@ -23,7 +23,9 @@
     "fields": {
       "group": "Scene",
       "name": "Name",
+      "area": "Area",
       "num_devices": "Devices",
+      "controllers": "Controllers",
       "actions": "Actions"
     },
     "unsaved": {
@@ -37,15 +39,48 @@
       "area": "Area",
       "delete": "Delete scene",
       "save": "Save scene",
+      "saving": "Saving scene data. Writing links to each device can take a minute or two.",
+      "deleting": "Deleting scene. Removing links from each device can take a minute or two.",
+      "area_failed": "The scene was saved, but its area could not be set because Home Assistant has no switch for the scene. Save again to retry.",
       "activate": "Turn on",
       "deactivate": "Turn off",
+      "controllers": {
+        "header": "Scene controllers",
+        "type": "Scene type",
+        "app_only": "Home Assistant Only",
+        "device_controlled": "Device + Home Assistant",
+        "introduction": "Home Assistant can always control this scene. Add hardware buttons to control it directly without Home Assistant.",
+        "device": "Controller device",
+        "button": "Controller button",
+        "add": "Add controller",
+        "remove": "Remove controller",
+        "required": "Add at least one controller, or select Home Assistant Only.",
+        "invalid": "Select a valid controller device and button.",
+        "duplicate": "This controller button is already in the scene.",
+        "wake": "Wake battery-operated controllers before saving or deleting the scene. Read their complete All-Link Database before saving.",
+        "local_load": "Controller buttons also respond when Home Assistant or another controller turns this scene on. A controller's load uses its local on-level and ramp rate unless you set its level in the scene, and keypad button lights turn on. Pressing a controller button always uses its local settings.",
+        "pending": "The scene was not fully written. Some devices may already have changed. Wake battery devices, read missing All-Link Databases, and save again or retry deletion to finish.",
+        "upgrade": "Device + Home Assistant scenes require an updated Insteon integration and pyinsteon library."
+      },
       "devices": {
-        "header": "Add device",
-        "introduction": "Add or remove devices from the scene. Select the entities associated with each device that you want the scene to control.",
+        "header": "Devices",
+        "introduction": "Add devices to the scene and set what each one does when the scene turns on. For devices with several outputs, such as keypads, select the outputs that the scene controls.",
         "remove": "Remove device",
         "add": "Add device",
         "on_level": "On level",
-        "ramp_rate": "Ramp rate in seconds",
+        "ramp_rate": "Ramp rate",
+        "seconds": "{seconds} s",
+        "state": "State",
+        "speed": "Speed",
+        "states": {
+          "off": "Off",
+          "on": "On",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "unlocked": "Unlocked",
+          "locked": "Locked"
+        },
         "button": "Button"
       }
     }
@@ -104,8 +139,10 @@
       },
       "actions": {
         "target_db_not_loaded": "Load All-Link Database",
-        "missing_responder": "Delete exiting record",
-        "missing_controller": "Create missing record"
+        "missing_responder": "Delete existing record",
+        "missing_controller": "Create missing record",
+        "create_missing": "Create missing record",
+        "delete_record": "Delete this record"
       },
       "status": {
         "target_db_not_loaded": "All-Link Database not loaded",
@@ -115,6 +152,40 @@
       "load_aldb": "The All-Link Database for device ",
       "load_aldb_1": " will load in the background. If this is a battery operated device, you will need to trigger the device to wake up before the ALDB will load.",
       "remove_record": "The record will be removed from device "
+    },
+    "modem_links": {
+      "caption": "Missing modem links",
+      "fields": {
+        "device": "Device",
+        "address": "Address",
+        "problem": "Problem"
+      },
+      "status": {
+        "control": "Home Assistant cannot control this device",
+        "unreported": "Not reported to Home Assistant: {buttons}",
+        "not_loaded": "Link database not loaded",
+        "unreachable": "Could not read this device"
+      },
+      "scanning": "Reading every device's link database",
+      "none": "Every device is linked to the modem"
+    },
+    "device_scenes": {
+      "caption": "Import device scenes",
+      "no_data": "No device-controlled scenes to import. Read the All-Link Databases of all devices to find scenes created outside Home Assistant.",
+      "fields": {
+        "controllers": "Controllers",
+        "area": "Area",
+        "responders": "Responders",
+        "status": "Status"
+      },
+      "ready": "Ready to import",
+      "import": "Import",
+      "name": "Scene name",
+      "import_title": "Import device scene",
+      "import_text": "Home Assistant will control this scene too. Existing device links are kept and a modem scene is added.",
+      "importing_title": "Importing scene",
+      "importing_text": "Adding a modem scene and writing links to each device. This can take a minute or two.",
+      "failed": "The scene could not be imported."
     },
     "unknown_devices": {
       "caption": "Unknown Devices",
@@ -137,7 +208,7 @@
       "delete_scene": "Delete scene",
       "add_device": "Add device",
       "save_scene": "Save scene",
-      "add_default_links": "Add Default Links",
+      "add_default_links": "Add default links",
       "add_override": "Add override",
       "delete_override": "Delete override"
     },
@@ -149,7 +220,7 @@
       "scene_write": "The scene did not save to one or more devices correctly.",
       "scene_device_no_entities": "There are one or more devices without any entities selected. Please select an entity or remove the device from the scene.",
       "device_not_found": "An Insteon device was not found.",
-      "connect_error": "Could not connect to the modem. Pleaes check the configuration.",
+      "connect_error": "Could not connect to the modem. Please check the configuration.",
       "save_config_error": "An unknown error occured saving the configuration. Please retry, and if this issue occures again restart Home Assistant."
     },
     "warn": {
@@ -175,6 +246,62 @@
   },
   "device": {
     "caption": "Insteon Device",
+    "overview": {
+      "caption": "Overview",
+      "battery_device": "Battery powered",
+      "not_identified": "Not identified",
+      "connections": "Connections",
+      "select_hint": "Select a button to see what it controls",
+      "records_error": "Could not read the link database from Home Assistant.",
+      "retry": "Retry",
+      "no_links_stored": "No links stored on this device",
+      "modem_scenes": "Scenes",
+      "scene_devices": "Scene {group} · {count, plural, one {# device} other {# devices}}",
+      "modem_devices": "{count, plural, one {# device} other {# devices}} Home Assistant can control",
+      "see_aldb": "The full record list is on the All-Link Database tab.",
+      "pane": {
+        "controls": "Controls",
+        "controlled_by": "Controlled by",
+        "no_links": "No connections",
+        "group": "Group {group}",
+        "load_button": "Load button",
+        "scene_button": "Scene button",
+        "load_caption": "Load button: {label}",
+        "home_assistant": "Home Assistant",
+        "ha_notified": "Notified when this button is used",
+        "ha_controls": "Can control this button",
+        "scene": "Scene {group}",
+        "scene_named": "Scene {group}: {name}",
+        "not_a_button": "Group {group}, not a button",
+        "other_links": "Other links ({count})",
+        "other_links_hint": "These links are not tied to a button. The All-Link Database tab lists every record.",
+        "controls_row": "Controls {name}",
+        "controlled_by_row": "Controlled by {name}",
+        "ha_no_control_link": "Home Assistant has no control link to this device",
+        "button_not_notified": "Home Assistant is not notified when this button is used",
+        "pending": "Some of these links have not been written to the device yet. Write or undo them from the All-Link Database tab.",
+        "pending_row": "Not written yet"
+      },
+      "button": {
+        "named": "Button {label}",
+        "group": "Group {group}",
+        "paddle": "Paddle",
+        "dial": "Dial",
+        "toggle": "Toggle",
+        "outlet_top": "Top outlet",
+        "outlet_bottom": "Bottom outlet",
+        "light": "Light",
+        "fan": "Fan",
+        "load": "Load"
+      },
+      "fields": {
+        "category": "Category / subcategory",
+        "engine_version": "Engine version",
+        "firmware": "Firmware",
+        "aldb_status": "Link database",
+        "buttons": "Buttons"
+      }
+    },
     "remove_all_refs": {
       "title": "Delete All References",
       "description": "Do you want to delete all references to this device in all Insteon devices?",
@@ -184,7 +311,8 @@
     "actions": {
       "add": "Add Insteon Device",
       "stop": "Stop",
-      "delete": "Delete device"
+      "delete": "Delete device",
+      "open_in_ha": "Open in Home Assistant"
     },
     "fields": {
       "device_address": "Insteon device address (optional)",
@@ -240,7 +368,7 @@
       "create": "Create ALDB Record",
       "show": "Show Unused",
       "hide": "Hide Unused",
-      "add_default_links": "Add Default Links",
+      "add_default_links": "Add default links",
       "download": "Download"
     },
     "fields": {
@@ -256,6 +384,11 @@
   "properties": {
     "caption": "Properties",
     "no_data": "No properties are available for this device.",
+    "errors": {
+      "required": "Enter a value",
+      "integer": "Enter a whole number",
+      "range": "Enter a number from {min} to {max}"
+    },
     "actions": {
       "manage": "Insteon Properties",
       "change": "Change Property Value",
@@ -268,9 +401,12 @@
       "modified": "Modified",
       "value": "Value"
     },
+    "form": {
+      "range": "{min} to {max}"
+    },
     "form_options": {
       "on_off_switch_main": "Main switch",
-      "dimmable_light_main": "Main dimmery switch",
+      "dimmable_light_main": "Main dimmer switch",
       "on_off_switch_a": "Button A",
       "on_off_switch_b": "Button B",
       "on_off_switch_c": "Button C",

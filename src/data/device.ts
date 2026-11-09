@@ -1,5 +1,5 @@
 import type { HomeAssistant } from "@ha/types";
-import type { HaFormSchema } from "@ha/components/ha-form/types";
+import type { HaFormSchema, HaFormSelectSchema } from "@ha/components/ha-form/types";
 import type { Insteon, InsteonDevice, InsteonX10Device } from "./insteon";
 import type { ConfigUpdateStatus } from "./config";
 
@@ -161,6 +161,21 @@ export const aldbRecordLoaded = (hass: HomeAssistant, id: string): Promise<void>
     device_address: id,
   });
 
+export interface AldbNotification {
+  type: "record_loaded" | "status_changed" | "unsubscribed";
+  is_loading?: boolean;
+}
+
+export const subscribeAldbLoading = (
+  hass: HomeAssistant,
+  address: string,
+  callback: (message: AldbNotification) => void,
+): Promise<() => Promise<void>> =>
+  hass.connection.subscribeMessage<AldbNotification>(callback, {
+    type: "insteon/aldb/notify",
+    device_address: address,
+  });
+
 export const aldbNewRecordSchema = (insteon: Insteon): HaFormSchema[] => [
   {
     name: "mode",
@@ -297,7 +312,7 @@ export const RAMP_RATE_SECONDS: { [seconds: string]: number } = {
   "0.1": 31,
 };
 
-export const rampRateSchema: HaFormSchema = {
+export const rampRateSchema: HaFormSelectSchema = {
   name: "ramp_rate",
   options: [
     ["31", "0.1"],

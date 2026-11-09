@@ -74,11 +74,9 @@ class DialogAddDeviceOverride extends LitElement {
               </div>
             `
           : html`
-        <div class="buttons">
           <ha-button @click=${this._submit} slot="primaryAction">
             ${this.insteon!.localize("common.ok")}
           </ha-button>
-        </div>
       </ha-dialog>`}
       </ha-dialog>
     `;
@@ -104,7 +102,7 @@ class DialogAddDeviceOverride extends LitElement {
       if (this._checkData(override)) {
         await addDeviceOverride(this.hass!, override);
         if (this._callback) {
-          this._callback(true);
+          await this._callback(true);
         }
         this._opened = false;
       }

@@ -9,7 +9,8 @@ import type {
   DataTableColumnContainer,
   DataTableRowData,
 } from "@ha/components/data-table/ha-data-table";
-import type { InsteonProperty, Insteon } from "../../data/insteon";
+import type { InsteonProperty } from "../../data/device";
+import type { Insteon } from "../../data/insteon";
 import type { HomeAssistant } from "@ha/types";
 import { computeRTLDirection } from "@ha/common/util/compute_rtl";
 import type { HaFormSchema } from "@ha/components/ha-form/types";
@@ -76,7 +77,7 @@ export class InsteonPropertiesDataTable extends LitElement {
             name: {
               title: this.insteon.localize("properties.fields.name"),
               sortable: true,
-              grows: true,
+              flex: 2,
             },
             modified: {
               title: this.insteon.localize("properties.fields.modified"),
@@ -87,24 +88,24 @@ export class InsteonPropertiesDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
             display_value: {
               title: this.insteon.localize("properties.fields.value"),
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
           }
         : {
             name: {
               title: this.insteon.localize("properties.fields.name"),
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
             description: {
               title: this.insteon.localize("properties.fields.description"),
               sortable: true,
-              grows: true,
+              flex: 2,
             },
             modified: {
               title: this.insteon.localize("properties.fields.modified"),
@@ -115,12 +116,12 @@ export class InsteonPropertiesDataTable extends LitElement {
                 return html`${this.hass.localize("ui.common.no")}`;
               },
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
             display_value: {
               title: this.insteon.localize("properties.fields.value"),
               sortable: true,
-              width: "20%",
+              minWidth: "20%",
             },
           },
   );
@@ -147,7 +148,7 @@ export class InsteonPropertiesDataTable extends LitElement {
   ) {
     const schema = this.schema[name];
     if (schema.name === "radio_button_groups") {
-      return "" + value.length + " groups";
+      return "" + (Array.isArray(value) ? value.length : 0) + " groups";
     }
     if (schema.type === "multi_select" && Array.isArray(value)) {
       return value.map((item) => schema.options[item]).join(", ");

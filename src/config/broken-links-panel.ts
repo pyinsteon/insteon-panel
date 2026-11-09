@@ -1,4 +1,4 @@
-import { mdiInformationOutline } from "@mdi/js";
+import { mdiDatabaseRefreshOutline, mdiDeleteOutline, mdiLinkPlus } from "@mdi/js";
 import type { TemplateResult } from "lit";
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators";
@@ -43,13 +43,7 @@ interface BrokenLinkRowData extends DataTableRowData {
   data1: number;
   data2: number;
   data3: number;
-  status: [
-    "missing_controller",
-    "missing_responder",
-    "missing_target",
-    "found",
-    "target_db_not_loaded",
-  ];
+  status: BrokenLink["status"];
 }
 
 @customElement("broken-links-panel")
@@ -139,28 +133,8 @@ export class BrokenLinksPanel extends LitElement {
       actions: {
         title: "",
         type: "overflow-menu",
-        template: (record) => html`
-          <ha-icon-overflow-menu
-            .hass=${this.hass}
-            narrow
-            .items=${[
-              {
-                path: mdiInformationOutline,
-                label: this.insteon.localize("utils.broken_links.actions.target_db_not_loaded"),
-                action: () => this._handleReloadAldb(record),
-              },
-              {
-                path: mdiInformationOutline,
-                label: this.insteon.localize("utils.broken_links.actions.missing_responder"),
-                action: () => this._handleDeleteRecord(record),
-              },
-              {
-                path: mdiInformationOutline,
-                label: this.insteon.localize("utils.broken_links.actions.missing_controller"),
-                action: () => this._handleCreateRecord(record),
-              },
-            ]}
-          >
+        template: (record: BrokenLinkRowData) => html`
+          <ha-icon-overflow-menu .hass=${this.hass} narrow .items=${this._rowActions(record)}>
           </ha-icon-overflow-menu>
         `,
       },
@@ -192,6 +166,34 @@ export class BrokenLinksPanel extends LitElement {
     });
     return broken_link_list;
   });
+
+  private _rowActions(record: BrokenLinkRowData) {
+    const status = record.status;
+    if (status === "target_db_not_loaded") {
+      return [
+        {
+          path: mdiDatabaseRefreshOutline,
+          label: this.insteon.localize("utils.broken_links.actions.target_db_not_loaded"),
+          action: () => this._handleReloadAldb(record),
+        },
+      ];
+    }
+    if (status === "missing_controller" || status === "missing_responder") {
+      return [
+        {
+          path: mdiLinkPlus,
+          label: this.insteon.localize("utils.broken_links.actions.create_missing"),
+          action: () => this._handleCreateRecord(record),
+        },
+        {
+          path: mdiDeleteOutline,
+          label: this.insteon.localize("utils.broken_links.actions.delete_record"),
+          action: () => this._handleDeleteRecord(record),
+        },
+      ];
+    }
+    return [];
+  }
 
   private async _handleReloadAldb(record: BrokenLinkRowData) {
     showConfirmationDialog(this, {
@@ -228,17 +230,20 @@ export class BrokenLinksPanel extends LitElement {
   }
 
   private async _handleCreateRecord(record: BrokenLinkRowData) {
+    // The new record is the complement of the surviving half, with the
+    // same data defaults pyinsteon uses for its own default links.
+    const creating_controller = !record.is_controller;
     const aldb_rec: ALDBRecord = {
       mem_addr: 0,
       in_use: true,
-      is_controller: !record.is_controller,
+      is_controller: creating_controller,
       highwater: false,
       group: record.group,
       target: record.address,
       target_name: "",
       data1: 255,
-      data2: 0,
-      data3: 1,
+      data2: 28,
+      data3: creating_controller ? record.group : 1,
       dirty: true,
     };
     this._selected_device = record.target;

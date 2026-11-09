@@ -44,13 +44,7 @@ export interface BrokenLink {
   data1: number;
   data2: number;
   data3: number;
-  status: [
-    "missing_controller",
-    "missing_responder",
-    "missing_target",
-    "found",
-    "target_db_not_loaded",
-  ];
+  status: "missing_controller" | "missing_responder" | "target_db_not_loaded";
 }
 
 export interface UnknownDevice {

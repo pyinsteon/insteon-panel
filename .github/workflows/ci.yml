@@ -7,6 +7,7 @@ on:
   pull_request:
     branches:
       - main
+      - dev
 
 jobs:
   lint:
@@ -14,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out files from GitHub
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -27,6 +28,9 @@ jobs:
       - name: Run prettier
         run: yarn run lint:prettier
 
+      - name: Check types
+        run: yarn run lint:types
+
       - name: Check for duplicate dependencies
         run: yarn dedupe --check
 
@@ -35,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out files from GitHub
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
 
@@ -45,39 +49,39 @@ jobs:
       - name: Run tests
         run: yarn test
 
-  coverage:
-    name: Coverage
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Check out files from GitHub
-        uses: actions/checkout@v5
-        with:
-          submodules: recursive
+  # coverage:
+  #   name: Coverage
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     pull-requests: write
+  #   steps:
+  #     - name: Check out files from GitHub
+  #       uses: actions/checkout@v5
+  #       with:
+  #         submodules: recursive
 
-      - name: Setup Node and Dependencies
-        uses: ./.github/actions/setup
+  #     - name: Setup Node and Dependencies
+  #       uses: ./.github/actions/setup
 
-      - name: Run tests with coverage
-        run: yarn run test:coverage
+  #     - name: Run tests with coverage
+  #       run: yarn run test:coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        # always() to also upload coverage if tests are failing
-        if: always()
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: ./test/coverage
-          fail_ci_if_error: true
+  #     - name: Upload coverage to Codecov
+  #       uses: codecov/codecov-action@v5
+  #       # always() to also upload coverage if tests are failing
+  #       if: always()
+  #       with:
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+  #         directory: ./test/coverage
+  #         fail_ci_if_error: true
 
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Check out files from GitHub
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 

@@ -1,4 +1,5 @@
 import { mdiDotsVertical } from "@mdi/js";
+import type { ActionDetail } from "@material/mwc-list";
 import type { CSSResultGroup, TemplateResult, PropertyValues } from "lit";
 import { css, html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators";
@@ -17,7 +18,10 @@ import "@ha/components/ha-button-menu";
 import { haStyle } from "@ha/resources/styles";
 import "./insteon-properties-data-table";
 import { showInsteonPropertyDialog } from "./show-dialog-insteon-property";
-import { insteonDeviceTabs } from "../insteon-device-router";
+import memoizeOne from "memoize-one";
+import { deviceTabs } from "../device-tabs";
+import "../insteon-device-header";
+import { confirmDeleteDevice } from "../delete-device";
 import type { Insteon, InsteonDevice } from "../../data/insteon";
 import type { InsteonProperty } from "../../data/device";
 import {
@@ -27,9 +31,7 @@ import {
   writeProperties,
   loadProperties,
   resetProperties,
-  removeInsteonDevice,
 } from "../../data/device";
-// import { get_insteon_devices_tabs } from "../insteon-device-router";
 
 @customElement("insteon-device-properties-page")
 class InsteonDevicePropertiesPage extends LitElement {
@@ -59,20 +61,38 @@ class InsteonDevicePropertiesPage extends LitElement {
 
   private _advancedAvailable = false;
 
-  protected firstUpdated(changedProps: PropertyValues) {
-    super.firstUpdated(changedProps);
-    if (this.deviceId && this.hass) {
-      this._advancedAvailable = Boolean(this.hass.userData?.showAdvanced);
-      fetchInsteonDevice(this.hass, this.deviceId).then(
-        (device) => {
-          this._device = device;
-          this._getProperties();
-        },
-        () => {
-          this._noDeviceError();
-        },
-      );
+  private _tabs = memoizeOne((deviceId: string) => deviceTabs(this.insteon.localize, deviceId));
+
+  protected willUpdate(changedProps: PropertyValues) {
+    super.willUpdate(changedProps);
+    // The device router reuses this element when switching devices, so reload
+    // whenever deviceId changes rather than only on first render.
+    if (changedProps.has("deviceId") && this.deviceId && this.hass) {
+      this._loadDevice();
     }
+  }
+
+  private _loadDevice() {
+    const token = this.deviceId!;
+    this._advancedAvailable = Boolean(this.hass.userData?.showAdvanced);
+    this._device = undefined;
+    this._properties = [];
+    this._schema = undefined;
+    fetchInsteonDevice(this.hass, token).then(
+      (device) => {
+        if (this.deviceId !== token) {
+          return;
+        }
+        this._device = device;
+        this._getProperties();
+      },
+      () => {
+        if (this.deviceId !== token) {
+          return;
+        }
+        this._noDeviceError();
+      },
+    );
   }
 
   protected _dirty() {
@@ -85,55 +105,29 @@ class InsteonDevicePropertiesPage extends LitElement {
         .hass=${this.hass}
         .narrow=${this.narrow!}
         .route=${this.route!}
-        .tabs=${insteonDeviceTabs}
+        .tabs=${this._tabs(this.deviceId ?? "")}
         .localizeFunc=${this.insteon.localize}
         .backCallback=${this._handleBackTapped}
       >
-      ${
-        this.narrow
-          ? html`
-              <div slot="header" class="header fullwidth">
-                <div slot="header" class="narrow-header-left">${this._device?.name}</div>
-                <div slot="header" class="narrow-header-right">${this._generateActionMenu()}</div>
-              </div>
-            `
-          : ""
-      }
+        ${this.narrow
+          ? html`<insteon-device-header
+              slot="header"
+              narrow
+              .hass=${this.hass}
+              .insteon=${this.insteon}
+              .device=${this._device}
+              >${this._generateActionMenu()}</insteon-device-header
+            >`
+          : ""}
         <div class="container">
-          ${
-            !this.narrow
-              ? html`
-                  <div class="page-header fullwidth">
-                    <table>
-                      <tr>
-                        <td>
-                          <div class="device-name">
-                            <h1>${this._device?.name}</h1>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <div></div>
-                        </td>
-                      </tr>
-                    </table>
-                    <div class="logo header-right">
-                      <img
-                        src="https://brands.home-assistant.io/insteon/logo.png"
-                        alt="Insteon Logo"
-                        referrerpolicy="no-referrer"
-                        @load=${this._onImageLoad}
-                        @error=${this._onImageError}
-                      />
-                      ${this._generateActionMenu()}
-                    </div>
-                  </div>
-                `
-              : ""
-          }
-
-          </div>
+          ${!this.narrow
+            ? html`<insteon-device-header
+                .hass=${this.hass}
+                .insteon=${this.insteon}
+                .device=${this._device}
+                >${this._generateActionMenu()}</insteon-device-header
+              >`
+            : ""}
           <insteon-properties-data-table
             .hass=${this.hass}
             .insteon=${this.insteon}
@@ -158,20 +152,17 @@ class InsteonDevicePropertiesPage extends LitElement {
           .path=${mdiDotsVertical}
         ></ha-icon-button>
 
-        <!-- 0 -->
         <ha-list-item> ${this.insteon!.localize("common.actions.load")} </ha-list-item>
+        <ha-list-item>${this.insteon.localize("device.actions.open_in_ha")}</ha-list-item>
 
-        <!-- 1 -->
         <ha-list-item .disabled=${!this._dirty()}>
           ${this.insteon!.localize("common.actions.write")}
         </ha-list-item>
 
-        <!-- 2 -->
         <ha-list-item .disabled=${!this._dirty()}>
           ${this.insteon!.localize("common.actions.reset")}
         </ha-list-item>
 
-        <!-- 3 -->
         <ha-list-item
           aria-label=${this.insteon.localize("device.actions.delete")}
           class=${classMap({ warning: true })}
@@ -179,7 +170,6 @@ class InsteonDevicePropertiesPage extends LitElement {
           ${this.insteon.localize("device.actions.delete")}
         </ha-list-item>
 
-        <!-- 4 -->
         ${this._advancedAvailable
           ? html`<ha-list-item>
               ${this.insteon!.localize("properties.actions." + this._showHideAdvanced)}
@@ -187,14 +177,6 @@ class InsteonDevicePropertiesPage extends LitElement {
           : ""}
       </ha-button-menu>
     `;
-  }
-
-  private _onImageLoad(ev) {
-    ev.target.style.display = "inline-block";
-  }
-
-  private _onImageError(ev) {
-    ev.target.style.display = "none";
   }
 
   private async _onLoadPropertiesClick() {
@@ -222,39 +204,6 @@ class InsteonDevicePropertiesPage extends LitElement {
       });
     }
     this._showWait = false;
-  }
-
-  private async _onDeleteDevice() {
-    await showConfirmationDialog(this, {
-      text: this.insteon.localize("common.warn.delete"),
-      confirmText: this.insteon!.localize("common.yes"),
-      dismissText: this.insteon!.localize("common.no"),
-      confirm: async () => this._checkScope(),
-      warning: true,
-    });
-  }
-
-  private async _delete(remove_all_refs: boolean) {
-    await removeInsteonDevice(this.hass, this._device!.address, remove_all_refs);
-    navigate("/insteon");
-  }
-
-  private async _checkScope() {
-    if (this._device!.address.includes("X10")) {
-      this._delete(false);
-      return;
-    }
-    const remove_all_refs = await showConfirmationDialog(this, {
-      title: this.insteon.localize("device.remove_all_refs.title"),
-      text: html` ${this.insteon.localize("device.remove_all_refs.description")}<br /><br />
-        ${this.insteon.localize("device.remove_all_refs.confirm_description")}<br />
-        ${this.insteon.localize("device.remove_all_refs.dismiss_description")}`,
-      confirmText: this.insteon!.localize("common.yes"),
-      dismissText: this.insteon!.localize("common.no"),
-      warning: true,
-      destructive: true,
-    });
-    this._delete(remove_all_refs);
   }
 
   private async _onWritePropertiesClick() {
@@ -286,11 +235,11 @@ class InsteonDevicePropertiesPage extends LitElement {
   }
 
   private async _getProperties() {
-    const propertiesInfo = await fetchInsteonProperties(
-      this.hass,
-      this._device!.address,
-      this._showAdvanced,
-    );
+    const address = this._device!.address;
+    const propertiesInfo = await fetchInsteonProperties(this.hass, address, this._showAdvanced);
+    if (this._device?.address !== address) {
+      return;
+    }
     // eslint-disable-next-line no-console
     console.info("Properties: " + propertiesInfo.properties.length);
     this._properties = propertiesInfo.properties;
@@ -344,15 +293,18 @@ class InsteonDevicePropertiesPage extends LitElement {
         await this._onLoadPropertiesClick();
         break;
       case 1:
-        await this._onWritePropertiesClick();
+        navigate("/config/devices/device/" + this.deviceId);
         break;
       case 2:
-        await this._onResetPropertiesClick();
+        await this._onWritePropertiesClick();
         break;
       case 3:
-        await this._onDeleteDevice();
+        await this._onResetPropertiesClick();
         break;
       case 4:
+        confirmDeleteDevice(this, this.hass, this.insteon, this._device!);
+        break;
+      case 5:
         await this._onShowHideAdvancedClicked();
         break;
     }
@@ -425,77 +377,24 @@ class InsteonDevicePropertiesPage extends LitElement {
           --app-header-border-bottom: 1px solid var(--divider-color);
         }
 
-        :host([narrow]) {
-          --properties-table-height: 80vh;
-        }
-
-        :host(:not([narrow])) {
-          --properties-table-height: 80vh;
-        }
-
-        .header {
-          display: flex;
-          justify-content: space-between;
-        }
-
         .container {
           display: flex;
-          flex-wrap: wrap;
-          margin: 0px;
+          flex-direction: column;
+          box-sizing: border-box;
+          height: 100%;
+          margin: 0 auto;
+          padding-top: 8px;
+          max-width: 1000px;
         }
-        .device-name {
-          display: flex;
-          align-items: left;
-          padding-left: 0px;
-          padding-inline-start: 0px;
-          direction: var(--direction);
-          font-size: 24px;
-        }
+
         insteon-properties-data-table {
+          flex: 1 1 auto;
+          min-height: 0;
+          margin-top: 16px;
           width: 100%;
-          height: var(--properties-table-height);
           display: block;
           --data-table-border-width: 0;
-        }
-
-        h1 {
-          margin: 0;
-          font-family: var(--paper-font-headline_-_font-family);
-          -webkit-font-smoothing: var(--paper-font-headline_-_-webkit-font-smoothing);
-          font-size: var(--paper-font-headline_-_font-size);
-          font-weight: var(--paper-font-headline_-_font-weight);
-          letter-spacing: var(--paper-font-headline_-_letter-spacing);
-          line-height: var(--paper-font-headline_-_line-height);
-          opacity: var(--dark-primary-opacity);
-        }
-
-        .page-header {
-          padding: 8px;
-          margin-left: 32px;
-          margin-right: 32px;
-          display: flex;
-          justify-content: space-between;
-        }
-
-        .fullwidth {
-          padding: 8px;
-          box-sizing: border-box;
-          width: 100%;
-          flex-grow: 1;
-        }
-
-        .header-right {
-          align-self: center;
-          display: flex;
-        }
-
-        .header-right img {
-          height: 30px;
-        }
-
-        .header-right:first-child {
-          width: 100%;
-          justify-content: flex-end;
+          --data-table-background-color: var(--primary-background-color);
         }
 
         .actions ha-button {
@@ -503,15 +402,7 @@ class InsteonDevicePropertiesPage extends LitElement {
         }
 
         :host([narrow]) .container {
-          margin-top: 0;
-        }
-
-        .narrow-header-left {
-          padding: 8px;
-          width: 90%;
-        }
-        .narrow-header-right {
-          align-self: right;
+          padding-top: 0;
         }
       `,
     ];

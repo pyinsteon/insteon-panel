@@ -9,7 +9,7 @@ import type { Insteon } from "./data/insteon";
 import { insteonMainTabs } from "./insteon-router";
 import "@ha/components/ha-fab";
 import "./insteon-utils-card";
-import { mdiWrench, mdiCog, mdiDevices } from "@mdi/js";
+import { mdiWrench, mdiCog, mdiDevices, mdiImport, mdiLinkOff } from "@mdi/js";
 import "@ha/components/ha-svg-icon";
 import type {
   InsteonModemConfig,
@@ -25,7 +25,7 @@ import {
   modemIsPlm,
 } from "./data/config";
 import { showConfigModemDialog } from "./config/show-dialog-config-modem";
-import { showDeleteDeviceDialog } from "./config/show-dialog-delete-device";
+
 import { showAlertDialog } from "@ha/dialogs/generic/show-dialog-box";
 import type { HaFormDataContainer } from "@ha/components/ha-form/types";
 
@@ -157,6 +157,20 @@ export class InsteonUtilsPanel extends LitElement {
           >
             <ha-svg-icon slot="icon" .path=${mdiDevices}></ha-svg-icon>
           </insteon-utils-card>
+          <insteon-utils-card
+            .hass=${this.hass}
+            .title=${this.insteon.localize("utils.modem_links.caption")}
+            .action_url=${"/insteon/modem_links"}
+          >
+            <ha-svg-icon slot="icon" .path=${mdiLinkOff}></ha-svg-icon>
+          </insteon-utils-card>
+          <insteon-utils-card
+            .hass=${this.hass}
+            .title=${this.insteon.localize("utils.device_scenes.caption")}
+            .action_url=${"/insteon/device_scenes"}
+          >
+            <ha-svg-icon slot="icon" .path=${mdiImport}></ha-svg-icon>
+          </insteon-utils-card>
         </div>
       </hass-tabs-subpage>
     `;
@@ -185,14 +199,6 @@ export class InsteonUtilsPanel extends LitElement {
       text: this.insteon.localize("utils.config_modem.success_text"),
     });
     history.back();
-  }
-
-  private async _showDeleteDeviceDialog() {
-    await showDeleteDeviceDialog(this, {
-      hass: this.hass,
-      insteon: this.insteon,
-      title: this.insteon.localize("device.actions.delete"),
-    });
   }
 
   static get styles(): CSSResultGroup {
@@ -335,7 +341,7 @@ export class InsteonUtilsPanel extends LitElement {
           this._broken_links = broken_links || [];
         });
         fetchUnknownDevices(this.hass).then((unknown_devices) => {
-          this._unknown_devices = unknown_devices || [];
+          this._unknown_devices = (unknown_devices || []).map((addr) => ({ address: addr }));
         });
       }
     }

@@ -23,7 +23,7 @@
     "isolatedModules": true,
     "baseUrl": "src",
     "paths": {
-      "@ha/*": ["../homeassistant-frontend/src/*"],
+      "@ha/*": ["../homeassistant-frontend/src/*"]
     },
     "plugins": [
       {
@@ -39,5 +39,7 @@
         }
       }
     ]
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/tools/markdown"]
 }
