@@ -215,6 +215,26 @@ describe("receptacle ground openings", () => {
       );
     }
   });
+
+  it.each([
+    { name: "on/off outlet", cat: 0x02, subcat: 0x39 },
+    { name: "i3 outlet", cat: 0x02, subcat: 0x3f },
+  ])("keeps the upper ground clear of the controls on the $name", async ({ cat, subcat }) => {
+    const el = await renderPlate(cat, subcat);
+    const [upper, lower] = [1, 2].map((group) => {
+      const key = root(el).querySelector(`.key[data-group="${group}"]`)!;
+      const bottom = Number(key.querySelector("path.slot")!.getAttribute("d")!.split(" ")[1]);
+      const slot = key.querySelector("rect.slot")!;
+      const hit = key.querySelector(".hit")!;
+      return {
+        bottom,
+        gap: bottom - Number(slot.getAttribute("y")) - Number(slot.getAttribute("height")),
+        limit: Number(hit.getAttribute("y")) + Number(hit.getAttribute("height")),
+      };
+    });
+    expect(upper.bottom).toBeLessThan(upper.limit);
+    expect(upper.gap).toBeCloseTo(lower.gap);
+  });
 });
 
 describe("on/off outlet", () => {

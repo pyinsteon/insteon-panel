@@ -311,7 +311,7 @@ export class InsteonDevicePlate extends LitElement {
 
   private _outletDual(): SVGTemplateResult {
     return this._outletFace(
-      svg`${slots(40, 6.4, 32.8, 18, 16.3)}${ground(40, 49.6, 11.5, 12.5)}`,
+      svg`${slots(40, 6.4, 32.8, 18, 16.3)}${ground(40, 29.4, 11.5, 12.5)}`,
       svg`${slots(40, 118, 32.8, 18, 16.3)}${ground(40, 141, 11.5, 12.5)}`,
       svg`
         <rect class="btn" x="28" y="63.2" width="24" height="8" rx="4"></rect>
@@ -324,7 +324,7 @@ export class InsteonDevicePlate extends LitElement {
 
   private _outletI3(): SVGTemplateResult {
     return this._outletFace(
-      svg`${slots(40, 6, 32.8, 20, 16.5, 5)}${ground(40, 49, 11, 12)}`,
+      svg`${slots(40, 6, 32.8, 20, 16.5, 5)}${ground(40, 29, 11, 12)}`,
       svg`${slots(40, 120, 32.8, 20, 16.5, 5)}${ground(40, 143, 11, 12)}`,
       svg`
         <circle class="btn" cx="40" cy="67.2" r="6.4"></circle>
