@@ -412,12 +412,13 @@ export class InsteonDevicePlate extends LitElement {
   }
 
   private _plugin(): SVGTemplateResult {
+    // Open button paths share the case border instead of adding a second left edge.
     return svg`
       ${this._key(1, svg`<rect class="face" x="0.5" y="0.5" width="79" height="126" rx="4"></rect>`)}
       <rect class="led strip" x="11.3" y="3" width="1.4" height="6.4" rx="0.7"></rect>
-      <rect class="btn" x="80" y="55" width="5" height="12" rx="1"></rect>
-      <rect class="btn" x="80" y="73" width="5" height="12" rx="1"></rect>
-      <rect class="btn" x="80" y="94" width="5" height="2" rx="0.5"></rect>
+      <path class="btn" d="M80 55 h2.5 v12 h-2.5"></path>
+      <path class="btn" d="M80 73 h2.5 v12 h-2.5"></path>
+      <path class="btn" d="M80 94 h2.5 v2 h-2.5"></path>
     `;
   }
 

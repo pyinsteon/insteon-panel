@@ -438,19 +438,21 @@ describe("in-line module", () => {
 });
 
 describe("plug-in module", () => {
-  it("draws a led strip and three side buttons but no receptacle", async () => {
+  it("draws three side buttons without left borders or a receptacle", async () => {
     const el = await renderPlate(0x01, 0x0e);
     const r = root(el);
     expect(r.querySelector("svg")!.getAttribute("viewBox")).toBe("0 0 86 127");
     expect(r.querySelector(".led.strip")).not.toBeNull();
     expect(r.querySelector(".wordmark")).toBeNull();
     expect(r.querySelector(".slot")).toBeNull();
-    const buttons = [...r.querySelectorAll("rect.btn")].map((button) => ({
-      x: Number(button.getAttribute("x")),
-      y: Number(button.getAttribute("y")),
-      width: Number(button.getAttribute("width")),
-      height: Number(button.getAttribute("height")),
-    }));
+    const buttons = [...r.querySelectorAll("path.btn")].map((button) => {
+      const path = button.getAttribute("d")!;
+      const match = path.match(/^M([\d.]+) ([\d.]+) h([\d.]+) v([\d.]+) h(-[\d.]+)$/);
+      expect(match).not.toBeNull();
+      const [, x, y, width, height, bottom] = match!;
+      expect(Number(bottom)).toBe(-Number(width));
+      return { x: Number(x), y: Number(y), width: Number(width), height: Number(height) };
+    });
     expect(buttons).toHaveLength(3);
     expect(buttons[0].height).toBe(buttons[1].height);
     expect(buttons[0].height).toBeGreaterThan(buttons[0].width);
