@@ -123,6 +123,23 @@ describe("i3 paddle", () => {
 });
 
 describe("kp014 keypad", () => {
+  it("keeps the bottom row inset so it cannot cover the frame border", async () => {
+    const el = await renderPlate(0x01, 0x59);
+    const r = root(el);
+    const frame = r.querySelector(".frame")!;
+    const rows = [...r.querySelectorAll(".face.row")];
+    const first = rows[0];
+    const last = rows[rows.length - 1];
+    const topInset = Number(first.getAttribute("y")) - Number(frame.getAttribute("y"));
+    const bottomInset =
+      Number(frame.getAttribute("y")) +
+      Number(frame.getAttribute("height")) -
+      Number(last.getAttribute("y")) -
+      Number(last.getAttribute("height"));
+    expect(bottomInset).toBeCloseTo(topInset);
+    expect(bottomInset).toBeGreaterThan(0);
+  });
+
   it("draws four blank rows with a led each and keeps separators when selected", async () => {
     const el = await renderPlate(0x01, 0x59, { 1: "Button A", 2: "Button B" });
     el.selected = 1;
@@ -184,6 +201,22 @@ describe("keypadlinc 8", () => {
   });
 });
 
+describe("keypadlinc label placement", () => {
+  it.each([
+    { name: "six-button", subcat: 0x42 },
+    { name: "eight-button", subcat: 0x41 },
+  ])("vertically centers every $name label within its button", async ({ subcat }) => {
+    const el = await renderPlate(0x01, subcat);
+    for (const label of root(el).querySelectorAll(".print")) {
+      const face = label.previousElementSibling!;
+      expect(face.matches(".face")).toBe(true);
+      const center = Number(face.getAttribute("y")) + Number(face.getAttribute("height")) / 2;
+      expect(Number(label.getAttribute("y"))).toBeCloseTo(center);
+      expect(label.getAttribute("dominant-baseline")).toBe("central");
+    }
+  });
+});
+
 describe("i3 dial", () => {
   it("draws a knob 0.87 of the insert width with a shadow and no leds", async () => {
     const el = await renderPlate(0x01, 0x58);
@@ -194,6 +227,135 @@ describe("i3 dial", () => {
     expect(r.querySelector(".shadow")).not.toBeNull();
     expect(r.querySelectorAll(".led").length).toBe(0);
     expect(r.querySelector(".tab")).toBeNull();
+  });
+});
+
+describe("receptacle ground openings", () => {
+  it.each([
+    { name: "on/off outlet", cat: 0x02, subcat: 0x39, grounds: 2 },
+    { name: "i3 outlet", cat: 0x02, subcat: 0x3f, grounds: 2 },
+    { name: "outletlinc dimmer", cat: 0x01, subcat: 0x21, grounds: 1 },
+    { name: "outletlinc relay", cat: 0x02, subcat: 0x08, grounds: 2 },
+  ])("puts the flat side down on the $name", async ({ cat, subcat, grounds }) => {
+    const el = await renderPlate(cat, subcat);
+    const paths = [...root(el).querySelectorAll("path.slot")];
+    expect(paths).toHaveLength(grounds);
+    for (const path of paths) {
+      // Rise from the flat base, then arc counterclockwise over the top.
+      expect(path.getAttribute("d")).toMatch(
+        /^M[\d.]+ [\d.]+ h[\d.]+ v-[\d.]+ a[\d.]+ [\d.]+ 0 0 0 -[\d.]+ 0 z$/,
+      );
+    }
+  });
+
+  it.each([
+    { name: "on/off outlet", cat: 0x02, subcat: 0x39 },
+    { name: "i3 outlet", cat: 0x02, subcat: 0x3f },
+  ])("keeps the upper ground clear of the controls on the $name", async ({ cat, subcat }) => {
+    const el = await renderPlate(cat, subcat);
+    const [upper, lower] = [1, 2].map((group) => {
+      const key = root(el).querySelector(`.key[data-group="${group}"]`)!;
+      const bottom = Number(key.querySelector("path.slot")!.getAttribute("d")!.split(" ")[1]);
+      const slot = key.querySelector("rect.slot")!;
+      const hit = key.querySelector(".hit")!;
+      return {
+        bottom,
+        gap: bottom - Number(slot.getAttribute("y")) - Number(slot.getAttribute("height")),
+        limit: Number(hit.getAttribute("y")) + Number(hit.getAttribute("height")),
+      };
+    });
+    expect(upper.bottom).toBeLessThan(upper.limit);
+    expect(upper.gap).toBeCloseTo(lower.gap);
+  });
+
+  it.each([
+    { name: "on/off outlet", cat: 0x02, subcat: 0x39 },
+    { name: "i3 outlet", cat: 0x02, subcat: 0x3f },
+    { name: "outletlinc relay", cat: 0x02, subcat: 0x08 },
+  ])(
+    "vertically centers receptacles within their sections on the $name",
+    async ({ cat, subcat }) => {
+      const el = await renderPlate(cat, subcat);
+      for (const key of root(el).querySelectorAll(".key")) {
+        const hit = key.querySelector(".hit")!;
+        const sectionTop = Number(hit.getAttribute("y"));
+        const sectionBottom = sectionTop + Number(hit.getAttribute("height"));
+        const top = Number(key.querySelector("rect.slot")!.getAttribute("y"));
+        const bottom = Number(key.querySelector("path.slot")!.getAttribute("d")!.split(" ")[1]);
+        expect(top - sectionTop).toBeCloseTo(sectionBottom - bottom);
+      }
+    },
+  );
+
+  it("uses the same blade and ground geometry across all receptacles", async () => {
+    const drawings = await Promise.all(
+      [
+        [0x02, 0x39],
+        [0x02, 0x3f],
+        [0x01, 0x21],
+        [0x02, 0x08],
+      ].map(async ([cat, subcat]) => root(await renderPlate(cat, subcat))),
+    );
+    const bladeGeometry = (left: Element, right: Element) => [
+      left.getAttribute("width"),
+      left.getAttribute("height"),
+      right.getAttribute("width"),
+      right.getAttribute("height"),
+      (Number(right.getAttribute("x")) - Number(left.getAttribute("x"))).toFixed(4),
+      (Number(right.getAttribute("y")) - Number(left.getAttribute("y"))).toFixed(4),
+    ];
+    const groundGeometry = (path: Element, left: Element) => {
+      const [x, y, ...commands] = path.getAttribute("d")!.split(" ");
+      return [
+        (Number(x.slice(1)) - Number(left.getAttribute("x"))).toFixed(4),
+        (Number(y) - Number(left.getAttribute("y"))).toFixed(4),
+        ...commands,
+      ];
+    };
+    const reference = [...drawings[0].querySelectorAll(".slot")];
+    for (const drawing of drawings) {
+      const blades = [...drawing.querySelectorAll("rect.slot")];
+      for (let i = 0; i < blades.length; i += 2) {
+        expect(bladeGeometry(blades[i], blades[i + 1])).toEqual(
+          bladeGeometry(reference[0], reference[1]),
+        );
+      }
+      const slots = [...drawing.querySelectorAll(".slot")];
+      slots.forEach((slot, i) => {
+        if (slot.localName === "path") {
+          expect(groundGeometry(slot, slots[i - 2])).toEqual(
+            groundGeometry(reference[2], reference[0]),
+          );
+        }
+      });
+    }
+  });
+});
+
+describe("dual outlet controls", () => {
+  it.each([
+    { name: "on/off outlet", cat: 0x02, subcat: 0x39 },
+    { name: "i3 outlet", cat: 0x02, subcat: 0x3f },
+  ])("centers buttons and leds between the dividers on the $name", async ({ cat, subcat }) => {
+    const el = await renderPlate(cat, subcat);
+    const r = root(el);
+    const [upper, lower] = [...r.querySelectorAll(".hit")];
+    const top = Number(upper.getAttribute("y")) + Number(upper.getAttribute("height"));
+    const bottom = Number(lower.getAttribute("y"));
+    const leds = [...r.querySelectorAll(".led")];
+    [...r.querySelectorAll(".btn")].forEach((button, i) => {
+      const circle = button.localName === "circle";
+      const height = circle
+        ? Number(button.getAttribute("r")) * 2
+        : Number(button.getAttribute("height"));
+      const center = circle
+        ? Number(button.getAttribute("cy"))
+        : Number(button.getAttribute("y")) + height / 2;
+      expect(center).toBeCloseTo(top + ((bottom - top) * (i + 0.5)) / 2);
+      expect(center - height / 2).toBeGreaterThan(top);
+      expect(center + height / 2).toBeLessThan(bottom);
+      expect(Number(leds[i].getAttribute("cy"))).toBeCloseTo(center);
+    });
   });
 });
 
@@ -223,11 +385,32 @@ describe("i3 outlet", () => {
     const leds = [...r.querySelectorAll(".led")];
     expect(leds.map((c) => c.getAttribute("cx"))).toEqual(["24.8", "24.8"]);
     expect(leds[0].getAttribute("r")).toBe("0.8");
-    expect(r.querySelector(".slot")!.getAttribute("width")).toBe("5");
   });
 });
 
 describe("outletlinc dimmer", () => {
+  it("rounds and vertically centers the keyed adapter outline within the upper section", async () => {
+    const el = await renderPlate(0x01, 0x21);
+    const r = root(el);
+    const hit = r.querySelector(".hit")!;
+    const sectionTop = Number(hit.getAttribute("y"));
+    const sectionBottom = sectionTop + Number(hit.getAttribute("height"));
+    const outline = r.querySelector(".keyed")!;
+    const curves = [
+      ...outline.getAttribute("d")!.matchAll(/Q[-\d.]+ ([-\d.]+) [-\d.]+ ([-\d.]+)/g),
+    ];
+    expect(curves.length).toBeGreaterThanOrEqual(4);
+    const ys = curves.flatMap(([, control, end]) => [Number(control), Number(end)]);
+    const [, y] = outline.getAttribute("transform")!.match(/^translate\(0 ([\d.]+)\)$/)!;
+    const top = Number(y) + Math.min(...ys);
+    const bottom = Number(y) + Math.max(...ys);
+    expect(top - sectionTop).toBeCloseTo(sectionBottom - bottom);
+    const slot = r.querySelector("rect.slot")!;
+    const slotTop = Number(slot.getAttribute("y"));
+    expect(slotTop).toBeGreaterThan(top);
+    expect(slotTop + Number(slot.getAttribute("height"))).toBeLessThan(bottom);
+  });
+
   it("keys only the upper receptacle and draws a vertical oval", async () => {
     const el = await renderPlate(0x01, 0x21);
     const r = root(el);
@@ -262,17 +445,39 @@ describe("outletlinc relay", () => {
 });
 
 describe("togglelinc", () => {
-  it("draws a lever in a toggle opening with one led and a set tab beside it", async () => {
+  it("draws a narrow toggle assembly between two screws with the set tab underneath", async () => {
     const el = await renderPlate(0x02, 0x1a);
     const r = root(el);
     expect(r.querySelector(".opening")).not.toBeNull();
-    expect(r.querySelector(".key .face.lever")).not.toBeNull();
-    const leds = r.querySelectorAll(".led");
-    expect(leds.length).toBe(1);
-    expect(leds[0].getAttribute("cy")).toBe("104");
-    const tabEl = r.querySelector(".tab")!;
-    expect(tabEl.getAttribute("width")).toBe("8");
-    expect(Number(tabEl.getAttribute("x"))).toBeLessThan(40);
+    const lever = r.querySelector(".key .face.lever")!;
+    expect(lever).not.toBeNull();
+    expect(r.querySelector(".key .lever-base")).not.toBeNull();
+    const frame = r.querySelector(".frame")!;
+    const frameTop = Number(frame.getAttribute("y"));
+    const frameBottom = frameTop + Number(frame.getAttribute("height"));
+    const center = Number(frame.getAttribute("x")) + Number(frame.getAttribute("width")) / 2;
+    expect(Number(frame.getAttribute("width"))).toBeLessThan(40);
+    const screws = [...r.querySelectorAll(".screw")];
+    expect(screws).toHaveLength(2);
+    expect(Number(screws[0].getAttribute("cy")) + Number(screws[0].getAttribute("r"))).toBeLessThan(
+      frameTop,
+    );
+    expect(
+      Number(screws[1].getAttribute("cy")) - Number(screws[1].getAttribute("r")),
+    ).toBeGreaterThan(frameBottom);
+    for (const screw of screws) {
+      expect(Number(screw.getAttribute("cx"))).toBeCloseTo(center);
+    }
+    const tabEl = r.querySelector(".set-button")!;
+    expect(Number(tabEl.getAttribute("x")) + Number(tabEl.getAttribute("width")) / 2).toBeCloseTo(
+      center,
+    );
+    expect(Number(tabEl.getAttribute("y"))).toBeGreaterThan(
+      Number(lever.getAttribute("y")) + Number(lever.getAttribute("height")),
+    );
+    expect(Number(tabEl.getAttribute("y")) + Number(tabEl.getAttribute("height"))).toBeLessThan(
+      frameBottom,
+    );
   });
 });
 
@@ -291,14 +496,35 @@ describe("in-line module", () => {
 });
 
 describe("plug-in module", () => {
-  it("draws a tall body with a receptacle, led strip and edge rocker", async () => {
+  it("draws three side buttons without left borders or a receptacle", async () => {
     const el = await renderPlate(0x01, 0x0e);
     const r = root(el);
     expect(r.querySelector("svg")!.getAttribute("viewBox")).toBe("0 0 86 127");
     expect(r.querySelector(".led.strip")).not.toBeNull();
     expect(r.querySelector(".wordmark")).toBeNull();
-    expect(r.querySelectorAll(".slot").length).toBe(3);
-    expect(r.querySelector("rect.btn")!.getAttribute("x")).toBe("80");
+    expect(r.querySelector(".slot")).toBeNull();
+    const buttons = [...r.querySelectorAll("path.btn")].map((button) => {
+      const path = button.getAttribute("d")!;
+      const match = path.match(/^M([\d.]+) ([\d.]+) h([\d.]+) v([\d.]+) h(-[\d.]+)$/);
+      expect(match).not.toBeNull();
+      const [, x, y, width, height, bottom] = match!;
+      expect(Number(bottom)).toBe(-Number(width));
+      return { x: Number(x), y: Number(y), width: Number(width), height: Number(height) };
+    });
+    expect(buttons).toHaveLength(3);
+    expect(buttons[0].height).toBe(buttons[1].height);
+    expect(buttons[0].height).toBeGreaterThan(buttons[0].width);
+    expect(buttons[2].height).toBeLessThan(buttons[2].width);
+    const face = r.querySelector(".face")!;
+    const edge = Number(face.getAttribute("x")) + Number(face.getAttribute("width"));
+    buttons.forEach((button, i) => {
+      expect(button.x).toBeGreaterThan(edge);
+      expect(button.x).toBe(buttons[0].x);
+      expect(button.width).toBe(buttons[0].width);
+      if (i > 0) {
+        expect(button.y).toBeGreaterThan(buttons[i - 1].y + buttons[i - 1].height);
+      }
+    });
   });
 });
 
@@ -395,11 +621,23 @@ describe("plate keys as tabs", () => {
 describe("plate legibility", () => {
   it("gives the toggle lever a hit area that covers the opening", async () => {
     const el = await renderPlate(0x01, 0x17);
-    const hit = root(el).querySelector(".key .hit")!;
+    const r = root(el);
+    const hit = r.querySelector(".key .hit")!;
+    const opening = r.querySelector(".opening")!;
     expect(hit).not.toBeNull();
-    expect(Number(hit.getAttribute("width"))).toBeGreaterThanOrEqual(16);
-    expect(Number(hit.getAttribute("height"))).toBeGreaterThanOrEqual(46);
-    expect(hit.getAttribute("y")).toBe("48");
+    for (const [position, size] of [
+      ["x", "width"],
+      ["y", "height"],
+    ]) {
+      expect(Number(hit.getAttribute(position))).toBeLessThanOrEqual(
+        Number(opening.getAttribute(position)),
+      );
+      expect(
+        Number(hit.getAttribute(position)) + Number(hit.getAttribute(size)),
+      ).toBeGreaterThanOrEqual(
+        Number(opening.getAttribute(position)) + Number(opening.getAttribute(size)),
+      );
+    }
     expect(hit.classList.contains("no-edge")).toBe(true);
   });
 });

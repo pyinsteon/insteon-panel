@@ -20,19 +20,33 @@ const tab = (x: number, y: number, w: number, h: number, cls = ""): SVGTemplateR
   svg`<rect class="tab ${cls}" x=${x} y=${y} width=${w} height=${h} rx=${h / 2}></rect>`;
 
 const print = (x: number, y: number, text: string, size: number, cls = ""): SVGTemplateResult =>
-  svg`<text class="print ${cls}" x=${x} y=${y} font-size=${size}>${text}</text>`;
+  svg`<text class="print ${cls}" x=${x} y=${y} font-size=${size} dominant-baseline="central">${text}</text>`;
 
-const slots = (cx: number, y: number, gap: number, tall: number, short: number, w = 4) =>
+const slots = (cx: number, y: number): SVGTemplateResult =>
   svg`
-    <rect class="slot" x=${cx - gap / 2 - w / 2} y=${y} width=${w} height=${tall} rx="1"></rect>
-    <rect class="slot" x=${cx + gap / 2 - w / 2} y=${y + (tall - short) / 2} width=${w} height=${short} rx="1"></rect>
+    <rect class="slot" x=${cx - 18.4} y=${y} width="4" height="18" rx="1"></rect>
+    <rect class="slot" x=${cx + 14.4} y=${y + 0.85} width="4" height="16.3" rx="1"></rect>
   `;
 
-const ground = (cx: number, y: number, w: number, h: number): SVGTemplateResult =>
-  svg`<path class="slot" d="M${cx - w / 2} ${y} h${w} v${h - w / 2} a${w / 2} ${w / 2} 0 0 1 -${w} 0 z"></path>`;
+const RECEPTACLE_HEIGHT = 35.5;
+
+const receptacle = (cx: number, cy: number): SVGTemplateResult => {
+  const y = cy - RECEPTACLE_HEIGHT / 2;
+  return svg`
+    ${slots(cx, y)}
+    <path class="slot" d="M${cx - 5.75} ${y + RECEPTACLE_HEIGHT} h11.5 v-6.75 a5.75 5.75 0 0 0 -11.5 0 z"></path>
+  `;
+};
 
 const hit = (y: number, h: number): SVGTemplateResult =>
   svg`<rect class="hit" x="0.5" y=${y} width="79" height=${h} rx="2"></rect>`;
+
+const OUTLET_CONTROLS = { top: 60.5, bottom: 100 };
+const OUTLET_TOP_CENTER = (0.5 + OUTLET_CONTROLS.top) / 2;
+const OUTLET_BOTTOM_CENTER = (OUTLET_CONTROLS.bottom + 159.5) / 2;
+const OUTLET_BUTTON_Y = [0.25, 0.75].map(
+  (fraction) => OUTLET_CONTROLS.top + (OUTLET_CONTROLS.bottom - OUTLET_CONTROLS.top) * fraction,
+);
 
 const BAR_LED_Y = [11, 18, 26.3, 34.6, 42.9, 51.2, 59.5, 67.8, 78.6];
 
@@ -45,7 +59,7 @@ const kplFace = (x: number, y: number, w: number): SVGTemplateResult =>
 
 const sceneKey = (x: number, y: number, letter: string): SVGTemplateResult => svg`
   ${kplFace(x, y, KPL_KEY.w)}
-  ${print(x + KPL_KEY.w / 2, y + 24, letter, 6.5)}
+  ${print(x + KPL_KEY.w / 2, y + KPL_KEY.h / 2, letter, 6.5)}
 `;
 
 @customElement("insteon-device-plate")
@@ -224,7 +238,7 @@ export class InsteonDevicePlate extends LitElement {
       ${rows.map((i) =>
         this._key(
           i + 1,
-          svg`<rect class="face row" x="1.5" y=${i * 40 + 1.5} width="77" height="38"></rect>`,
+          svg`<rect class="face row" x="1.5" y=${i * 40 + 1.5} width="77" height=${i === rows.length - 1 ? 37 : 38}></rect>`,
         ),
       )}
       ${[40, 80, 120].map((y) => svg`<line class="hair" x1="1" y1=${y} x2="79" y2=${y}></line>`)}
@@ -248,9 +262,9 @@ export class InsteonDevicePlate extends LitElement {
         1,
         svg`
           ${kplFace(6, KPL_ROWS[0], 68)}
-          ${print(40, KPL_ROWS[0] + 21, "ON", 6)}
+          ${print(40, KPL_ROWS[0] + KPL_KEY.h / 2, "ON", 6)}
           ${kplFace(6, KPL_ROWS[3], 68)}
-          ${print(40, KPL_ROWS[3] + 21, "OFF", 6)}
+          ${print(40, KPL_ROWS[3] + KPL_KEY.h / 2, "OFF", 6)}
         `,
       )}
       ${letters.map((letter, i) =>
@@ -266,7 +280,7 @@ export class InsteonDevicePlate extends LitElement {
         1,
         svg`
           ${kplFace(6, 6, KPL_KEY.w)}
-          ${print(22.75, 24, "MAIN", 6, "bold")}
+          ${print(22.75, KPL_ROWS[0] + KPL_KEY.h / 2, "MAIN", 6, "bold")}
         `,
       )}
       ${letters.map((letter, i) => {
@@ -303,71 +317,91 @@ export class InsteonDevicePlate extends LitElement {
   ): SVGTemplateResult {
     return svg`
       <rect class="frame" x="0.5" y="0.5" width="79" height="159" rx="2"></rect>
-      ${this._key(1, svg`${hit(0.5, 60)}${upper}`)}
+      ${this._key(1, svg`${hit(0.5, OUTLET_CONTROLS.top - 0.5)}${upper}`)}
       ${controls}
-      ${this._key(2, svg`${hit(100, 59.5)}${lower}`)}
+      ${this._key(2, svg`${hit(OUTLET_CONTROLS.bottom, 159.5 - OUTLET_CONTROLS.bottom)}${lower}`)}
     `;
   }
 
   private _outletDual(): SVGTemplateResult {
     return this._outletFace(
-      svg`${slots(40, 6.4, 32.8, 18, 16.3)}${ground(40, 49.6, 11.5, 12.5)}`,
-      svg`${slots(40, 118, 32.8, 18, 16.3)}${ground(40, 141, 11.5, 12.5)}`,
+      receptacle(40, OUTLET_TOP_CENTER),
+      receptacle(40, OUTLET_BOTTOM_CENTER),
       svg`
-        <rect class="btn" x="28" y="63.2" width="24" height="8" rx="4"></rect>
-        <rect class="btn" x="28" y="84" width="24" height="8" rx="4"></rect>
-        ${led(14.4, 67.2, 2.3)}
-        ${led(14.4, 88, 2.3)}
+        ${OUTLET_BUTTON_Y.map(
+          (y) => svg`
+            <rect class="btn" x="28" y=${y - 4} width="24" height="8" rx="4"></rect>
+            ${led(14.4, y, 2.3)}
+          `,
+        )}
       `,
     );
   }
 
   private _outletI3(): SVGTemplateResult {
     return this._outletFace(
-      svg`${slots(40, 6, 32.8, 20, 16.5, 5)}${ground(40, 49, 11, 12)}`,
-      svg`${slots(40, 120, 32.8, 20, 16.5, 5)}${ground(40, 143, 11, 12)}`,
+      receptacle(40, OUTLET_TOP_CENTER),
+      receptacle(40, OUTLET_BOTTOM_CENTER),
       svg`
-        <circle class="btn" cx="40" cy="67.2" r="6.4"></circle>
-        <circle class="btn" cx="40" cy="91.2" r="6.4"></circle>
-        ${led(24.8, 67.2, 0.8)}
-        ${led(24.8, 91.2, 0.8)}
+        ${OUTLET_BUTTON_Y.map(
+          (y) => svg`
+            <circle class="btn" cx="40" cy=${y} r="6.4"></circle>
+            ${led(24.8, y, 0.8)}
+          `,
+        )}
       `,
     );
   }
 
   private _outletLinc(dimmer: boolean): SVGTemplateResult {
+    const keyedTop = OUTLET_TOP_CENTER - 19;
+    const upper = dimmer
+      ? svg`
+          <path
+            class="keyed"
+            transform="translate(0 ${keyedTop})"
+            d="M18 0 H62 Q66 0 66 4 V22 Q66 25 63.5 26.5 L44 36.5 Q42 38 40 38 Q38 38 36 36.5 L16.5 26.5 Q14 25 14 22 V4 Q14 0 18 0 Z"
+          ></path>
+          ${slots(40, keyedTop + 4)}
+        `
+      : receptacle(40, OUTLET_TOP_CENTER);
     const controls = dimmer
       ? svg`
-          <path class="keyed" d="M14 4 h52 v30 l-26 8 l-26 -8 z"></path>
           <rect class="btn" x="9.6" y="67.2" width="14.4" height="28.8" rx="7.2"></rect>
           ${led(56, 83.2, 2.4)}
         `
       : svg`
-          ${ground(40, 38, 11, 12)}
           ${led(40, 72, 1.8)}
           <rect class="btn" x="31" y="80" width="18" height="8" rx="4"></rect>
         `;
     return svg`
       <rect class="frame" x="0.5" y="0.5" width="79" height="159" rx="2"></rect>
-      ${this._key(1, svg`${hit(0.5, 60)}${slots(40, 8, 34, 20, 17)}`)}
+      ${this._key(1, svg`${hit(0.5, 60)}${upper}`)}
       ${controls}
-      <g class="dim">${slots(40, 112, 34, 20, 17)}${ground(40, 138, 11, 12)}</g>
+      <g class="dim">${receptacle(40, OUTLET_BOTTOM_CENTER)}</g>
     `;
   }
 
   private _toggle(): SVGTemplateResult {
     return svg`
-      <rect class="frame" x="0.5" y="0.5" width="79" height="159" rx="2"></rect>
-      <rect class="opening" x="32" y="48" width="16" height="46" rx="1"></rect>
+      ${[24, 130].map(
+        (y) => svg`
+          <circle class="tab screw" cx="40" cy=${y} r="6"></circle>
+          <path class="hair screw-slot" d="M39 ${y - 5} l2 10"></path>
+        `,
+      )}
+      <rect class="frame" x="31" y="55" width="18" height="44" rx="0.5"></rect>
+      <rect class="opening" x="34" y="61" width="12" height="28" rx="0.5"></rect>
       ${this._key(
         1,
         svg`
-          <rect class="hit no-edge" x="32" y="48" width="16" height="46" rx="2"></rect>
-          <rect class="face lever" x="34" y="44" width="12" height="30" rx="3"></rect>
+          <rect class="hit no-edge" x="31" y="55" width="18" height="44" rx="0.5"></rect>
+          <path class="face lever-base" d="M34.5 81.5 h11 l-1.5 6 h-8 z"></path>
+          <rect class="face lever" x="34.5" y="67.5" width="11" height="14" rx="1"></rect>
         `,
       )}
-      ${led(40, 104, 1.5)}
-      ${tab(24, 102.5, 8, 3)}
+      <rect class="opening set-recess" x="35" y="93" width="10" height="5" rx="0.5"></rect>
+      <rect class="tab set-button" x="36.5" y="94" width="7" height="3" rx="0.3"></rect>
     `;
   }
 
@@ -389,12 +423,13 @@ export class InsteonDevicePlate extends LitElement {
   }
 
   private _plugin(): SVGTemplateResult {
+    // Open button paths share the case border instead of adding a second left edge.
     return svg`
       ${this._key(1, svg`<rect class="face" x="0.5" y="0.5" width="79" height="126" rx="4"></rect>`)}
-      ${slots(40, 18, 24, 14, 12)}
-      ${ground(40, 40, 10, 11)}
       <rect class="led strip" x="11.3" y="3" width="1.4" height="6.4" rx="0.7"></rect>
-      <rect class="btn" x="80" y="48" width="5" height="30" rx="2"></rect>
+      <path class="btn" d="M80 55 h2.5 v12 h-2.5"></path>
+      <path class="btn" d="M80 73 h2.5 v12 h-2.5"></path>
+      <path class="btn" d="M80 94 h2.5 v2 h-2.5"></path>
     `;
   }
 
@@ -610,6 +645,10 @@ export class InsteonDevicePlate extends LitElement {
 
       .face.lever {
         stroke: var(--key-edge);
+      }
+
+      .face.lever-base {
+        fill: var(--plate-face);
       }
 
       .led.strip {
