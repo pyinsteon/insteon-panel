@@ -28,15 +28,22 @@ const slots = (cx: number, y: number): SVGTemplateResult =>
     <rect class="slot" x=${cx + 14.4} y=${y + 0.85} width="4" height="16.3" rx="1"></rect>
   `;
 
-const receptacle = (cx: number, y: number): SVGTemplateResult => svg`
-  ${slots(cx, y)}
-  <path class="slot" d="M${cx - 5.75} ${y + 35.5} h11.5 v-6.75 a5.75 5.75 0 0 0 -11.5 0 z"></path>
-`;
+const RECEPTACLE_HEIGHT = 35.5;
+
+const receptacle = (cx: number, cy: number): SVGTemplateResult => {
+  const y = cy - RECEPTACLE_HEIGHT / 2;
+  return svg`
+    ${slots(cx, y)}
+    <path class="slot" d="M${cx - 5.75} ${y + RECEPTACLE_HEIGHT} h11.5 v-6.75 a5.75 5.75 0 0 0 -11.5 0 z"></path>
+  `;
+};
 
 const hit = (y: number, h: number): SVGTemplateResult =>
   svg`<rect class="hit" x="0.5" y=${y} width="79" height=${h} rx="2"></rect>`;
 
 const OUTLET_CONTROLS = { top: 60.5, bottom: 100 };
+const OUTLET_TOP_CENTER = (0.5 + OUTLET_CONTROLS.top) / 2;
+const OUTLET_BOTTOM_CENTER = (OUTLET_CONTROLS.bottom + 159.5) / 2;
 const OUTLET_BUTTON_Y = [0.25, 0.75].map(
   (fraction) => OUTLET_CONTROLS.top + (OUTLET_CONTROLS.bottom - OUTLET_CONTROLS.top) * fraction,
 );
@@ -318,8 +325,8 @@ export class InsteonDevicePlate extends LitElement {
 
   private _outletDual(): SVGTemplateResult {
     return this._outletFace(
-      receptacle(40, 6.4),
-      receptacle(40, 118),
+      receptacle(40, OUTLET_TOP_CENTER),
+      receptacle(40, OUTLET_BOTTOM_CENTER),
       svg`
         ${OUTLET_BUTTON_Y.map(
           (y) => svg`
@@ -333,8 +340,8 @@ export class InsteonDevicePlate extends LitElement {
 
   private _outletI3(): SVGTemplateResult {
     return this._outletFace(
-      receptacle(40, 6.4),
-      receptacle(40, 118),
+      receptacle(40, OUTLET_TOP_CENTER),
+      receptacle(40, OUTLET_BOTTOM_CENTER),
       svg`
         ${OUTLET_BUTTON_Y.map(
           (y) => svg`
@@ -347,9 +354,15 @@ export class InsteonDevicePlate extends LitElement {
   }
 
   private _outletLinc(dimmer: boolean): SVGTemplateResult {
+    const keyedTop = OUTLET_TOP_CENTER - 19;
+    const upper = dimmer
+      ? svg`
+          <path class="keyed" d="M14 ${keyedTop} h52 v30 l-26 8 l-26 -8 z"></path>
+          ${slots(40, keyedTop + 4)}
+        `
+      : receptacle(40, OUTLET_TOP_CENTER);
     const controls = dimmer
       ? svg`
-          <path class="keyed" d="M14 4 h52 v30 l-26 8 l-26 -8 z"></path>
           <rect class="btn" x="9.6" y="67.2" width="14.4" height="28.8" rx="7.2"></rect>
           ${led(56, 83.2, 2.4)}
         `
@@ -359,9 +372,9 @@ export class InsteonDevicePlate extends LitElement {
         `;
     return svg`
       <rect class="frame" x="0.5" y="0.5" width="79" height="159" rx="2"></rect>
-      ${this._key(1, svg`${hit(0.5, 60)}${dimmer ? slots(40, 8) : receptacle(40, 8)}`)}
+      ${this._key(1, svg`${hit(0.5, 60)}${upper}`)}
       ${controls}
-      <g class="dim">${receptacle(40, 112)}</g>
+      <g class="dim">${receptacle(40, OUTLET_BOTTOM_CENTER)}</g>
     `;
   }
 
@@ -401,7 +414,6 @@ export class InsteonDevicePlate extends LitElement {
   private _plugin(): SVGTemplateResult {
     return svg`
       ${this._key(1, svg`<rect class="face" x="0.5" y="0.5" width="79" height="126" rx="4"></rect>`)}
-      ${receptacle(40, 18)}
       <rect class="led strip" x="11.3" y="3" width="1.4" height="6.4" rx="0.7"></rect>
       <rect class="btn" x="80" y="48" width="5" height="30" rx="2"></rect>
     `;

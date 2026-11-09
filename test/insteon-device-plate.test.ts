@@ -203,7 +203,6 @@ describe("receptacle ground openings", () => {
     { name: "i3 outlet", cat: 0x02, subcat: 0x3f, grounds: 2 },
     { name: "outletlinc dimmer", cat: 0x01, subcat: 0x21, grounds: 1 },
     { name: "outletlinc relay", cat: 0x02, subcat: 0x08, grounds: 2 },
-    { name: "plug-in module", cat: 0x01, subcat: 0x0e, grounds: 1 },
   ])("puts the flat side down on the $name", async ({ cat, subcat, grounds }) => {
     const el = await renderPlate(cat, subcat);
     const paths = [...root(el).querySelectorAll("path.slot")];
@@ -236,6 +235,25 @@ describe("receptacle ground openings", () => {
     expect(upper.gap).toBeCloseTo(lower.gap);
   });
 
+  it.each([
+    { name: "on/off outlet", cat: 0x02, subcat: 0x39 },
+    { name: "i3 outlet", cat: 0x02, subcat: 0x3f },
+    { name: "outletlinc relay", cat: 0x02, subcat: 0x08 },
+  ])(
+    "vertically centers receptacles within their sections on the $name",
+    async ({ cat, subcat }) => {
+      const el = await renderPlate(cat, subcat);
+      for (const key of root(el).querySelectorAll(".key")) {
+        const hit = key.querySelector(".hit")!;
+        const sectionTop = Number(hit.getAttribute("y"));
+        const sectionBottom = sectionTop + Number(hit.getAttribute("height"));
+        const top = Number(key.querySelector("rect.slot")!.getAttribute("y"));
+        const bottom = Number(key.querySelector("path.slot")!.getAttribute("d")!.split(" ")[1]);
+        expect(top - sectionTop).toBeCloseTo(sectionBottom - bottom);
+      }
+    },
+  );
+
   it("uses the same blade and ground geometry across all receptacles", async () => {
     const drawings = await Promise.all(
       [
@@ -243,7 +261,6 @@ describe("receptacle ground openings", () => {
         [0x02, 0x3f],
         [0x01, 0x21],
         [0x02, 0x08],
-        [0x01, 0x0e],
       ].map(async ([cat, subcat]) => root(await renderPlate(cat, subcat))),
     );
     const bladeGeometry = (left: Element, right: Element) => [
@@ -339,6 +356,25 @@ describe("i3 outlet", () => {
 });
 
 describe("outletlinc dimmer", () => {
+  it("vertically centers the keyed adapter outline within the upper section", async () => {
+    const el = await renderPlate(0x01, 0x21);
+    const r = root(el);
+    const hit = r.querySelector(".hit")!;
+    const sectionTop = Number(hit.getAttribute("y"));
+    const sectionBottom = sectionTop + Number(hit.getAttribute("height"));
+    const outline = r.querySelector(".keyed")!.getAttribute("d")!;
+    const [, y, side, tip] = outline.match(
+      /^M[\d.]+ ([\d.]+) h[\d.]+ v([\d.]+) l-[\d.]+ ([\d.]+)/,
+    )!;
+    const top = Number(y);
+    const bottom = top + Number(side) + Number(tip);
+    expect(top - sectionTop).toBeCloseTo(sectionBottom - bottom);
+    const slot = r.querySelector("rect.slot")!;
+    const slotTop = Number(slot.getAttribute("y"));
+    expect(slotTop).toBeGreaterThan(top);
+    expect(slotTop + Number(slot.getAttribute("height"))).toBeLessThan(bottom);
+  });
+
   it("keys only the upper receptacle and draws a vertical oval", async () => {
     const el = await renderPlate(0x01, 0x21);
     const r = root(el);
@@ -402,13 +438,13 @@ describe("in-line module", () => {
 });
 
 describe("plug-in module", () => {
-  it("draws a tall body with a receptacle, led strip and edge rocker", async () => {
+  it("draws a tall body with a led strip and edge rocker but no receptacle", async () => {
     const el = await renderPlate(0x01, 0x0e);
     const r = root(el);
     expect(r.querySelector("svg")!.getAttribute("viewBox")).toBe("0 0 86 127");
     expect(r.querySelector(".led.strip")).not.toBeNull();
     expect(r.querySelector(".wordmark")).toBeNull();
-    expect(r.querySelectorAll(".slot").length).toBe(3);
+    expect(r.querySelector(".slot")).toBeNull();
     expect(r.querySelector("rect.btn")!.getAttribute("x")).toBe("80");
   });
 });
