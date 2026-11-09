@@ -380,17 +380,24 @@ export class InsteonDevicePlate extends LitElement {
 
   private _toggle(): SVGTemplateResult {
     return svg`
-      <rect class="frame" x="0.5" y="0.5" width="79" height="159" rx="2"></rect>
-      <rect class="opening" x="32" y="48" width="16" height="46" rx="1"></rect>
+      ${[24, 130].map(
+        (y) => svg`
+          <circle class="tab screw" cx="40" cy=${y} r="6"></circle>
+          <path class="hair screw-slot" d="M39 ${y - 5} l2 10"></path>
+        `,
+      )}
+      <rect class="frame" x="31" y="55" width="18" height="44" rx="0.5"></rect>
+      <rect class="opening" x="34" y="61" width="12" height="28" rx="0.5"></rect>
       ${this._key(
         1,
         svg`
-          <rect class="hit no-edge" x="32" y="48" width="16" height="46" rx="2"></rect>
-          <rect class="face lever" x="34" y="44" width="12" height="30" rx="3"></rect>
+          <rect class="hit no-edge" x="31" y="55" width="18" height="44" rx="0.5"></rect>
+          <path class="face lever-base" d="M34.5 81.5 h11 l-1.5 6 h-8 z"></path>
+          <rect class="face lever" x="34.5" y="67.5" width="11" height="14" rx="1"></rect>
         `,
       )}
-      ${led(40, 104, 1.5)}
-      ${tab(24, 102.5, 8, 3)}
+      <rect class="opening set-recess" x="35" y="93" width="10" height="5" rx="0.5"></rect>
+      <rect class="tab set-button" x="36.5" y="94" width="7" height="3" rx="0.3"></rect>
     `;
   }
 
@@ -634,6 +641,10 @@ export class InsteonDevicePlate extends LitElement {
 
       .face.lever {
         stroke: var(--key-edge);
+      }
+
+      .face.lever-base {
+        fill: var(--plate-face);
       }
 
       .led.strip {

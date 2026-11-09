@@ -442,17 +442,39 @@ describe("outletlinc relay", () => {
 });
 
 describe("togglelinc", () => {
-  it("draws a lever in a toggle opening with one led and a set tab beside it", async () => {
+  it("draws a narrow toggle assembly between two screws with the set tab underneath", async () => {
     const el = await renderPlate(0x02, 0x1a);
     const r = root(el);
     expect(r.querySelector(".opening")).not.toBeNull();
-    expect(r.querySelector(".key .face.lever")).not.toBeNull();
-    const leds = r.querySelectorAll(".led");
-    expect(leds.length).toBe(1);
-    expect(leds[0].getAttribute("cy")).toBe("104");
-    const tabEl = r.querySelector(".tab")!;
-    expect(tabEl.getAttribute("width")).toBe("8");
-    expect(Number(tabEl.getAttribute("x"))).toBeLessThan(40);
+    const lever = r.querySelector(".key .face.lever")!;
+    expect(lever).not.toBeNull();
+    expect(r.querySelector(".key .lever-base")).not.toBeNull();
+    const frame = r.querySelector(".frame")!;
+    const frameTop = Number(frame.getAttribute("y"));
+    const frameBottom = frameTop + Number(frame.getAttribute("height"));
+    const center = Number(frame.getAttribute("x")) + Number(frame.getAttribute("width")) / 2;
+    expect(Number(frame.getAttribute("width"))).toBeLessThan(40);
+    const screws = [...r.querySelectorAll(".screw")];
+    expect(screws).toHaveLength(2);
+    expect(Number(screws[0].getAttribute("cy")) + Number(screws[0].getAttribute("r"))).toBeLessThan(
+      frameTop,
+    );
+    expect(
+      Number(screws[1].getAttribute("cy")) - Number(screws[1].getAttribute("r")),
+    ).toBeGreaterThan(frameBottom);
+    for (const screw of screws) {
+      expect(Number(screw.getAttribute("cx"))).toBeCloseTo(center);
+    }
+    const tabEl = r.querySelector(".set-button")!;
+    expect(Number(tabEl.getAttribute("x")) + Number(tabEl.getAttribute("width")) / 2).toBeCloseTo(
+      center,
+    );
+    expect(Number(tabEl.getAttribute("y"))).toBeGreaterThan(
+      Number(lever.getAttribute("y")) + Number(lever.getAttribute("height")),
+    );
+    expect(Number(tabEl.getAttribute("y")) + Number(tabEl.getAttribute("height"))).toBeLessThan(
+      frameBottom,
+    );
   });
 });
 
@@ -596,11 +618,23 @@ describe("plate keys as tabs", () => {
 describe("plate legibility", () => {
   it("gives the toggle lever a hit area that covers the opening", async () => {
     const el = await renderPlate(0x01, 0x17);
-    const hit = root(el).querySelector(".key .hit")!;
+    const r = root(el);
+    const hit = r.querySelector(".key .hit")!;
+    const opening = r.querySelector(".opening")!;
     expect(hit).not.toBeNull();
-    expect(Number(hit.getAttribute("width"))).toBeGreaterThanOrEqual(16);
-    expect(Number(hit.getAttribute("height"))).toBeGreaterThanOrEqual(46);
-    expect(hit.getAttribute("y")).toBe("48");
+    for (const [position, size] of [
+      ["x", "width"],
+      ["y", "height"],
+    ]) {
+      expect(Number(hit.getAttribute(position))).toBeLessThanOrEqual(
+        Number(opening.getAttribute(position)),
+      );
+      expect(
+        Number(hit.getAttribute(position)) + Number(hit.getAttribute(size)),
+      ).toBeGreaterThanOrEqual(
+        Number(opening.getAttribute(position)) + Number(opening.getAttribute(size)),
+      );
+    }
     expect(hit.classList.contains("no-edge")).toBe(true);
   });
 });
